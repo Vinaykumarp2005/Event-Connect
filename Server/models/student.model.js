@@ -41,7 +41,12 @@ const studentSchema=new Schema({
     },eventsenrolled:[{
         type:Schema.Types.ObjectId,
         ref:"Event"
-    }]
+    }],
+    rewardsEarned:{
+        type:Number,
+        required:true,
+        default:0,
+    }
 
 },{timestamps:true})
 

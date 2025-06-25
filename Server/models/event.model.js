@@ -61,8 +61,11 @@ const eventSchema= new Schema({
     keyTakeAways:{
         type:String,
         required:true
-    },isAprrove:{
+    },isAprooved:{
         type:boolean,
+    },rewardPoints:{
+        type:Number,
+        required:true
     }
 
 },{timestamps:true})
