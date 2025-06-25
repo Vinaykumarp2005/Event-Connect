@@ -1,4 +1,4 @@
-import {mongoose,Schema} from "mongoose";
+const {mongoose,Schema}=require("mongoose");
 
 const studentSchema=new Schema({
     username:{
@@ -46,8 +46,15 @@ const studentSchema=new Schema({
         type:Number,
         required:true,
         default:0,
+    },
+    role:{
+         type:String,
+         required:true
     }
 
 },{timestamps:true})
 
-export const Student=mongoose.model("Student",studentSchema);
+const Student=mongoose.model("Student",studentSchema);
+module.exports={
+    Student:Student
+}

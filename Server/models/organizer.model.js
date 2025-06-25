@@ -1,4 +1,5 @@
-import mongoose,{ Schema } from "mongoose";
+const {mongoose,Schema}=require("mongoose");
+
 
 const organizerSchema=new Schema({
     username:{
@@ -55,8 +56,13 @@ const organizerSchema=new Schema({
         type:String,
         required:true
     }
-
+,   role:{
+         type:String,
+         required:true
+    }
 
 },{timestamps:true,strict:true})
-export const Organizer=mongoose.model("Organizer",organizerSchema)
-
+const Organizer=mongoose.model("Organizer",organizerSchema)
+module.exports={
+    Organizer:Organizer
+}
