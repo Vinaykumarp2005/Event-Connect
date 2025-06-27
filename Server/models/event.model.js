@@ -1,4 +1,4 @@
-import mongoose,{ Schema } from "mongoose";
+const {mongoose,Schema}=require("mongoose");
 
 const faqSchema=new Schema({
     question:{
@@ -29,7 +29,7 @@ const eventSchema= new Schema({
         required:true
     },
     category:{
-        type:Number,
+        type:String,
         required:true,
     },faqs:{
         type:[faqSchema]
@@ -61,8 +61,9 @@ const eventSchema= new Schema({
     keyTakeAways:{
         type:String,
         required:true
-    },isAprooved:{
-        type:boolean,
+    },isApproved:{
+        type:Boolean,
+        default:false
     },rewardPoints:{
         type:Number,
         required:true
@@ -73,7 +74,18 @@ const eventSchema= new Schema({
     },registrationForm:{
         type:String,
         required:true
+    },
+    registrationEndDate:{
+        type:Date,
+        required:true
+    },
+    endTime:{
+        type:String,
+        required:true
     }
 
 },{timestamps:true})
-export const Events=mongoose.model("Event",eventSchema);
+const Events=mongoose.model("Event",eventSchema);
+module.exports={
+    Events:Events
+}
