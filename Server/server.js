@@ -1,9 +1,9 @@
 const mongoose=require("mongoose");
 const exp=require("express");
 const app=exp();
-
-const {authApp}=require('./apis/Auth');
 require('dotenv').config();
+const {authApp}=require('./apis/Auth');
+
 const dbUrl=process.env.DB_URL;
 app.use(exp.json());
 mongoose.connect(dbUrl).then(()=>{
@@ -12,6 +12,7 @@ mongoose.connect(dbUrl).then(()=>{
   console.log(e)
 })
 const port=process.env.port||4000;
+// require("dotenv").config(); 
 app.use('/auth',authApp);
 
 

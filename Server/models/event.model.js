@@ -66,6 +66,13 @@ const eventSchema= new Schema({
     },rewardPoints:{
         type:Number,
         required:true
+    },
+    organiser:{
+        type:Schema.Types.ObjectId,
+        ref:"Organizer"
+    },registrationForm:{
+        type:String,
+        required:true
     }
 
 },{timestamps:true})
