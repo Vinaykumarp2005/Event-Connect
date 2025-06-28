@@ -101,6 +101,8 @@ const eventSchema= new Schema({
     }
 
 },{timestamps:true})
+
+
 const Events=mongoose.model("Event",eventSchema);
 module.exports={
     Events:Events

@@ -6,6 +6,7 @@ const {authApp}=require('./apis/Auth');
 const {eventApp}=require('./apis/Event');
 const {organizerApp}=require('./apis/Organizer');
 const {studentApp}=require('./apis/User')
+const {adminApp}=require('./apis/Admin')
 const dbUrl=process.env.DB_URL;
 app.use(exp.json());
 mongoose.connect(dbUrl).then(()=>{
@@ -19,6 +20,7 @@ app.use('/auth',authApp);
 app.use('/event',eventApp);
 app.use('/organiser',organizerApp);
 app.use('/student',studentApp);
+app.use('/admin',adminApp);
 app.listen(port,()=>{
   console.log("server is running on the backend server on port ",port);
 });

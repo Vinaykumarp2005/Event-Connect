@@ -1,4 +1,4 @@
-import mongoose,{Schema} from "mongoose"
+const {mongoose,Schema}=require("mongoose");
 
 const adminSchema=new Schema({
     name:{
@@ -23,5 +23,8 @@ const adminSchema=new Schema({
     
 },{timestamps:true})
 
-export const Admin=mongoose.model("Admin",adminSchema)
 
+const Admin=mongoose.model("Admin",adminSchema);
+module.exports={
+    Admin:Admin
+}
