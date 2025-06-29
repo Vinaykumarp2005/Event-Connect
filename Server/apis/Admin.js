@@ -5,7 +5,8 @@ const jwt=require("jsonwebtoken");
 const bcrypt=require("bcryptjs");
 const z=require("zod");
 const { Admin } = require('../models/admin.model');
-
+const {Events} =require('../models/event.model');
+const {verifyUser} =require('../middlewares/verifyUser')
 require("dotenv").config()
 const validateAdminData=(req,res,next)=>{
 const {name,password,email}=req.body;
@@ -30,6 +31,21 @@ const {name,password,email}=req.body;
  }
  
  next();
+}
+
+//validate Admin
+const validAdmin=async(req,res,next)=>{
+  try{
+  const response=await Admin.findById(req.userId
+  )
+  if(response){
+  next();
+  }
+  }catch(e){
+    res.status(411).json({
+      message:"unauthorized access"
+    })
+  }
 }
 
 adminApp.post("/signUp",validateAdminData,async(req,res)=>{
@@ -86,5 +102,78 @@ adminApp.post("/signin",async(req,res)=>{
         }
 
 })
+
+
+adminApp.put('/event/comment/:eventId/:commentId', verifyUser,validAdmin, async (req, res) => {
+  try {
+    const { eventId, commentId } = req.params;
+    const userId = req.userId;
+
+    const event = await Events.findById(eventId);
+    if (!event) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    const commentIndex = event.comments.findIndex(
+      (c) => c._id.toString() === commentId
+    );
+
+    if (commentIndex === -1) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+
+    const comment = event.comments[commentIndex];
+
+    
+
+    event.comments.splice(commentIndex, 1);
+    await event.save();
+
+    res.status(200).json({
+      message: 'Comment deleted successfully',
+      payload: event
+    });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
+});
+
+
+
+
+//Aproove event
+adminApp.put('/app/v1/event/update/:eventId', verifyUser, validAdmin, async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const existingEvent = await Events.findOne({ _id: eventId});
+    if (!existingEvent) {
+      res.status(403).json({
+        message: "You are not authorized to update this event or it doesn't exist."
+      });
+      return;
+    }
+
+    // Update the event with new data
+    const updatedEvent = await Events.findByIdAndUpdate(
+      eventId,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      message: "Event approved ",
+      payload: updatedEvent
+    });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
+
+
+
 
 module.exports={adminApp:adminApp}
