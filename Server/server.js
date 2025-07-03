@@ -8,7 +8,9 @@ const {organizerApp}=require('./apis/Organizer');
 const {studentApp}=require('./apis/User')
 const {adminApp}=require('./apis/Admin')
 const dbUrl=process.env.DB_URL;
+const cors=require('cors');
 app.use(exp.json());
+app.use(cors());
 mongoose.connect(dbUrl).then(()=>{
   console.log('database is successfully connected to the backend')
 }).catch((e)=>{
