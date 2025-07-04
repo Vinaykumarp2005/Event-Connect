@@ -33,7 +33,7 @@ return (
       <Route path=':eventById' element={<EventsById/>}/>
       <Route path='events' element={<Events/>}/>
     </Route>
-    <Route path='admin-profile/'>
+    <Route path='admin-profile/:emailId'>
       <Route path='dashboard' element={<AdminDashBoard/>} />
         <Route path='manageEvents' element={<ManageEvents/>}/>
       <Route path=':eventById' element={<EventsById/>}/>
