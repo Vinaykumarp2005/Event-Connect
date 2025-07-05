@@ -45,6 +45,7 @@ role:z.string()
 
 }
 authRouter.post('/student/signUp',validStudentDataSignup,async(req,res)=>{
+  console.log(req.body);
 const {username,password,email,phoneNumber,collegeName,department,year,role}=req.body;
 const hashedPassword=await bcrypt.hash(password,5);
 const Data=await new Student({
@@ -61,11 +62,11 @@ const token=await new StudentToken({
   userId:Data._id,
   token:crypto.randomBytes(32).toString("hex"),
 }).save();
-const url=`${process.env.BASE_URL}/auth/student/${Data._id}/verifyStudent/${token.token}`;
+const url=`${process.env.BASE_URL}/verifyPage/${Data.role}/${Data._id}/${token.token}`;
 await sendEmail(Data.email,"Verify Email",url);
 if(Data){
   res.status(200).json({
-    message:"An Email sent to your pleaseverify email",
+    message:"An Email sent to your please verify email",
     payload:Data
   })
 }else{
@@ -92,6 +93,7 @@ const validUserData=(req,res,next)=>{
 
 }
 authRouter.get('/student/:id/verifyStudent/:token',async(req,res)=>{
+  console.log("reached");
   try{
       const student=await Student.findOne({_id:req.params.id});
       if(!student){
@@ -108,9 +110,11 @@ authRouter.get('/student/:id/verifyStudent/:token',async(req,res)=>{
                message:"invalid link"
         })
       }
-      await Student.updateOne({
-        _id:student._id,verified:true
-      })
+      await Student.updateOne(
+  { _id: student._id },
+  { verified: true }
+)
+
       await token.deleteOne()
       res.status(200).send({
         message:'user verified successfully'
@@ -130,14 +134,14 @@ authRouter.post('/student/signin',validUserData,async(req,res)=>{
  
  if(validPassword){
   if(!StudentResponse.verified){
-  let emailtoken=await StudentToken.findOne({userId:User._id});
+  let emailtoken=await StudentToken.findOne({userId:StudentResponse._id});
   if(!emailtoken){
    const token=await new StudentToken({
-  userId:Data._id,
+  userId:StudentResponse._id,
   token:crypto.randomBytes(32).toString("hex"),
 }).save();
-const url=`${process.env.BASE_URL}/student/${Data._id}/verifyStudent/${token.token}`;
-await sendEmail(Data.email,"Verify Email",url);
+const url=`${process.env.BASE_URL}/verifyPage/${StudentResponse.role}/${StudentResponse._id}/${token.token}`;
+await sendEmail(StudentResponse.email,"Verify Email",url);
 
   }
   return res.status(400).send({
@@ -226,6 +230,7 @@ role:z.string()
 
 }
 authRouter.get('/organizer/:id/verifyOrganizer/:token',async(req,res)=>{
+  console.log('')
   try{
       const organizer=await Organizer.findOne({_id:req.params.id});
       if(!organizer){
@@ -242,9 +247,11 @@ authRouter.get('/organizer/:id/verifyOrganizer/:token',async(req,res)=>{
                message:"invalid link"
         })
       }
-      await Organizer.updateOne({
-        _id:organizer._id,verified:true
-      })
+      await Organizer.updateOne(
+  { _id: organizer._id },
+  { verified: true }
+)
+
       await token.deleteOne()
       res.status(200).send({
         message:'user verified successfully'
@@ -260,6 +267,7 @@ const {username,clubName,password,email,phoneNumber,collegeName,department,posit
 const hashedPassword=await bcrypt.hash(password,5);
 
 const logoLocalPath=req.files?.logo[0]?.path
+console.log(logoLocalPath)
 // console.log("req.body", req.body);
 // console.log("req.files", req.files);
 
@@ -272,7 +280,7 @@ if(!logoLocalPath){
  const logoPath= await uploadOnCloudinary(logoLocalPath)
 // console.log(logoPath);
   if(!logoPath){
-    res.status(400).json({
+   return res.status(400).json({
     message:"logo is required"
   })
   }
@@ -293,7 +301,7 @@ const token=await new OrganizerToken({
   userId:Data._id,
   token:crypto.randomBytes(32).toString("hex"),
 }).save();
-const url=`${process.env.BASE_URL}/auth/organiser/${Data._id}/verifyOrganiser/${token.token}`;
+const url=`${process.env.BASE_URL}/verifyPage/${Data.role}/${Data._id}/${token.token}`;
 await sendOrganiserEmail(Data.email,"Verify Email",url);
 
 
@@ -317,14 +325,14 @@ authRouter.post('/organizer/signin',validUserData,async(req,res)=>{
  const validPassword=await bcrypt.compare(password,OrganizerResponse.password);
  if(validPassword){
   if(!OrganizerResponse.verified){
-  let emailtoken=await OrganizerToken.findOne({userId:User._id});
+  let emailtoken=await OrganizerToken.findOne({userId:OrganizerResponse._id});
   if(!emailtoken){
    const token=await new OrganizerToken({
-  userId:Data._id,
+  userId:OrganizerResponse._id,
   token:crypto.randomBytes(32).toString("hex"),
 }).save();
-const url=`${process.env.BASE_URL}/organizer/${Data._id}/verifyOrganizer/${token.token}`;
-await sendOrganiserEmail(Data.email,"Verify Email",url);
+const url=`${process.env.BASE_URL}/verifyPage/${OrganizerResponse.role}/${OrganizerResponse._id}/${token.token}`;
+await sendOrganiserEmail(OrganizerResponse.email,"Verify Email",url);
 
   }
   return res.status(400).send({

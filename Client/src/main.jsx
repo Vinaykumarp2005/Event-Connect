@@ -13,14 +13,17 @@ import OrganizerDashBoard from './components/organizer/OrganizerDashBoard.jsx'
 import AdminDashBoard from './components/admin/AdminDashBoard.jsx'
 import ManageEvents from './components/admin/ManageEvents.jsx'
 import Events from './components/common/Events.jsx';
+import VerifyPage from './components/common/VerifyPage.jsx'
 function Main(){
 return (
   <BrowserRouter>
-  <Routes>
+ <Routes>
+    
     <Route path='/' element={<RootLayout/>}>
     <Route index element={<LandingPage/>}/>
     <Route path='signup' element={<SignUp/>}/>
     <Route path='signin' element={<SignIn/>}/>
+     <Route path='verifyPage/:role/:id/:token' element={<VerifyPage/>}/>
     <Route path='student-profile/:emailId'>
       <Route path='dashboard' element={<StudentDashBoard/>}/>
       <Route path='enrolledevents' element={<EnrolledEvents/>}/>
@@ -49,7 +52,7 @@ return (
 
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+  
     <Main/>
-  </StrictMode>,
+
 )

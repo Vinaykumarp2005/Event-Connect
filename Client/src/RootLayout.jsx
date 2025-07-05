@@ -6,7 +6,7 @@ function RootLayout() {
   return (
     <div>
       <Header/>
-      <div className='min-h-[800px]'>
+      <div className='min-h-screen'>
         <Outlet/>
       </div>
       <Footer/>

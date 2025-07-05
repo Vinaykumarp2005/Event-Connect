@@ -4,7 +4,8 @@ function Header() {
   return (
     <div className='bg-blue-500 p-3  flex justify-between'>
       <div className='p-1'>
-      Logo
+        <Link to='/'>Logo</Link>
+      
       </div>
       <div className='pr-8 bg-red-200'>
           <ul className='flex justify-between p-1'>
