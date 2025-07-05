@@ -13,22 +13,29 @@ export default function SignIn() {
             data
            );
        if(res.status===200){
-        alert("successfully signed in")
+       // console.log(res)
+            localStorage.setItem('token',res.data.token);
+        navigate(`/student-profile/${res.data.payload.username}`)
        }else{
         alert("Invalid data");
        }
     }else if(data.role==='admin'){
            const res=await axios.post('http://localhost:3000/admin/signin',data);
            if(res.status===200){
-            alert('signin signed in');
+            
+            localStorage.setItem('token',res.data.token);
+            //alert('signin signed i
+            // n');
+              navigate(`/admin-profile/${res.data.payload.username}`)
            }else{
             alert('invalid data')
            }
     }else{
       const res=await axios.post('http://localhost:3000/auth/organizer/signin',data);
            if(res.status===200){
-            alert('signin signed in');
-           }else{
+            localStorage.setItem('token',res.data.token);
+            navigate(`/organizer-profile/${res.data.payload.username}`)
+            }else{
             alert('invalid data')
            }
 

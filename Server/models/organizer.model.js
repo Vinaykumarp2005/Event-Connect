@@ -1,4 +1,5 @@
 const {mongoose,Schema}=require("mongoose");
+const { type } = require("os");
 
 
 const organizerSchema=new Schema({
@@ -59,6 +60,9 @@ const organizerSchema=new Schema({
 ,   role:{
          type:String,
          required:true
+    },verified:{
+        type:Boolean,
+        default:false
     }
 
 },{timestamps:true,strict:true})

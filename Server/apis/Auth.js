@@ -230,7 +230,7 @@ role:z.string()
 
 }
 authRouter.get('/organizer/:id/verifyOrganizer/:token',async(req,res)=>{
-  console.log('')
+  console.log('reached')
   try{
       const organizer=await Organizer.findOne({_id:req.params.id});
       if(!organizer){
