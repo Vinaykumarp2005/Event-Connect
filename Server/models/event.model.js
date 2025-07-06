@@ -57,9 +57,6 @@ const eventSchema= new Schema({
         type:String,
 
     }],
-    eventVideo:[{
-        type:String
-    }],
     sampleCertificate:{
         type:String
     },

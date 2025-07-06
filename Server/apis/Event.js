@@ -5,33 +5,35 @@ const express=require('express');
 const eventApp=express.Router();
 const {verifyUser}=require('../middlewares/verifyUser');
 const {Organizer}=require('../models/organizer.model');
+const upload = require('../middlewares/multer.middleware');
+const uploadOnCloudinary = require('../utils/cloudinary');
 const {Events}=require('../models/event.model');
 const validEventData=(req,res,next)=>{
-  const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,eventImage,eventVideo,sampleCertificate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime}=req.body;
-  const eventSchema=z.object({
-    eventName:z.string(),
-    description:z.string(),
-    maxLimit:z.number(),
-    enrolled:z.number(),
-    category:z.string(),
-    faqs:z.array(z.object({
-  question: z.string().min(1, "Question is required"),
-  answer: z.string().min(1, "Answer is required")
-}))
-,
-   startDate:z.coerce.date(),
-   endDate:z.coerce.date(),
-   eventImage:z.string(),
-   eventVideo:z.string(),
-   sampleCertificate:z.string(),
-   registrationFee:z.number(),
-   venue:z.string(),
-   keyTakeAways:z.string(),
-   rewardPoints:z.number(),
-   registrationForm:z.string(),
-   registrationEndDate:z.coerce.date(),
-   endTime:z.string()
-  });
+  const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime}=req.body;
+ 
+const eventSchema = z.object({
+  eventName: z.string(),
+  description: z.string(),
+  maxLimit: z.number(),
+  enrolled: z.number(),
+  category: z.string(),
+  faqs: z.array(z.object({
+    question: z.string().min(1, "Question is required"),
+    answer: z.string().min(1, "Answer is required")
+  })).optional().default([]),
+  startDate: z.coerce.date(),
+  endDate: z.coerce.date(),
+  registrationFee: z.number(),
+  venue: z.string(),
+  keyTakeAways: z.string(),
+  rewardPoints: z.number(),
+  registrationForm: z.string(),
+  registrationEndDate: z.coerce.date(),
+  endTime: z.string()
+});
+
+
+
   const {success}=eventSchema.safeParse(req.body);
   if(success){
     next();
@@ -54,8 +56,33 @@ const validPerson=async(req,res,next)=>{
     })
   }
 }
-eventApp.post('/app/v1/create',verifyUser,validPerson,async(req,res)=>{
- const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,eventImage,eventVideo,sampleCertificate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime}=req.body;
+eventApp.post('/app/v1/create',verifyUser,validPerson,upload.fields([
+  { name: 'eventImage', maxCount: 1 },
+  { name: 'sampleCertificate', maxCount: 1 }
+])
+,async(req,res)=>{
+ const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime}=req.body;
+
+let eventImageUrls = [];
+
+    // Check if file exists
+    if (req.files['eventImage'] && req.files['eventImage'][0]) {
+    const uploadResult = await uploadOnCloudinary(req.files['eventImage'][0].path);
+    if (uploadResult) {
+      eventImageUrls.push(uploadResult.url);
+    }
+  }
+  let sampleCertificateUrl="";
+  // Upload sample certificate PDF if present
+  if (req.files['sampleCertificate'] && req.files['sampleCertificate'][0]) {
+    const uploadResult = await uploadOnCloudinary(req.files['sampleCertificate'][0].path);
+    if (uploadResult) {
+      sampleCertificateUrl = uploadResult.url;
+    }
+  }
+
+
+
  const response=await Events.create({
   eventName:eventName,
   description:description,
@@ -65,9 +92,8 @@ eventApp.post('/app/v1/create',verifyUser,validPerson,async(req,res)=>{
   faqs:faqs,
   startDate:new Date(startDate),
   endDate:new Date(endDate),
-  eventImage:eventImage,
-  eventVideo:eventVideo,
-  sampleCertificate:sampleCertificate,
+  eventImage: eventImageUrls, 
+  sampleCertificate: sampleCertificateUrl,
   registrationFee:registrationFee,
   venue:venue,
   keyTakeAways:keyTakeAways,
@@ -77,6 +103,9 @@ eventApp.post('/app/v1/create',verifyUser,validPerson,async(req,res)=>{
   endTime:endTime,
   organiser:req.userId
  })
+
+
+
 if(response){
   res.status(200).json({
     message:"event is created succesfully",
@@ -150,21 +179,40 @@ eventApp.get('/app/v1/organiser/events', verifyUser,validPerson, async (req, res
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-eventApp.put('/app/v1/event/update/:eventId', verifyUser, validPerson, async (req, res) => {
+eventApp.put('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.fields([
+    { name: 'eventImage', maxCount: 1 },
+    { name: 'sampleCertificate', maxCount: 1 }
+  ]), async (req, res) => {
   try {
     const { eventId } = req.params;
     const existingEvent = await Events.findOne({ _id: eventId, organiser: req.userId });
     if (!existingEvent) {
-      res.status(403).json({
+      return res.status(403).json({
         message: "You are not authorized to update this event or it doesn't exist."
       });
-      return;
     }
 
-    // Update the event with new data
+    let updatedData = { ...req.body };
+
+    // If new eventImage is uploaded
+    if (req.files['eventImage'] && req.files['eventImage'][0]) {
+      const uploadResult = await uploadOnCloudinary(req.files['eventImage'][0].path);
+      if (uploadResult) {
+        updatedData.eventImage = [uploadResult.url];
+      }
+    }
+
+    // If new sampleCertificate is uploaded
+    if (req.files['sampleCertificate'] && req.files['sampleCertificate'][0]) {
+      const uploadResult = await uploadOnCloudinary(req.files['sampleCertificate'][0].path);
+      if (uploadResult) {
+        updatedData.sampleCertificate = uploadResult.url;
+      }
+    }
+
     const updatedEvent = await Events.findByIdAndUpdate(
       eventId,
-      { $set: req.body },
+      { $set: updatedData },
       { new: true, runValidators: true }
     );
 
@@ -178,9 +226,6 @@ eventApp.put('/app/v1/event/update/:eventId', verifyUser, validPerson, async (re
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-
-
-
 
 eventApp.delete('/app/v1/event/delete/:eventId',verifyUser,validPerson,async(req,res)=>{
   try{
