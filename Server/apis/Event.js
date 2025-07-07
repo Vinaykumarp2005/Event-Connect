@@ -9,7 +9,7 @@ const upload = require('../middlewares/multer.middleware');
 const uploadOnCloudinary = require('../utils/cloudinary');
 const {Events}=require('../models/event.model');
 const validEventData=(req,res,next)=>{
-  const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime}=req.body;
+  const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
  
 const eventSchema = z.object({
   eventName: z.string(),
@@ -29,7 +29,8 @@ const eventSchema = z.object({
   rewardPoints: z.number(),
   registrationForm: z.string(),
   registrationEndDate: z.coerce.date(),
-  endTime: z.string()
+  endTime: z.string(),
+  venueAddress:z.string()
 });
 
 
@@ -61,7 +62,7 @@ eventApp.post('/app/v1/create',verifyUser,validPerson,upload.fields([
   { name: 'sampleCertificate', maxCount: 1 }
 ])
 ,async(req,res)=>{
- const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime}=req.body;
+ const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
 
 let eventImageUrls = [];
 
@@ -101,7 +102,8 @@ let eventImageUrls = [];
   registrationForm:registrationForm,
   registrationEndDate:new Date(registrationEndDate),
   endTime:endTime,
-  organiser:req.userId
+  organiser:req.userId,
+  venueAddress:venueAddress
  })
 
 

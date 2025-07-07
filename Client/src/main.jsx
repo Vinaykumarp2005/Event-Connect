@@ -14,6 +14,9 @@ import AdminDashBoard from './components/admin/AdminDashBoard.jsx'
 import ManageEvents from './components/admin/ManageEvents.jsx'
 import Events from './components/common/Events.jsx';
 import VerifyPage from './components/common/VerifyPage.jsx'
+import OrganizerHomePage from './components/organizer/OrganizerHomePage.js'
+import CreatedEvents from './components/organizer/CreatedEvents.jsx'
+import PostEvent from './components/organizer/PostEvent.jsx'
 function Main(){
 return (
   <BrowserRouter>
@@ -30,11 +33,14 @@ return (
       <Route path=':eventById' element={<EventsById/>}/>
       <Route path='events' element={<Events/>}/>
     </Route>
-    <Route path='organizer-profile/:emailId'>
-      <Route path='dashboard' element={<OrganizerDashBoard/>}/>
+    <Route path='organizer-profile/:emailId' element={<OrganizerHomePage/>}>
+    <Route index  element={<OrganizerDashBoard/>}/>
+      <Route  path='dashboard' element={<OrganizerDashBoard/>}/>
       <Route path='enrolledevents' element={<EnrolledEvents/>}/>
       <Route path=':eventById' element={<EventsById/>}/>
       <Route path='events' element={<Events/>}/>
+      <Route path='createdEvents' element={<CreatedEvents/>}/>
+      <Route path='postEvents' element={<PostEvent/>}/>
     </Route>
     <Route path='admin-profile/:emailId'>
       <Route path='dashboard' element={<AdminDashBoard/>} />

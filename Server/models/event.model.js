@@ -95,6 +95,9 @@ const eventSchema= new Schema({
     },
     comments:{
         type:[commentSchema]
+    },
+    venueAddress:{
+        type:String
     }
 
 },{timestamps:true})
