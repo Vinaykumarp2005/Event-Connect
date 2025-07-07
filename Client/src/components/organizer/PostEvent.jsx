@@ -1,199 +1,13 @@
 
-// import { useForm } from 'react-hook-form';
-// import axios from 'axios';
-// import React, { useState } from 'react';
-
-// function PostEvent() {
-//   const { register, handleSubmit, formState: { errors } } = useForm();
-//   const [faqs, setFaqs] = useState([{ question: '', answer: '' }]);
-
-//   const addFaq = () => setFaqs([...faqs, { question: '', answer: '' }]);
-//   const removeFaq = (index) => setFaqs(faqs.filter((_, i) => i !== index));
-//   const handleFaqChange = (index, field, value) => {
-//     const updatedFaqs = [...faqs];
-//     updatedFaqs[index][field] = value;
-//     setFaqs(updatedFaqs);
-//   };
-
-//    function handleFormSubmit(data) {
-//       console.log(data);
-    
-//     // const formData = new FormData();
-
-//     // formData.append('eventName', data.eventName);
-//     // formData.append('description', data.description);
-//     // formData.append('maxLimit', data.maxLimit);
-//     // formData.append('enrolled', 0);
-//     // formData.append('category', data.category);
-//     // formData.append('startDate', data.startDate);
-//     // formData.append('endDate', data.endDate);
-//     // formData.append('sampleCertificate', data.sampleCertificate[0]);
-//     // formData.append('registrationFee', data.registrationFee);
-//     // formData.append('venue', data.venue);
-//     //     formData.append('venueAddressLink', data.venueAddressLink);
-//     // formData.append('keyTakeAways', data.keyTakeAways);
-//     // formData.append('isApproved', false);
-//     // formData.append('rewardPoints', data.rewardPoints);
-//     // formData.append('registrationForm', data.registrationForm);
-//     // formData.append('registrationEndDate', data.registrationEndDate);
-//     // formData.append('endTime', data.endTime);
-//     // formData.append('eventImage', data.eventImage[0]);
-//     // formData.append('faqs', JSON.stringify(faqs));
-
-//      // try {
-//     //   const res =  axios.post('http://localhost:3000/event/app/v1/create', formData, {
-//     //     headers: { 'Content-Type': 'multipart/form-data' },
-//     //   });
-//     //   if (res.status === 200) {
-//     //     alert(res.data.message);
-//     //   } else {
-//     //     alert('Invalid Data');
-//     //   }
-//     // } catch (err) {
-//     //   console.error(err);
-//     //   alert('Something went wrong');
-//     // }
-//   }
-
-//   return (
-//     <div className="p-6 w-full">
-//       <h1 className="text-xl mb-4">Create Event</h1>
-
-//       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 w-full">
-
-//         <div>
-//           <label>Event Name:</label>
-//           <input type="text" {...register('eventName', { required: true, minLength: 3, maxLength: 30 })} className="w-full border px-3 py-2 rounded" />
-//           {errors.eventName && <p className="text-red-600">* Event Name is required (3-30 characters)</p>}
-//         </div>
-
-//         <div>
-//           <label>Description:</label>
-//           <textarea type="text" placeholder="Describe your event" {...register('description',   { required: true })} className="w-full border px-3 py-2 rounded" rows="10"></textarea>
-//           {errors.description && <p className="text-red-600">* Description is required</p>}
-//         </div>
-
-//         <div>
-//           <label>Max Limit:</label>
-//           <input type="number" {...register('maxLimit', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.maxLimit && <p className="text-red-600">* Max Limit is required</p>}
-//         </div>
-
-//         <div>
-//           <label>Category:</label>
-//           <select {...register('category', { required: true })} className="w-full border px-3 py-2 rounded">
-//             <option value="">-- Select --</option>
-//             <option value="hackathon">Hackathon</option>
-//             <option value="codingcontest">Coding Contest</option>
-//             <option value="workshop">Workshop</option>
-//             <option value="seminar">Seminar</option>
-//             <option value="bootcamp">Bootcamp</option>
-//           </select>
-//           {errors.category && <p className="text-red-600">* Category is required</p>}
-//         </div>
-
-//         <div>
-//           <label>Start Date:</label>
-//           <input type="date" {...register('startDate', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.startDate && <p className="text-red-600">* Start Date is required</p>}
-//         </div>
-
-//         <div>
-//           <label>End Date:</label>
-//           <input type="date" {...register('endDate', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.endDate && <p className="text-red-600">* End Date is required</p>}
-//         </div>
-
-//         <div>
-//           <label>Event Image:</label>
-//           <input type="file" {...register('eventImage', { required: true })} className="w-full" />
-//           {/* {errors.eventImage && <p className="text-red-600">* Event Image is required</p>} */}
-//         </div>
-
-//         <div>
-//           <label>Sample Certificate:</label>
-//           <input type="file" {...register('sampleCertificate', { required: true })} className="w-full" />
-//           {/* {errors.sampleCertificate && <p className="text-red-600">* Sample Certificate is required</p>} */}
-//         </div>
-
-//         <div>
-//           <label>Venue:</label>
-//           <input type="text" {...register('venue', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.venue && <p className="text-red-600">* Venue is required</p>}
-//         </div>
-//         <div>
-//           <label>Venue Link Address:</label>
-//           <input type="text" {...register('venueAddressLink', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {/* {errors.venueAddressLink && <p className="text-red-600">* Venue Link  is required</p>} */}
-//         </div>
-
-//         <div>
-//           <label>Registration Fee:</label>
-//           <input type="number" {...register('registrationFee', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.registrationFee && <p className="text-red-600">* Registration Fee is required</p>}
-//         </div>
-
-//         <div>
-//           <label>Key Takeaways:</label>
-//           <input type="text" {...register('keyTakeAways', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.keyTakeAways && <p className="text-red-600">* Key Takeaways is required</p>}
-//         </div>
-
-//         <div>
-//           <label>Reward Points:</label>
-//           <input type="number" {...register('rewardPoints', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.rewardPoints && <p className="text-red-600">* Reward Points is required</p>}
-//         </div>
-
-//         <div>
-//           <label>Registration Form (Link):</label>
-//           <input type="text" {...register('registrationForm', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.registrationForm && <p className="text-red-600">* Registration Form link is required</p>}
-//         </div>
-
-//         <div>
-//           <label>Registration End Date:</label>
-//           <input type="date" {...register('registrationEndDate', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.registrationEndDate && <p className="text-red-600">* Registration End Date is required</p>}
-//         </div>
-
-//         <div>
-//           <label>End Time:</label>
-//           <input type="time" {...register('endTime', { required: true })} className="w-full border px-3 py-2 rounded" />
-//           {errors.endTime && <p className="text-red-600">* End Time is required</p>}
-//         </div>
-
-//         <div>
-//           <h3 className="text-lg font-semibold">FAQs</h3>
-//           {faqs.map((faq, index) => (
-//             <div key={index} className="flex flex-col md:flex-row gap-4 items-center">
-//               <input type="text" placeholder="Question" value={faq.question} onChange={(e) => handleFaqChange(index, 'question', e.target.value)} className="w-full border px-3 py-2 rounded" />
-//               <hr />
-//               <input type="text" placeholder="Answer" value={faq.answer} onChange={(e) => handleFaqChange(index, 'answer', e.target.value)} className="w-full border px-3 py-2 rounded" />
-//               <button type="button" onClick={() => removeFaq(index)} className="text-red-500 font-semibold">Remove</button>
-//             </div>
-//           ))}
-//           <button type="button" onClick={addFaq} className="text-blue-600 font-medium hover:underline">+ Add FAQ</button>
-//         </div>
-
-//         <button type="submit"  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded w-full">Create Event</button>
-
-//       </form>
-//     </div>
-//   );
-// }
-
-// export default PostEvent;
-
-
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import React, { useState } from 'react';
-
+import { userAtom } from '../UserAtom';
+import { useRecoilValue } from 'recoil';
 function PostEvent() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [faqs, setFaqs] = useState([{ question: '', answer: '' }]);
-
+  const user=useRecoilValue(userAtom);
   const addFaq = () => setFaqs([...faqs, { question: '', answer: '' }]);
   const removeFaq = (index) => setFaqs(faqs.filter((_, i) => i !== index));
   const handleFaqChange = (index, field, value) => {
@@ -226,20 +40,21 @@ function PostEvent() {
     formData.append('endTime', data.endTime);
     formData.append('eventImage', data.eventImage[0]);
     formData.append('faqs', JSON.stringify(faqs));
-
-    // try {
-    //   const res = await axios.post('http://localhost:3000/event/app/v1/create', formData, {
-    //     headers: { 'Content-Type': 'multipart/form-data' },
-    //   });
-    //   if (res.status === 200) {
-    //     alert(res.data.message);
-    //   } else {
-    //     alert('Invalid Data');
-    //   }
-    // } catch (err) {
-    //   console.error(err);
-    //   alert('Something went wrong');
-    // }
+    formData.append('venueAddress',data.venueAddress);
+    
+    try {
+      const res = await axios.post('http://localhost:3000/event/app/v1/create', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' ,'Authorization':localStorage.getItem("token")},
+      });
+      if (res.status === 200) {
+        alert(res.data.message);
+      } else {
+        alert('Invalid Data');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Something went wrong');
+    }
   }
 
   return (
@@ -293,12 +108,12 @@ function PostEvent() {
 
         <div>
           <label>Event Image:</label>
-          <input type="file" {...register('eventImage', { required: true })} className="w-full" />
+          <input type="file" {...register('eventImage', { required: true })} className="w-full" accept=".pdf,.jpg,.jpeg,.png" />
        </div>
 
         <div>
           <label>Sample Certificate:</label>
-          <input type="file" {...register('sampleCertificate', { required: true })} className="w-full" />
+          <input type="file" {...register('sampleCertificate', { required: true })} className="w-full" accept=".pdf,.jpg,.jpeg,.png"  />
           
          </div>
 
@@ -306,6 +121,11 @@ function PostEvent() {
           <label>Venue:</label>
           <input type="text" {...register('venue', { required: true })} className="w-full border px-3 py-2 rounded" />
           {errors.venue && <p className="text-red-600">* Venue is required</p>}
+        </div>
+        <div>
+          <label>Venue Address (Link) :</label>
+          <input type="text" {...register('venueAddress', { required: true })} className="w-full border px-3 py-2 rounded" placeholder='paste google maps address of your college'/>
+          {errors.venueAddress && <p className="text-red-600">* Venue Address is required</p>}
         </div>
 
         <div>
@@ -316,7 +136,7 @@ function PostEvent() {
 
         <div>
           <label>Key Takeaways:</label>
-          <input type="text" {...register('keyTakeAways', { required: true })} className="w-full border px-3 py-2 rounded" />
+          <textarea placeholder="Describe Key takeways" {...register('keyTakeAways', { required: true })} className="w-full border px-3 py-2 rounded" rows="10"></textarea>
           {errors.keyTakeAways && <p className="text-red-600">* Key Takeaways is required</p>}
         </div>
 
@@ -347,13 +167,13 @@ function PostEvent() {
         <div>
           <h3 className="text-lg font-semibold">FAQs</h3>
           {faqs.map((faq, index) => (
-            <div key={index} className="flex flex-col md:flex-row gap-4 items-center">
+            <div key={index} className="flex flex-col md:flex-col gap-4 items-center">
               <input type="text" placeholder="Question" value={faq.question} onChange={(e) => handleFaqChange(index, 'question', e.target.value)} className="w-full border px-3 py-2 rounded" />
               <input type="text" placeholder="Answer" value={faq.answer} onChange={(e) => handleFaqChange(index, 'answer', e.target.value)} className="w-full border px-3 py-2 rounded" />
               <button type="button" onClick={() => removeFaq(index)} className="text-red-500 font-semibold">Remove</button>
             </div>
           ))}
-          <button type="button" onClick={addFaq} className="text-blue-600 font-medium hover:underline">+ Add FAQ</button>
+          <button type="button" onClick={addFaq} className="text-white font-medium bg-black rounded-lg p-2 mt-1">+ Add FAQ</button>
         </div>
 
         <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded w-full">Create Event</button>
@@ -361,7 +181,7 @@ function PostEvent() {
       </form>
 
 
-
+ <button onClick={()=>{console.log("reached")}}>hello</button>
     </div>
   );
 }

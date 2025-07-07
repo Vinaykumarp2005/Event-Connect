@@ -17,6 +17,7 @@ import VerifyPage from './components/common/VerifyPage.jsx'
 import OrganizerHomePage from './components/organizer/OrganizerHomePage.js'
 import CreatedEvents from './components/organizer/CreatedEvents.jsx'
 import PostEvent from './components/organizer/PostEvent.jsx'
+import {RecoilRoot} from 'recoil'
 function Main(){
 return (
   <BrowserRouter>
@@ -58,7 +59,7 @@ return (
 
 
 createRoot(document.getElementById('root')).render(
-  
+  <RecoilRoot>
     <Main/>
-
+  </RecoilRoot>
 )

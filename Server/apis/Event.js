@@ -15,7 +15,6 @@ const eventSchema = z.object({
   eventName: z.string(),
   description: z.string(),
   maxLimit: z.number(),
-  enrolled: z.number(),
   category: z.string(),
   faqs: z.array(z.object({
     question: z.string().min(1, "Question is required"),
@@ -62,7 +61,7 @@ eventApp.post('/app/v1/create',verifyUser,validPerson,upload.fields([
   { name: 'sampleCertificate', maxCount: 1 }
 ])
 ,async(req,res)=>{
- const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
+ const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
 
 let eventImageUrls = [];
 
@@ -88,7 +87,6 @@ let eventImageUrls = [];
   eventName:eventName,
   description:description,
   maxLimit:maxLimit,
-  enrolled:enrolled,
   category:category,
   faqs:faqs,
   startDate:new Date(startDate),

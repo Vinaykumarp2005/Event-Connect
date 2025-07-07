@@ -2,8 +2,12 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import {useNavigate}from 'react-router-dom'
 import axios from 'axios'
+import { userAtom } from '../UserAtom'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 export default function SignIn() {
   const navigate=useNavigate();
+  const setUser=useSetRecoilState(userAtom);
+
   const { register, handleSubmit ,formState:{errors}} = useForm();
 
   async function handleFormSubmit(data) {
@@ -14,6 +18,13 @@ export default function SignIn() {
            );
        if(res.status===200){
        // console.log(res)
+            const payload={
+              username:res.data.payload.username,
+              role:res.data.payload.role,
+              _id:res.data.payload._id,
+              email:res.data.payload.email
+            }
+            setUser(payload);
             localStorage.setItem('token',res.data.token);
         navigate(`/student-profile/${res.data.payload.username}`)
        }else{
@@ -22,7 +33,13 @@ export default function SignIn() {
     }else if(data.role==='admin'){
            const res=await axios.post('http://localhost:3000/admin/signin',data);
            if(res.status===200){
-            
+            const payload={
+              username:res.data.payload.username,
+              role:res.data.payload.role,
+              _id:res.data.payload._id,
+              email:res.data.payload.email
+            }
+            setUser(payload);
             localStorage.setItem('token',res.data.token);
             //alert('signin signed i
             // n');
@@ -32,6 +49,13 @@ export default function SignIn() {
            }
     }else{
       const res=await axios.post('http://localhost:3000/auth/organizer/signin',data);
+            const payload={
+              username:res.data.payload.username,
+              role:res.data.payload.role,
+              _id:res.data.payload._id,
+              email:res.data.payload.email
+            }
+            setUser(payload);
            if(res.status===200){
             localStorage.setItem('token',res.data.token);
             navigate(`/organizer-profile/${res.data.payload.username}`)
