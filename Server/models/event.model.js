@@ -38,9 +38,8 @@ const eventSchema= new Schema({
         required:true,
     },
     enrolled:{
-        type:Number,
-        required:true
-    },
+        type:Number, 
+    default:0   },
     category:{
         type:String,
         required:true,

@@ -9,7 +9,7 @@ const upload = require('../middlewares/multer.middleware');
 const uploadOnCloudinary = require('../utils/cloudinary');
 const {Events}=require('../models/event.model');
 const validEventData=(req,res,next)=>{
-  const {eventName,description,maxLimit,enrolled,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
+  const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
  
 const eventSchema = z.object({
   eventName: z.string(),
@@ -88,7 +88,7 @@ let eventImageUrls = [];
   description:description,
   maxLimit:maxLimit,
   category:category,
-  faqs:faqs,
+  faqs:JSON.parse(faqs),
   startDate:new Date(startDate),
   endDate:new Date(endDate),
   eventImage: eventImageUrls, 
@@ -142,9 +142,8 @@ eventApp.get('/app/v1/events/:eventId',verifyUser,async(req,res)=>{
     });
   }
 })
-eventApp.get('/app/v1/events/',verifyUser,async(req,res)=>{
+eventApp.get('/app/v1/events',verifyUser,async(req,res)=>{
   try{
-
     const response=await Events.find({
     })
     if(response){

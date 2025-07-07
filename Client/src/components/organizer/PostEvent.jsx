@@ -108,12 +108,12 @@ function PostEvent() {
 
         <div>
           <label>Event Image:</label>
-          <input type="file" {...register('eventImage', { required: true })} className="w-full" accept=".pdf,.jpg,.jpeg,.png" />
+          <input type="file" {...register('eventImage')} className="w-full" accept=".pdf,.jpg,.jpeg,.png" />
        </div>
 
         <div>
           <label>Sample Certificate:</label>
-          <input type="file" {...register('sampleCertificate', { required: true })} className="w-full" accept=".pdf,.jpg,.jpeg,.png"  />
+          <input type="file" {...register('sampleCertificate')} className="w-full" accept=".pdf,.jpg,.jpeg,.png"  />
           
          </div>
 
@@ -179,9 +179,6 @@ function PostEvent() {
         <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded w-full">Create Event</button>
 
       </form>
-
-
- <button onClick={()=>{console.log("reached")}}>hello</button>
     </div>
   );
 }

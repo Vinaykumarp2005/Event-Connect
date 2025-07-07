@@ -14,10 +14,7 @@ function OrganizerHomePage() {
 <Link to='dashboard'>DashBoard</Link>
         </li>
         <li>
-<Link to='enrolledevents'>EnrolledEvenrts</Link>
-        </li>
-        <li>
-          <Link to=''>Created Events</Link>
+          <Link to='events'>Events</Link>
         </li>
         <li>
           <Link to='postEvents'>PostEvent</Link>

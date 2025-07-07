@@ -37,7 +37,6 @@ return (
     <Route path='organizer-profile/:emailId' element={<OrganizerHomePage/>}>
     <Route index  element={<OrganizerDashBoard/>}/>
       <Route  path='dashboard' element={<OrganizerDashBoard/>}/>
-      <Route path='enrolledevents' element={<EnrolledEvents/>}/>
       <Route path=':eventById' element={<EventsById/>}/>
       <Route path='events' element={<Events/>}/>
       <Route path='createdEvents' element={<CreatedEvents/>}/>
