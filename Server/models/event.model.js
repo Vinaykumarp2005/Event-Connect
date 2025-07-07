@@ -68,6 +68,9 @@ const eventSchema= new Schema({
         type:String,
         required:true
     },
+    venueAddressLink:{
+        type:String
+    },
     keyTakeAways:{
         type:String,
         required:true

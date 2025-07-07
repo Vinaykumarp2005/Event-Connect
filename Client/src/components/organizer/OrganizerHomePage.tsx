@@ -24,8 +24,8 @@ function OrganizerHomePage() {
     
     
      </div>
-     <div>
-      <Outlet/>
+     <div className="flex-grow bg-gray-100 flex justify-center items-center p-4">
+        <Outlet />
      </div>
     </div>
   )
