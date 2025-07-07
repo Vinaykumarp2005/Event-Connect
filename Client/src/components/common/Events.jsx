@@ -39,9 +39,9 @@ const isActive = (registrationEndDate, enrolled, maxLimit) => {
     <div className="flex flex-wrap flex-row gap-4 p-4">
       {
         events.map((obj, idx) => (
-          <div key={idx} className='min-h-52 bg-gray-500 w-60 flex flex-col rounded-lg border border-white'>
+          <div key={idx} className='min-h-52 bg-gray-500 min-w-60 max-w-60 max-h-80 flex flex-col rounded-lg border border-white'>
             <div className='p-2'>
-              <img src={obj.eventImage} alt="" width="100%" style={{ borderRadius: "10px" }} />
+              <img src={obj.eventImage} alt=""  className="w-52 h-24  " style={{ borderRadius: "10px" }} />
             </div>
             <div className='px-4 pb-4 text-white'>
               <div className='flex justify-between items-center mb-2'>

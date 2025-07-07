@@ -2,7 +2,7 @@ import React from 'react'
 
 function OrganizerDashBoard() {
   return (
-    <div className='text-center'>
+    <div className=''>
              hetteiuj
     </div>
   )
