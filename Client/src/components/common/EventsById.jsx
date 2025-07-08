@@ -4,9 +4,11 @@ import { IoPricetags } from 'react-icons/io5';
 import { BsCalendarDate } from 'react-icons/bs';
 import { IoMdTime } from 'react-icons/io';
 import {useForm} from 'react-hook-form'
-
+import {useRecoilValue} from 'recoil'
+import {userAtom} from '../UserAtom'
 // Accordion Item Component
 function AccordionItem({ question, answer, isExpanded, onToggle }) {
+
   return (
     <div className="rounded-xl bg-gray-100 overflow-hidden">
       <div className="flex justify-between items-center p-4 cursor-pointer" onClick={onToggle}>
@@ -23,6 +25,7 @@ function AccordionItem({ question, answer, isExpanded, onToggle }) {
 }
 
 function EventsById() {
+    const user=useRecoilValue(userAtom);
   const { state } = useLocation();
   const [expandedID, setExpandedID] = useState(null);
 
@@ -30,11 +33,23 @@ function EventsById() {
     setExpandedID(expandedID === id ? null : id);
   };
 
- const [comments, setComments] = useState(state.comments || []); 
   const { register, handleSubmit, reset } = useForm();
+const [comments, setComments] = useState(state.comments || []);
 
-  const handleAddComment = (data) => {
-    setComments([...comments, data.newComment]);
+  const handleAddComment = async (data) => {
+    const newComment = {
+      content: data.newComment,
+      ownerId: user._id,
+    };
+    const res=await axios.put(`http://localhost:3000/event/app/v1/event/update/student/${state._id}`,{
+   newComment
+    },{
+      headers:{
+        Authorization:localStorage.getItem("token")
+      }
+    })
+      setComments(res.data.comments || []);
+
     reset(); 
   };
 
@@ -89,38 +104,28 @@ function EventsById() {
 
           {/* Venue */}
           <div>
-            <h2 className="text-xl font-semibold mb-2">Venue</h2>
-            <p className="text-gray-700">{state.venueAddress || 'N/A'}</p>
-            <div className="mt-3">
-              <iframe
-                title="Venue Location"
-                src={`https://www.google.com/maps?q=${encodeURIComponent(state.venueAddress)}&output=embed`}
-                width="100%"
-                height="200"
-                className="rounded-md"
-              ></iframe>
-            </div>
+            <h2 className="text-xl font-semibold mb-2 break-words">Venue</h2>
+               <p className="text-gray-700 max-w-96 break-words">{state.venue|| 'N/A'}</p>
+<div className="mt-3">
+  {state.venueAddress ? (
+    <iframe
+      title="Venue Location"
+      src={state.venueAddress}
+      width="100%"
+      height="200"
+      allowFullScreen
+      loading="lazy"
+      className="rounded-md border"
+    ></iframe>
+  ) : (
+    <p className="text-gray-500">Venue location not available.</p>
+  )}
+</div>
           </div>
 
           {/* FAQs */}
-          <div className='justify-center mx-auto items-center'>
-            <h2 className="text-xl font-semibold mb-2 "> FAQs</h2>
-            {state.faqs && state.faqs.length > 0 ? (
-              <div className="space-y-3">
-                {state.faqs.map((faq, index) => (
-                  <AccordionItem
-                    key={index}
-                    question={faq.question}
-                    answer={faq.answer}
-                    isExpanded={expandedID === index}
-                    onToggle={() => toggleExpand(index)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500">No FAQs available.</p>
-            )}
-          </div>
+      
+
         </div>
         <div className="w-full md:w-1/3 space-y-6 bg-gray-50 rounded-xl p-4 shadow-md h-fit">
             <div className="space-y-2">
@@ -170,7 +175,25 @@ function EventsById() {
       </div>
 
       
+                <h2 className="text-xl font-semibold mb-2 text-center"> FAQs</h2>
 
+          <div className="flex justify-center">
+  <div className="w-full  space-y-3">
+    {state.faqs && state.faqs.length > 0 ? (
+      state.faqs.map((faq, index) => (
+        <AccordionItem
+          key={index}
+          question={faq.question}
+          answer={faq.answer}
+          isExpanded={expandedID === index}
+          onToggle={() => toggleExpand(index)}
+        />
+      ))
+    ) : (
+      <p className="text-gray-500 text-center">No FAQs available.</p>
+    )}
+  </div>
+</div>
 
         <div className="mt-8">
         <h2 className="text-xl font-semibold mb-2">Comments</h2>
@@ -189,8 +212,8 @@ function EventsById() {
         )}
 
         {/* Add Comment */}
-        <form onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
-          <input
+      {user._id!==state.organiser&&<form onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
+        <input
             type="text"
             placeholder="Write a comment..."
             {...register('newComment', { required: true })}
@@ -202,7 +225,7 @@ function EventsById() {
           >
             Add Comment
           </button>
-        </form>
+        </form>}
       </div>
 
 

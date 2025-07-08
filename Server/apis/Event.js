@@ -182,6 +182,7 @@ eventApp.put('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.fi
     { name: 'eventImage', maxCount: 1 },
     { name: 'sampleCertificate', maxCount: 1 }
   ]), async (req, res) => {
+    console.log("hi")
   try {
     const { eventId } = req.params;
     const existingEvent = await Events.findOne({ _id: eventId, organiser: req.userId });
@@ -218,6 +219,36 @@ eventApp.put('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.fi
     res.status(200).json({
       message: "Event updated successfully",
       payload: updatedEvent
+    });
+
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
+eventApp.put('/app/v1/event/update/student/:eventId', verifyUser, async (req, res) => {
+  console.log("reached");
+  try {
+    const { eventId } = req.params;
+    const { newComment } = req.body;
+
+    const event = await Events.findById(eventId);
+    if (!event) {
+      return res.status(404).json({
+        message: "Event not found"
+      });
+    }
+
+    event.comments.push({
+      content: newComment,
+      owner: req.userId
+    });
+
+    await event.save();
+
+    res.status(200).json({
+      message: "Comment added successfully",
+      comments: event.comments
     });
 
   } catch (e) {
