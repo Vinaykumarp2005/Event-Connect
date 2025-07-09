@@ -340,7 +340,7 @@ await sendOrganiserEmail(OrganizerResponse.email,"Verify Email",url);
   })
  }
   const secret=process.env.JWT_SECRET;
-  const token=jwt.sign({userId:OrganizerResponse._id},secret);
+  const token=jwt.sign({userId:OrganizerResponse._id},secret,{expiresIn:"1h"});
   if(token){
     res.status(200).json({
       message:"sign in successfully",

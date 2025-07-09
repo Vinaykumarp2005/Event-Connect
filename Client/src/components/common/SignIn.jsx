@@ -11,60 +11,99 @@ export default function SignIn() {
   const { register, handleSubmit ,formState:{errors}} = useForm();
 
   async function handleFormSubmit(data) {
-    if(data.role==='student'){
-       const res = await axios.post(
-      'http://localhost:3000/auth/student/signin',
-            data
-           );
-       if(res.status===200){
-       // console.log(res)
-            const payload={
-              username:res.data.payload.username,
-              role:res.data.payload.role,
-              _id:res.data.payload._id,
-              email:res.data.payload.email
-            }
-            setUser(payload);
-            localStorage.setItem('token',res.data.token);
-        navigate(`/student-profile/${res.data.payload.username}`)
-       }else{
-        alert("Invalid data");
-       }
-    }else if(data.role==='admin'){
-           const res=await axios.post('http://localhost:3000/admin/signin',data);
-           if(res.status===200){
-            const payload={
-              username:res.data.payload.username,
-              role:res.data.payload.role,
-              _id:res.data.payload._id,
-              email:res.data.payload.email
-            }
-            setUser(payload);
-            localStorage.setItem('token',res.data.token);
-            //alert('signin signed i
-            // n');
-              navigate(`/admin-profile/${res.data.payload.username}`)
-           }else{
-            alert('invalid data')
-           }
-    }else{
-      const res=await axios.post('http://localhost:3000/auth/organizer/signin',data);
-            const payload={
-              username:res.data.payload.username,
-              role:res.data.payload.role,
-              _id:res.data.payload._id,
-              email:res.data.payload.email
-            }
-            setUser(payload);
-           if(res.status===200){
-            localStorage.setItem('token',res.data.token);
-            navigate(`/organizer-profile/${res.data.payload.username}`)
-            }else{
-            alert('invalid data')
-           }
-
+  try {
+    let res;
+    if (data.role === 'student') {
+      res = await axios.post('http://localhost:3000/auth/student/signin', data);
+    } else if (data.role === 'admin') {
+      res = await axios.post('http://localhost:3000/admin/signin', data);
+    } else {
+      res = await axios.post('http://localhost:3000/auth/organizer/signin', data);
     }
+
+    if (res.status === 200) {
+      const payload = {
+        username: res.data.payload.username,
+        role: res.data.payload.role,
+        _id: res.data.payload._id,
+        email: res.data.payload.email,
+      };
+      setUser(payload);
+      localStorage.setItem('token', res.data.token);
+
+      // Navigate to profile based on role
+      if (data.role === 'student') {
+        navigate(`/student-profile/${res.data.payload.username}`);
+      } else if (data.role === 'admin') {
+        navigate(`/admin-profile/${res.data.payload.username}`);
+      } else {
+        navigate(`/organizer-profile/${res.data.payload.username}`);
+      }
+    } else {
+      alert("Invalid data");
+    }
+  } catch (error) {
+    console.error("Login error:", error.response?.data || error.message);
+    alert("Login failed: " + (error.response?.data?.message || "Unknown error"));
   }
+}
+
+
+  // async function handleFormSubmit(data) {
+  //   if(data.role==='student'){
+  //      const res = await axios.post(
+  //     'http://localhost:3000/auth/student/signin',
+  //           data
+  //          );
+  //      if(res.status===200){
+  //      // console.log(res)
+  //           const payload={
+  //             username:res.data.payload.username,
+  //             role:res.data.payload.role,
+  //             _id:res.data.payload._id,
+  //             email:res.data.payload.email
+  //           }
+  //           setUser(payload);
+  //           localStorage.setItem('token',res.data.token);
+  //       navigate(`/student-profile/${res.data.payload.username}`)
+  //      }else{
+  //       alert("Invalid data");
+  //      }
+  //   }else if(data.role==='admin'){
+  //          const res=await axios.post('http://localhost:3000/admin/signin',data);
+  //          if(res.status===200){
+  //           const payload={
+  //             username:res.data.payload.username,
+  //             role:res.data.payload.role,
+  //             _id:res.data.payload._id,
+  //             email:res.data.payload.email
+  //           }
+  //           setUser(payload);
+  //           localStorage.setItem('token',res.data.token);
+  //           //alert('signin signed i
+  //           // n');
+  //             navigate(`/admin-profile/${res.data.payload.username}`)
+  //          }else{
+  //           alert('invalid data')
+  //          }
+  //   }else{
+  //     const res=await axios.post('http://localhost:3000/auth/organizer/signin',data);
+  //           const payload={
+  //             username:res.data.payload.username,
+  //             role:res.data.payload.role,
+  //             _id:res.data.payload._id,
+  //             email:res.data.payload.email
+  //           }
+  //           setUser(payload);
+  //          if(res.status===200){
+  //           localStorage.setItem('token',res.data.token);
+  //           navigate(`/organizer-profile/${res.data.payload.username}`)
+  //           }else{
+  //           alert('invalid data')
+  //          }
+
+  //   }
+  // }
   console.log("errors object",errors)
 
   return (

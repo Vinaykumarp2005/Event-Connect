@@ -1,17 +1,17 @@
 const {mongoose,Schema}=require("mongoose");
-const commentSchema=new Schema({
-    content:{
-        type:String,
-        required:true
-    },event:{
-        type:Schema.Types.ObjectId,
-        ref:"Event"
-    },
-    owner:{
-        type:Schema.Types.ObjectId,
-        ref:"Student"
-    },
-},{timestamps:true})
+// const commentSchema=new Schema({
+//     content:{
+//         type:String,
+//         required:true
+//     },event:{
+//         type:Schema.Types.ObjectId,
+//         ref:"Event"
+//     },
+//     owner:{
+//         type:Schema.Types.ObjectId,
+//         ref:"Student"
+//     },
+// },{timestamps:true})
 
 const faqSchema=new Schema({
     question:{
@@ -91,9 +91,14 @@ const eventSchema= new Schema({
         type:String,
         required:true
     },
-    comments:{
-        type:[commentSchema]
-    },
+    comments: [
+    {
+      content: String,
+      owner: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
+      name: String,
+      createdAt: { type: Date, default: Date.now }
+    }
+  ],
     venueAddress:{
         type:String
     }

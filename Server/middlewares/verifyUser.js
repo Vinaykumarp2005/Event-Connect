@@ -6,6 +6,7 @@ const verifyUser=async (req,res,next)=>{
     const token=req.headers["authorization"];
     const jwtsecret=process.env.JWT_SECRET;
     const validtoken=jwt.verify(token,jwtsecret);
+    
     if(validtoken){
       req.userId=validtoken.userId;
       next();

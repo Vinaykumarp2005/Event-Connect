@@ -47,7 +47,7 @@ const validPerson=async(req,res,next)=>{
   try{
   const response=await Organizer.findById(req.userId
   )
-  if(response.role){
+  if(response){
   next();
   }
   }catch(e){
@@ -230,26 +230,28 @@ eventApp.put('/app/v1/event/update/student/:eventId', verifyUser, async (req, re
   console.log("reached");
   try {
     const { eventId } = req.params;
-    const { newComment } = req.body;
-
+    const { content,name } = req.body;
+console.log("Request Body:", req.body);
     const event = await Events.findById(eventId);
     if (!event) {
       return res.status(404).json({
         message: "Event not found"
       });
     }
-
+    console.log(name)
+// console.log(newComment.name);
     event.comments.push({
-      content: newComment,
-      owner: req.userId
+      content,
+      owner: req.userId,
+      name,
     });
 
     await event.save();
 
-    res.status(200).json({
-      message: "Comment added successfully",
-      comments: event.comments
-    });
+   res.status(200).json({
+  message: "Comment added successfully",
+  payload: event
+});
 
   } catch (e) {
     console.error(e);
