@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { IoPricetags } from 'react-icons/io5';
 import { BsCalendarDate } from 'react-icons/bs';
@@ -8,7 +8,7 @@ import {useRecoilValue} from 'recoil'
 import axios from 'axios';
 import {userAtom} from '../UserAtom'
 import { MdDelete } from "react-icons/md";
-
+import { useParams } from 'react-router-dom';
 function AccordionItem({ question, answer, isExpanded, onToggle }) {
 
   return (
@@ -27,42 +27,66 @@ function AccordionItem({ question, answer, isExpanded, onToggle }) {
 }
 function EventsById() {
     const user=useRecoilValue(userAtom);
-    console.log(user)
-  const { state } = useLocation();
-  const [expandedID, setExpandedID] = useState(null);
-// const { state: locationState } = useLocation();
-  // const [eventDetails, setEventDetails] = useState(locationState ?? {}); // full event object
-  
+    const {eventById}=useParams();
+ // const { state } = useLocation();
+ const [expandedID, setExpandedID] = useState(null);
+  const [comments, setComments] = useState([]);
+
+  const [currentArticle,setCurrentArticle]=useState();
+useEffect(()=>{
+   const fetchEvent=async ()=>{
+    const res=await axios.get(`http://localhost:3000/event/app/v1/events/${eventById}`,{
+      headers:{
+        Authorization:localStorage.getItem('token')
+      }
+    });
+    if(res.status===200){
+      setCurrentArticle(res.data.payload);
+      setComments(res.data.payload.comments)
+    }
+   }
+   fetchEvent();
+},[eventById]);
   const toggleExpand = (id) => {
     setExpandedID(expandedID === id ? null : id);
   };
 
 const { register, handleSubmit, reset } = useForm();
-const [comments, setComments] = useState(state?.comments ?? []);
 
   console.log(user.username);
   const handleAddComment = async (data) => {
-    
-    console.log(user.username);
-    const res=await axios.put(`http://localhost:3000/event/app/v1/event/update/student/${state._id}`,{
-  
+    const res=await axios.put(`http://localhost:3000/event/app/v1/event/update/student/${eventById}`,{
        content: data.newComment,
         owner: user._id,
         name: user.username,
-
     },{
       headers:{
         Authorization:localStorage.getItem("token")
       }
     })
-      // setComments(res.data.comments || []);
-      setComments(res.data.payload.comments || []);
-
-
+   setComments(res.data.payload.comments || []);
     reset(); 
   };
+ async function deleteComment(commentId){
+      try{
+       const res=await axios.delete(`http://localhost:3000/event/app/v1/comment/delete/${eventById}/${commentId}`,{
+        headers:{
+          Authorization:localStorage.getItem('token')
+        }
+       })
 
+       if(res.status===200){
+        setComments(res.data.payload);
+       }
 
+      }catch(e){
+        
+       alert('error deeleting comment',e.message);
+      }
+  }
+if (!currentArticle) {
+  return <div className="text-center mt-10 text-gray-500">Loading event details...</div>;
+}
 
 
   return (
@@ -71,7 +95,7 @@ const [comments, setComments] = useState(state?.comments ?? []);
      
       <div className="mb-6">
         <img
-          src={state.eventImage}
+          src={currentArticle.eventImage}
           alt="Event"
           className="rounded-xl w-full h-full object-cover"
         />
@@ -85,28 +109,28 @@ const [comments, setComments] = useState(state?.comments ?? []);
 
           <div className="flex flex-wrap gap-2">
             <span className="text-xs bg-red-200 rounded px-2 py-1 flex items-center">
-              <IoPricetags className="mr-1" /> {state.category}
+              <IoPricetags className="mr-1" /> {currentArticle.category}
             </span>
           </div>
 
-          <h1 className="text-3xl font-bold">{state.eventName}</h1>
+          <h1 className="text-3xl font-bold">{currentArticle.eventName}</h1>
 
           <div>
             <h2 className="text-xl font-semibold mb-2">About</h2>
-            <p className="text-gray-700">{state.description}</p>
+            <p className="text-gray-700">{currentArticle.description}</p>
           </div>
 
           {/* Start & End Dates */}
           <div className="space-y-2">
            <p className="flex items-center gap-2 text-gray-700">
-            <BsCalendarDate /> <b>Registration End Date:</b> {new Date(state.registrationEndDate).toLocaleDateString('en-US', {
+            <BsCalendarDate /> <b>Registration End Date:</b> {new Date(currentArticle.registrationEndDate).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
             })}
             </p>
             <p className="flex items-center gap-2 text-gray-700">
-  <IoMdTime /> <b>End Time:</b> {state.endTime}
+  <IoMdTime /> <b>End Time:</b> {currentArticle.endTime}
 </p>
 
 
@@ -116,12 +140,12 @@ const [comments, setComments] = useState(state?.comments ?? []);
           {/* Venue */}
           <div>
             <h2 className="text-xl font-semibold mb-2 break-words">Venue</h2>
-               <p className="text-gray-700 max-w-96 break-words">{state.venue|| 'N/A'}</p>
+               <p className="text-gray-700 max-w-96 break-words">{currentArticle.venue|| 'N/A'}</p>
 <div className="mt-3">
-  {state.venueAddress ? (
+  {currentArticle.venueAddress ? (
     <iframe
       title="Venue Location"
-      src={state.venueAddress}
+      src={currentArticle.venueAddress}
       width="100%"
       height="200"
       allowFullScreen
@@ -142,14 +166,14 @@ const [comments, setComments] = useState(state?.comments ?? []);
             <div className="space-y-2">
                 <h3 className="font-semibold text-lg mb-2">Date & Time</h3>
                 <p className="flex items-center gap-2 text-gray-700">
-                  <BsCalendarDate /> <b>Start:</b> {new Date(state.startDate).toLocaleDateString('en-US', {
+                  <BsCalendarDate /> <b>Start:</b> {new Date(currentArticle.startDate).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
                   })}
                 </p>
                 <p className="flex items-center gap-2 text-gray-700">
-                  <IoMdTime /> <b>End:</b> {new Date(state.endDate).toLocaleDateString('en-US', {
+                  <IoMdTime /> <b>End:</b> {new Date(currentArticle.endDate).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -159,7 +183,7 @@ const [comments, setComments] = useState(state?.comments ?? []);
 
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Cost</h3>
-                  ₹{state.cost || 0}
+                  ₹{currentArticle.cost || 0}
                 </div>
 
                 <div>
@@ -167,15 +191,15 @@ const [comments, setComments] = useState(state?.comments ?? []);
                   <div className="w-full bg-gray-200 h-2 rounded">
                     <div
                       className="bg-blue-600 h-2 rounded"
-                      style={{ width: `${(state.enrolled / state.maxLimit) * 100}%` }}
+                      style={{ width: `${(currentArticle.enrolled / currentArticle.maxLimit) * 100}%` }}
                     ></div>
                   </div>
-                  <p className="mt-1 text-sm">{state.enrolled}/{state.maxLimit} spots filled</p>
+                  <p className="mt-1 text-sm">{currentArticle.enrolled}/{currentArticle.maxLimit} spots filled</p>
                 </div>
 
                 <div>
                   <h3 className="font-semibold text-lg mb-2">Reward Points</h3>
-                  {state.rewardPoints || 0} points
+                  {currentArticle.rewardPoints || 0} points
                 </div>
 
                 <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
@@ -190,8 +214,8 @@ const [comments, setComments] = useState(state?.comments ?? []);
 
           <div className="flex justify-center">
   <div className="w-full  space-y-3">
-    {state.faqs && state.faqs.length > 0 ? (
-      state.faqs.map((faq, index) => (
+    {currentArticle.faqs && currentArticle.faqs.length > 0 ? (
+      currentArticle.faqs.map((faq, index) => (
         <AccordionItem
           key={index}
           question={faq.question}
@@ -215,8 +239,11 @@ const [comments, setComments] = useState(state?.comments ?? []);
             {comments.map((comment, index) => (
               <div key={index} className="p-2 bg-gray-100 rounded">
                <p className="text-gray-700">{comment.name}</p>
-           
-                <p className="text-gray-700">{comment.content}</p>
+               <div className='flex justify-between'>
+                <p className="text-gray-700">{comment.content}</p>{user._id===comment.owner&&<button onClick={()=>deleteComment(comment._id)}><MdDelete className='text-red-600 mr-4 text-bold' /></button>}
+               </div>
+                
+
               </div>
             ))}
           </div>
@@ -225,7 +252,7 @@ const [comments, setComments] = useState(state?.comments ?? []);
         )}
 
         {/* Add Comment */}
-      {user._id!==state.organiser&&<form onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
+      {user._id!==currentArticle.organiser&&<form onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
         <input
             type="text"
             placeholder="Write a comment..."
@@ -249,6 +276,79 @@ const [comments, setComments] = useState(state?.comments ?? []);
 }
 
 export default EventsById;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   

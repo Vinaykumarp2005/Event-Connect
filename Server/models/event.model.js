@@ -1,18 +1,4 @@
 const {mongoose,Schema}=require("mongoose");
-// const commentSchema=new Schema({
-//     content:{
-//         type:String,
-//         required:true
-//     },event:{
-//         type:Schema.Types.ObjectId,
-//         ref:"Event"
-//     },
-//     owner:{
-//         type:Schema.Types.ObjectId,
-//         ref:"Student"
-//     },
-// },{timestamps:true})
-
 const faqSchema=new Schema({
     question:{
         type:String,

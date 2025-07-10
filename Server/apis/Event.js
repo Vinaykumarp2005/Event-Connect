@@ -259,6 +259,43 @@ console.log("Request Body:", req.body);
   }
 });
 
+eventApp.delete('/app/v1/comment/delete/:eventId/:commentId', verifyUser, async (req, res) => {
+  try {
+    const { eventId, commentId } = req.params;
+
+    const event = await Events.findById(eventId);
+    if (!event || !Array.isArray(event.comments)) {
+      return res.status(404).json({ message: "Event not found or has no comments" });
+    }
+
+    const commentIndex = event.comments.findIndex(
+      (comment) =>
+        comment?._id?.toString() === commentId &&
+        comment?.owner?.toString() === req.userId
+    );
+
+    if (commentIndex === -1) {
+      return res.status(403).json({
+        message: "You are not authorized to delete this comment or it doesn't exist.",
+      });
+    }
+
+    event.comments.splice(commentIndex, 1);
+    await event.save();
+
+    res.status(200).json({
+      message: "Comment deleted successfully",
+      payload: event.comments,
+    });
+
+  } catch (e) {
+    console.error("Error deleting comment:", e); // ⬅️ log the full error
+    res.status(500).json({ message: "Something went wrong", error: e.message });
+  }
+});
+
+
+
 eventApp.delete('/app/v1/event/delete/:eventId',verifyUser,validPerson,async(req,res)=>{
   try{
     const eventId=req.params.eventId;
