@@ -178,7 +178,7 @@ eventApp.get('/app/v1/organiser/events', verifyUser,validPerson, async (req, res
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-eventApp.put('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.fields([
+eventApp.post('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.fields([
     { name: 'eventImage', maxCount: 1 },
     { name: 'sampleCertificate', maxCount: 1 }
   ]), async (req, res) => {
@@ -192,7 +192,21 @@ eventApp.put('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.fi
       });
     }
 
-    let updatedData = { ...req.body };
+    const updatedData = { ...req.body };
+
+// Parse numeric fields (FormData sends them as strings)
+if (updatedData.maxLimit) updatedData.maxLimit = parseInt(updatedData.maxLimit);
+if (updatedData.registrationFee) updatedData.registrationFee = parseInt(updatedData.registrationFee);
+if (updatedData.rewardPoints) updatedData.rewardPoints = parseInt(updatedData.rewardPoints);
+
+// Parse dates
+if (updatedData.startDate) updatedData.startDate = new Date(updatedData.startDate);
+if (updatedData.endDate) updatedData.endDate = new Date(updatedData.endDate);
+if (updatedData.registrationEndDate) updatedData.registrationEndDate = new Date(updatedData.registrationEndDate);
+
+// Parse faqs
+if (updatedData.faqs) updatedData.faqs = JSON.parse(updatedData.faqs);
+
 
     // If new eventImage is uploaded
     if (req.files['eventImage'] && req.files['eventImage'][0]) {

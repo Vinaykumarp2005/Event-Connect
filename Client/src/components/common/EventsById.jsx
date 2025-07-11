@@ -40,6 +40,57 @@ const { register, handleSubmit, formState: { errors },reset} = useForm();
     setFaqs(updatedFaqs);
   };
 
+  async function handleUpdateSubmit(data) {
+  console.log('Updating Event:', data);
+  console.log('FAQs:', faqs);
+
+  const formData = new FormData();
+  formData.append('eventName', data.eventName);
+  formData.append('description', data.description);
+  formData.append('maxLimit', data.maxLimit);
+  formData.append('category', data.category);
+  formData.append('startDate', data.startDate);
+  formData.append('endDate', data.endDate);
+  formData.append('registrationFee', data.registrationFee);
+  formData.append('venue', data.venue);
+  formData.append('keyTakeAways', data.keyTakeAways);
+  formData.append('rewardPoints', data.rewardPoints);
+  formData.append('registrationForm', data.registrationForm);
+  formData.append('registrationEndDate', data.registrationEndDate);
+  formData.append('endTime', data.endTime);
+  formData.append('venueAddress', data.venueAddress);
+
+  if (data.sampleCertificate?.[0]) {
+    formData.append('sampleCertificate', data.sampleCertificate[0]);
+  }
+  if (data.eventImage?.[0]) {
+    formData.append('eventImage', data.eventImage[0]);
+  }
+
+  formData.append('faqs', JSON.stringify(faqs));
+
+  try {
+    const res = await axios.post(`http://localhost:3000/event/app/v1/event/update/${eventById}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data', 'Authorization': localStorage.getItem('token') },
+    });
+
+    if (res.status === 200) {
+      alert('Event updated successfully');
+
+      setCurrentArticle(res.data.payload); 
+      setEdit(false); 
+    } else {
+      alert('Failed to update event');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error updating event');
+  }
+}
+
+
+
+
   async function handleFormSubmit(data) {
     console.log('Form submitted:', data);
     console.log('FAQs:', faqs);
@@ -122,6 +173,33 @@ useEffect(()=>{
    setComments(res.data.payload.comments || []);
     reset(); 
   };
+
+useEffect(() => {
+  if (edit && currentArticle) {
+    reset({
+      eventName: currentArticle.eventName,
+      description: currentArticle.description,
+      maxLimit: currentArticle.maxLimit,
+      category: currentArticle.category,
+      startDate: new Date(currentArticle.startDate).toISOString().split('T')[0],
+      endDate: new Date(currentArticle.endDate).toISOString().split('T')[0],
+      registrationFee: currentArticle.registrationFee,
+      venue: currentArticle.venue,
+      venueAddress: currentArticle.venueAddress,
+      keyTakeAways: currentArticle.keyTakeAways,
+      rewardPoints: currentArticle.rewardPoints,
+      registrationForm: currentArticle.registrationForm,
+      registrationEndDate: new Date(currentArticle.registrationEndDate).toISOString().split('T')[0],
+      endTime: currentArticle.endTime,
+    });
+
+ 
+    setFaqs(currentArticle.faqs || []);
+  }
+}, [edit, currentArticle, reset]);
+
+
+
  async function deleteComment(commentId){
       try{
        const res=await axios.delete(`http://localhost:3000/event/app/v1/comment/delete/${eventById}/${commentId}`,{
@@ -154,13 +232,16 @@ if(res.status===200){
 }
 }
 
+
+
+
   return (
    <div> 
     {!edit?
     <div className="p-4  w-full ">
       
       {currentArticle.organiser===user._id&& <div className='flex justify-end'>
-         <button className='rounded-md  px-3 flex items-center gap-2 py-1 text-md bg-gray-500 text-white m-1'>Edit <MdModeEditOutline className='text-lg'/></button>
+         <button onClick={() => setEdit(true)}  className='rounded-md  px-3 flex items-center gap-2 py-1 text-md bg-gray-500 text-white m-1'>Edit <MdModeEditOutline className='text-lg'/></button>
     <button className='rounded-md py-1 px-1 ml-2 mr-2 m-1 flex items-center gap-1 bg-red-600 text-white' onClick={()=>deleteArticle()}>Delete <MdDelete className='text-white'/></button>
        </div>}
       <div className="mb-6">
@@ -213,15 +294,7 @@ if(res.status===200){
                <p className="text-gray-700 max-w-96 break-words">{currentArticle.venue|| 'N/A'}</p>
 <div className="mt-3">
   {currentArticle.venueAddress ? (
-    <iframe
-      title="Venue Location"
-      src={currentArticle.venueAddress}
-      width="100%"
-      height="200"
-      allowFullScreen
-      loading="lazy"
-      className="rounded-md border"
-    ></iframe>
+    <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin" width="600" height="450" style={{border:0}} allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
   ) : (
     <p className="text-gray-500">Venue location not available.</p>
   )}
@@ -308,10 +381,32 @@ if(res.status===200){
           <div className="space-y-3">
             {comments.map((comment, index) => (
               <div key={index} className="p-2 bg-gray-100 rounded">
-               <p className="text-gray-700">{comment.name}</p>
+                 
+<div key={index} className="p-2 bg-gray-100 rounded flex gap-3 items-center">
+  {/* Circle Avatar */}
+  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
+    {comment.name?.charAt(0)}
+  </div>
+
+  {/* Comment Content */}
+  <div className="flex-1">
+    <p className="font-semibold">{comment.name}</p>
+    <p className="text-gray-700">{comment.content}</p>
+  </div>
+
+  {/* Delete Button */}
+  {user._id === comment.owner && (
+    <button onClick={() => deleteComment(comment._id)}>
+      <MdDelete className="text-red-600 mr-4 text-bold" />
+    </button>
+  )}
+</div>
+
+
+               {/* <p className="text-gray-700">{comment.name}</p>
                <div className='flex justify-between'>
                 <p className="text-gray-700">{comment.content}</p>{user._id===comment.owner&&<button onClick={()=>deleteComment(comment._id)}><MdDelete className='text-red-600 mr-4 text-bold' /></button>}
-               </div>
+               </div> */}
                 
 
               </div>
@@ -344,7 +439,7 @@ if(res.status===200){
     </div>:<div className='p-6 w-full'>
       <h1 className="text-xl mb-4">Update Event</h1>
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 w-full">
+      <form onSubmit={handleSubmit(handleUpdateSubmit)} className="space-y-4 w-full">
 
         <div>
           <label>Event Name:</label>
@@ -390,15 +485,25 @@ if(res.status===200){
         </div>
 
         <div>
-          <label>Event Image:</label>
-          <input type="file" {...register('eventImage')} className="w-full" accept=".pdf,.jpg,.jpeg,.png" />
-       </div>
+  <label>Event Image:</label>
+  <div className="flex items-center gap-4">
+    <input type="file" {...register('eventImage')} accept=".pdf,.jpg,.jpeg,.png" />
+    {currentArticle?.eventImage && (
+      <img src={currentArticle.eventImage} alt="Event" className="h-20 w-20 object-cover rounded" />
+    )}
+  </div>
+</div>
+
 
         <div>
-          <label>Sample Certificate:</label>
-          <input type="file" {...register('sampleCertificate')} className="w-full" accept=".pdf,.jpg,.jpeg,.png"  />
-          
-         </div>
+  <label>Sample Certificate:</label>
+  <div className="flex items-center gap-4">
+    <input type="file" {...register('sampleCertificate')} accept=".pdf,.jpg,.jpeg,.png" />
+    {currentArticle?.sampleCertificate && (
+      <img src={currentArticle.sampleCertificate} alt="Certificate" className="h-20 w-20 object-cover rounded" />
+    )}
+  </div>
+</div>
 
         <div>
           <label>Venue:</label>
@@ -459,7 +564,7 @@ if(res.status===200){
           <button type="button" onClick={addFaq} className="text-white font-medium bg-black rounded-lg p-2 mt-1">+ Add FAQ</button>
         </div>
 
-        <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded w-full">Create Event</button>
+      <button type='submit' className='rounded-md px-3 flex items-center gap-2 py-1 text-md bg-gray-500 text-white m-1'>Update <MdModeEditOutline className='text-lg'/></button>
 
       </form>
       </div>}
