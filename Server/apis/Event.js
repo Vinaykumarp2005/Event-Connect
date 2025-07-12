@@ -241,31 +241,56 @@ if (updatedData.faqs) updatedData.faqs = JSON.parse(updatedData.faqs);
   }
 });
 eventApp.put('/app/v1/event/update/student/:eventId', verifyUser, async (req, res) => {
-  console.log("reached");
+  console.log("Reached student update route");
   try {
     const { eventId } = req.params;
-    const { content,name } = req.body;
-console.log("Request Body:", req.body);
+    const { content, name, enroll } = req.body; 
+
     const event = await Events.findById(eventId);
     if (!event) {
       return res.status(404).json({
         message: "Event not found"
       });
     }
-    console.log(name)
-// console.log(newComment.name);
-    event.comments.push({
-      content,
-      owner: req.userId,
-      name,
-    });
+    if (enroll) {
+      const alreadyEnrolled = event.enrolledStudents?.some(
+        s => s.studentId.toString() === req.userId
+      );
 
-    await event.save();
+      if (alreadyEnrolled) {
+        return res.status(400).json({ message: "You have already enrolled in this event" });
+      }
 
-   res.status(200).json({
-  message: "Comment added successfully",
-  payload: event
-});
+      event.enrolledStudents.push({
+        studentId: req.userId,
+        name: name
+      });
+
+      event.enrolled += 1;
+
+      await event.save();
+      return res.status(200).json({
+        message: "Enrolled successfully",
+        payload: event
+      });
+    }
+
+    if (content && name) {
+      event.comments.push({
+        content,
+        owner: req.userId,
+        name,
+      });
+
+      await event.save();
+
+      return res.status(200).json({
+        message: "Comment added successfully",
+        payload: event
+      });
+    }
+
+    return res.status(400).json({ message: "Invalid request" });
 
   } catch (e) {
     console.error(e);

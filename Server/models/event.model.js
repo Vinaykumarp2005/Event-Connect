@@ -87,7 +87,13 @@ const eventSchema= new Schema({
   ],
     venueAddress:{
         type:String
-    }
+    },enrolledStudents: [
+  {
+    studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
+    name: String,
+  }
+],
+
 
 },{timestamps:true})
 

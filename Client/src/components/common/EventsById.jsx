@@ -39,6 +39,42 @@ const { register, handleSubmit, formState: { errors },reset} = useForm();
     updatedFaqs[index][field] = value;
     setFaqs(updatedFaqs);
   };
+  const [isEnrolled, setIsEnrolled] = useState(false);
+async function handleEnroll() {
+  try {
+    const res = await axios.put(`http://localhost:3000/event/app/v1/event/update/student/${eventById}`, {
+      enroll: true,
+      name: user.username,  
+    }, {
+      headers: {
+        Authorization: localStorage.getItem('token')
+      }
+    });
+
+// function checkEnrollmentStatus(article) {
+//   const enrolled = article.enrolledStudents?.some(
+//     (student) => student.studentId === user._id
+//   );
+//   setIsEnrolled(enrolled);
+// }
+ console.log(isEnrolled)
+
+    if (res.status === 200) {
+      alert("Enrolled successfully");
+      setCurrentArticle(res.data.payload);  
+      setIsEnrolled(true)
+      // checkEnrollmentStatus(res.data.payload);
+       const enrolled = updatedEvent.enrolledStudents?.some(
+        (student) => student.studentId === user._id
+      );
+      setIsEnrolled(enrolled);
+    }
+  } catch (err) {
+     console.log(isEnrolled)
+    alert(err.response?.data?.message || "Failed to enroll");
+  }
+}
+
 
   async function handleUpdateSubmit(data) {
   console.log('Updating Event:', data);
@@ -135,11 +171,9 @@ const { register, handleSubmit, formState: { errors },reset} = useForm();
     
     const {eventById}=useParams();
     const [edit,setEdit]=useState(false);
- // const { state } = useLocation();
- const [expandedID, setExpandedID] = useState(null);
-  const [comments, setComments] = useState([]);
-
-  const [currentArticle,setCurrentArticle]=useState();
+    const [expandedID, setExpandedID] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [currentArticle,setCurrentArticle]=useState();
 useEffect(()=>{
    const fetchEvent=async ()=>{
     const res=await axios.get(`http://localhost:3000/event/app/v1/events/${eventById}`,{
@@ -147,9 +181,15 @@ useEffect(()=>{
         Authorization:localStorage.getItem('token')
       }
     });
+
     if(res.status===200){
       setCurrentArticle(res.data.payload);
       setComments(res.data.payload.comments)
+     const enrolled = eventData.enrolledStudents?.some(
+          (student) => student.studentId === user._id
+        );
+        setIsEnrolled(enrolled);
+        console.log(isEnrolled)
     }
    }
    fetchEvent();
@@ -157,7 +197,7 @@ useEffect(()=>{
   const toggleExpand = (id) => {
     setExpandedID(expandedID === id ? null : id);
   };
-
+    
 
   console.log(user.username);
   const handleAddComment = async (data) => {
@@ -174,72 +214,67 @@ useEffect(()=>{
     reset(); 
   };
 
-useEffect(() => {
-  if (edit && currentArticle) {
-    reset({
-      eventName: currentArticle.eventName,
-      description: currentArticle.description,
-      maxLimit: currentArticle.maxLimit,
-      category: currentArticle.category,
-      startDate: new Date(currentArticle.startDate).toISOString().split('T')[0],
-      endDate: new Date(currentArticle.endDate).toISOString().split('T')[0],
-      registrationFee: currentArticle.registrationFee,
-      venue: currentArticle.venue,
-      venueAddress: currentArticle.venueAddress,
-      keyTakeAways: currentArticle.keyTakeAways,
-      rewardPoints: currentArticle.rewardPoints,
-      registrationForm: currentArticle.registrationForm,
-      registrationEndDate: new Date(currentArticle.registrationEndDate).toISOString().split('T')[0],
-      endTime: currentArticle.endTime,
-    });
+        useEffect(() => {
+          if (edit && currentArticle) {
+            reset({
+              eventName: currentArticle.eventName,
+              description: currentArticle.description,
+              maxLimit: currentArticle.maxLimit,
+              category: currentArticle.category,
+              startDate: new Date(currentArticle.startDate).toISOString().split('T')[0],
+              endDate: new Date(currentArticle.endDate).toISOString().split('T')[0],
+              registrationFee: currentArticle.registrationFee,
+              venue: currentArticle.venue,
+              venueAddress: currentArticle.venueAddress,
+              keyTakeAways: currentArticle.keyTakeAways,
+              rewardPoints: currentArticle.rewardPoints,
+              registrationForm: currentArticle.registrationForm,
+              registrationEndDate: new Date(currentArticle.registrationEndDate).toISOString().split('T')[0],
+              endTime: currentArticle.endTime,
+            });
 
- 
-    setFaqs(currentArticle.faqs || []);
-  }
-}, [edit, currentArticle, reset]);
-
-
-
- async function deleteComment(commentId){
-      try{
-       const res=await axios.delete(`http://localhost:3000/event/app/v1/comment/delete/${eventById}/${commentId}`,{
-        headers:{
-          Authorization:localStorage.getItem('token')
-        }
-       })
-
-       if(res.status===200){
-        setComments(res.data.payload);
-       }
-
-      }catch(e){
         
-       alert('error deeleting comment',e.message);
-      }
-  }
-if (!currentArticle) {
-  return <div className="text-center mt-10 text-gray-500">Loading event details...</div>;
-}
-async function deleteArticle(){
-const res=await axios.delete(`http://localhost:3000/event/app/v1/event/delete/${eventById}`,{
-  headers:{
-    Authorization:localStorage.getItem('token')
-  }
-});
-if(res.status===200){
-  alert('article deleted successfully');
- navigate('../events');
-}
-}
+            setFaqs(currentArticle.faqs || []);
+          }
+        }, [edit, currentArticle, reset]);
 
 
 
+        async function deleteComment(commentId){
+              try{
+              const res=await axios.delete(`http://localhost:3000/event/app/v1/comment/delete/${eventById}/${commentId}`,{
+                headers:{
+                  Authorization:localStorage.getItem('token')
+                }
+              })
 
+              if(res.status===200){
+                setComments(res.data.payload);
+              }
+
+              }catch(e){
+                
+              alert('error deeleting comment',e.message);
+              }
+          }
+        if (!currentArticle) {
+          return <div className="text-center mt-10 text-gray-500">Loading event details...</div>;
+        }
+        async function deleteArticle(){
+        const res=await axios.delete(`http://localhost:3000/event/app/v1/event/delete/${eventById}`,{
+          headers:{
+            Authorization:localStorage.getItem('token')
+          }
+        });
+        if(res.status===200){
+          alert('article deleted successfully');
+        navigate('../events');
+        }
+        }
   return (
    <div> 
     {!edit?
     <div className="p-4  w-full ">
-      
       {currentArticle.organiser===user._id&& <div className='flex justify-end'>
          <button onClick={() => setEdit(true)}  className='rounded-md  px-3 flex items-center gap-2 py-1 text-md bg-gray-500 text-white m-1'>Edit <MdModeEditOutline className='text-lg'/></button>
     <button className='rounded-md py-1 px-1 ml-2 mr-2 m-1 flex items-center gap-1 bg-red-600 text-white' onClick={()=>deleteArticle()}>Delete <MdDelete className='text-white'/></button>
@@ -251,11 +286,7 @@ if(res.status===200){
           className="rounded-xl w-full h-full object-cover"
         />
       </div>
-
-      {/* 2-Column Layout */}
       <div className="flex flex-col md:flex-row gap-8">
-
-        {/* Left Section */}
         <div className="flex-1 space-y-6">
 
           <div className="flex flex-wrap gap-2">
@@ -270,40 +301,29 @@ if(res.status===200){
             <h2 className="text-xl font-semibold mb-2">About</h2>
             <p className="text-gray-700">{currentArticle.description}</p>
           </div>
-
-          {/* Start & End Dates */}
           <div className="space-y-2">
-           <p className="flex items-center gap-2 text-gray-700">
-            <BsCalendarDate /> <b>Registration End Date:</b> {new Date(currentArticle.registrationEndDate).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-            </p>
-            <p className="flex items-center gap-2 text-gray-700">
-  <IoMdTime /> <b>End Time:</b> {currentArticle.endTime}
-</p>
-
-
-            
+              <p className="flex items-center gap-2 text-gray-700">
+                            <BsCalendarDate /> <b>Registration End Date:</b> {new Date(currentArticle.registrationEndDate).toLocaleDateString('en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                            </p>
+                            <p className="flex items-center gap-2 text-gray-700">
+                  <IoMdTime /> <b>End Time:</b> {currentArticle.endTime}
+              </p>
           </div>
-
-          {/* Venue */}
           <div>
             <h2 className="text-xl font-semibold mb-2 break-words">Venue</h2>
-               <p className="text-gray-700 max-w-96 break-words">{currentArticle.venue|| 'N/A'}</p>
-<div className="mt-3">
-  {currentArticle.venueAddress ? (
-    <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin" width="600" height="450" style={{border:0}} allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-  ) : (
-    <p className="text-gray-500">Venue location not available.</p>
-  )}
-</div>
+            <p className="text-gray-700 max-w-96 break-words">{currentArticle.venue|| 'N/A'}</p>
+            <div className="mt-3">
+              {currentArticle.venueAddress ? (
+                <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin" width="600" height="450" style={{border:0}} allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              ) : (
+                <p className="text-gray-500">Venue location not available.</p>
+              )}
+            </div>
           </div>
-
-          {/* FAQs */}
-      
-
         </div>
         <div className="w-full md:w-1/3 space-y-6 bg-gray-50 rounded-xl p-4 shadow-md h-fit">
             <div className="space-y-2">
@@ -344,93 +364,82 @@ if(res.status===200){
                   <h3 className="font-semibold text-lg mb-2">Reward Points</h3>
                   {currentArticle.rewardPoints || 0} points
                 </div>
+{user._id !== currentArticle.organiser && (
+  <button
+    onClick={handleEnroll}
+    className={`w-full py-2 rounded transition ${isEnrolled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 text-white"}`}
+    disabled={isEnrolled}
+  >
+    {isEnrolled ? "Enrolled" : "Register Now"}
+  </button>
+)}
 
-                <button className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
-                  Register Now
-                </button>
+
         </div>
-        
-      </div>
-
-      
-                <h2 className="text-xl font-semibold mb-2 text-center"> FAQs</h2>
-
-          <div className="flex justify-center">
-  <div className="w-full  space-y-3">
-    {currentArticle.faqs && currentArticle.faqs.length > 0 ? (
-      currentArticle.faqs.map((faq, index) => (
-        <AccordionItem
-          key={index}
-          question={faq.question}
-          answer={faq.answer}
-          isExpanded={expandedID === index}
-          onToggle={() => toggleExpand(index)}
-        />
-      ))
-    ) : (
-      <p className="text-gray-500 text-center">No FAQs available.</p>
-    )}
-  </div>
-</div>
-
+      </div>                
+           <h2 className="text-xl font-semibold mb-2 text-center"> FAQs</h2>
+           <div className="flex justify-center">
+              <div className="w-full  space-y-3">
+                {currentArticle.faqs && currentArticle.faqs.length > 0 ? (
+                  currentArticle.faqs.map((faq, index) => (
+                    <AccordionItem
+                      key={index}
+                      question={faq.question}
+                      answer={faq.answer}
+                      isExpanded={expandedID === index}
+                      onToggle={() => toggleExpand(index)}
+                    />
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center">No FAQs available.</p>
+                )}
+              </div>
+          </div>
         <div className="mt-8">
         <h2 className="text-xl font-semibold mb-2">Comments</h2>
-
-        {/* Display Comments */}
         {comments.length > 0 ? (
           <div className="space-y-3">
-            {comments.map((comment, index) => (
-              <div key={index} className="p-2 bg-gray-100 rounded">
-                 
-<div key={index} className="p-2 bg-gray-100 rounded flex gap-3 items-center">
-  {/* Circle Avatar */}
-  <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
-    {comment.name?.charAt(0)}
-  </div>
+                  {comments.map((comment, index) => (
+                <div key={index} className="p-2 bg-gray-100 rounded">
+                                    
+                    <div key={index} className="p-2 bg-gray-100 rounded flex gap-3 items-center">
+                          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
+                            {comment.name?.charAt(0)}
+                          </div>
 
-  {/* Comment Content */}
-  <div className="flex-1">
-    <p className="font-semibold">{comment.name}</p>
-    <p className="text-gray-700">{comment.content}</p>
-  </div>
+                          <div className="flex-1">
+                            <p className="font-semibold">{comment.name}</p>
+                            <p className="text-gray-700">{comment.content}</p>
+                          </div>
 
-  {/* Delete Button */}
-  {user._id === comment.owner && (
-    <button onClick={() => deleteComment(comment._id)}>
-      <MdDelete className="text-red-600 mr-4 text-bold" />
-    </button>
-  )}
-</div>
-
-
-               {/* <p className="text-gray-700">{comment.name}</p>
-               <div className='flex justify-between'>
-                <p className="text-gray-700">{comment.content}</p>{user._id===comment.owner&&<button onClick={()=>deleteComment(comment._id)}><MdDelete className='text-red-600 mr-4 text-bold' /></button>}
-               </div> */}
-                
-
-              </div>
+                          {user._id === comment.owner && (
+                            <button onClick={() => deleteComment(comment._id)}>
+                              <MdDelete className="text-red-600 mr-4 text-bold" />
+                            </button>
+                          )}
+                    </div>
+               </div>
             ))}
           </div>
         ) : (
           <p className="text-gray-500">No Comments Yet</p>
         )}
 
-        {/* Add Comment */}
-      {user._id!==currentArticle.organiser&&<form onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
-        <input
-            type="text"
-            placeholder="Write a comment..."
-            {...register('newComment', { required: true })}
-            className="w-full border px-3 py-2 rounded"
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Add Comment
-          </button>
-        </form>}
+            {user._id!==currentArticle.organiser&&<form onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
+              <input
+                  type="text"
+                  placeholder="Write a comment..."
+                  {...register('newComment', { required: true })}
+                  className="w-full border px-3 py-2 rounded"
+                />
+                <button
+                  type="submit"
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                >
+                  Add Comment
+                </button>
+              </form>}
+
       </div>
 
 
