@@ -307,6 +307,43 @@ eventApp.put('/app/v1/event/update/student/:eventId', verifyUser, async (req, re
   }
 });
 
+eventApp.put('/app/v1/comment/update/:eventId/:commentId', verifyUser, async (req, res) => {
+  try {
+    const { eventId, commentId } = req.params;
+    const { text } = req.body; 
+
+    const event = await Events.findById(eventId);
+    if (!event || !Array.isArray(event.comments)) {
+      return res.status(404).json({ message: "Event not found or has no comments" });
+    }
+
+    const comment = event.comments.find(
+      (comment) =>
+        comment?._id?.toString() === commentId &&
+        comment?.owner?.toString() === req.userId
+    );
+
+    if (!comment) {
+      return res.status(403).json({
+        message: "You are not authorized to update this comment or it doesn't exist.",
+      });
+    }
+
+    comment.text = text; // update comment's text
+    await event.save();
+
+    res.status(200).json({
+      message: "Comment updated successfully",
+      payload: event.comments,
+    });
+
+  } catch (e) {
+    console.error("Error updating comment:", e);
+    res.status(500).json({ message: "Something went wrong", error: e.message });
+  }
+});
+
+
 eventApp.delete('/app/v1/comment/delete/:eventId/:commentId', verifyUser, async (req, res) => {
   try {
     const { eventId, commentId } = req.params;
@@ -341,8 +378,6 @@ eventApp.delete('/app/v1/comment/delete/:eventId/:commentId', verifyUser, async 
     res.status(500).json({ message: "Something went wrong", error: e.message });
   }
 });
-
-
 
 eventApp.delete('/app/v1/event/delete/:eventId',verifyUser,validPerson,async(req,res)=>{
   try{

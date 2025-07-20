@@ -45,7 +45,7 @@ async function handleEnroll() {
     const res = await axios.put(`http://localhost:3000/event/app/v1/event/update/student/${eventById}`, {
       enroll: true,
       name: user.username, 
-      rewardPoints:currentArticle.rewardPoints 
+      rewardPoints:rewardPoints 
     }, {
       headers: {
         Authorization: localStorage.getItem('token')

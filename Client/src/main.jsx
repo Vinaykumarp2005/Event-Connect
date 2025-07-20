@@ -18,6 +18,7 @@ import OrganizerHomePage from './components/organizer/OrganizerHomePage.js'
 import CreatedEvents from './components/organizer/CreatedEvents.jsx'
 import PostEvent from './components/organizer/PostEvent.jsx'
 import {RecoilRoot} from 'recoil'
+import Customcalendar from './components/common/Customcalender.jsx'
 function Main(){
 return (
   <BrowserRouter>
@@ -33,6 +34,7 @@ return (
       <Route path='enrolledevents' element={<EnrolledEvents/>}/>
       <Route path=':eventById' element={<EventsById/>}/>
       <Route path='events' element={<Events/>}/>
+      <Route path='calender' element={<Customcalendar/>}/>
     </Route>
     <Route path='organizer-profile/:emailId' element={<OrganizerHomePage/>}>
     <Route index  element={<OrganizerDashBoard/>}/>
@@ -41,6 +43,7 @@ return (
       <Route path='events' element={<Events/>}/>
       <Route path='createdEvents' element={<CreatedEvents/>}/>
       <Route path='postEvents' element={<PostEvent/>}/>
+      <Route path='calender' element={<Customcalendar/>}/>
     </Route>
     <Route path='admin-profile/:emailId'>
       <Route path='dashboard' element={<AdminDashBoard/>} />
