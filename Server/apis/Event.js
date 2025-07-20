@@ -8,6 +8,7 @@ const {Organizer}=require('../models/organizer.model');
 const upload = require('../middlewares/multer.middleware');
 const uploadOnCloudinary = require('../utils/cloudinary');
 const {Events}=require('../models/event.model');
+const {Student}=require('../models/student.model')
 const validEventData=(req,res,next)=>{
   const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
  
@@ -244,7 +245,7 @@ eventApp.put('/app/v1/event/update/student/:eventId', verifyUser, async (req, re
   console.log("Reached student update route");
   try {
     const { eventId } = req.params;
-    const { content, name, enroll } = req.body; 
+    const { content, name, enroll,rewardPoints } = req.body; 
 
     const event = await Events.findById(eventId);
     if (!event) {
@@ -267,8 +268,16 @@ eventApp.put('/app/v1/event/update/student/:eventId', verifyUser, async (req, re
       });
 
       event.enrolled += 1;
-
       await event.save();
+      
+      const student=await student.findById({
+        _id:req.userId
+      });
+      if(student){
+        student.eventsEnrolled.push({eventId});
+        student.rewardsEarned+=rewardPoints;
+        await student.save();
+      }
       return res.status(200).json({
         message: "Enrolled successfully",
         payload: event

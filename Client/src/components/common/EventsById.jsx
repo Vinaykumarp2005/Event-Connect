@@ -44,30 +44,20 @@ async function handleEnroll() {
   try {
     const res = await axios.put(`http://localhost:3000/event/app/v1/event/update/student/${eventById}`, {
       enroll: true,
-      name: user.username,  
+      name: user.username, 
+      rewardPoints:currentArticle.rewardPoints 
     }, {
       headers: {
         Authorization: localStorage.getItem('token')
       }
     });
 
-// function checkEnrollmentStatus(article) {
-//   const enrolled = article.enrolledStudents?.some(
-//     (student) => student.studentId === user._id
-//   );
-//   setIsEnrolled(enrolled);
-// }
- console.log(isEnrolled)
+
 
     if (res.status === 200) {
       alert("Enrolled successfully");
       setCurrentArticle(res.data.payload);  
-      setIsEnrolled(true)
-      // checkEnrollmentStatus(res.data.payload);
-       const enrolled = updatedEvent.enrolledStudents?.some(
-        (student) => student.studentId === user._id
-      );
-      setIsEnrolled(enrolled);
+      setIsEnrolled(c=>!c);
     }
   } catch (err) {
      console.log(isEnrolled)
