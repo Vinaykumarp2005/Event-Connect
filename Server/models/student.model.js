@@ -38,10 +38,11 @@ const studentSchema=new Schema({
     },year:{
         type:Number,
         required:true,
-    },eventsenrolled:[{
-        type:Schema.Types.ObjectId,
-        ref:"Event"
-    }],
+    },eventsEnrolled: [{
+    type: Schema.Types.ObjectId,
+    ref: "Event",
+    default: []
+  }],
     rewardsEarned:{
         type:Number,
         default:0,

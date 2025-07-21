@@ -118,31 +118,62 @@ if(response){
   })
 }
 })
-eventApp.get('/app/v1/events/:eventId',verifyUser,async(req,res)=>{
-  try{
-    const eventId=req.params.eventId;
-    const response=await Events.findOne({
-      _id:eventId,
-    })
-    if(response){
-      const response=await Events.findById(eventId);
-      res.status(200).json({
-        message:"Event details fetched succesfully",
-        payload:response
-      })
-    }else{
+
+// eventApp.get('/app/v1/events/:eventId',verifyUser,async(req,res)=>{
+//   try{
+//     const eventId=req.params.eventId;
+//     const response=await Events.findOne({
+//       _id:eventId,
+//     })
+//     if(response){
+//       const response=await Events.findById(eventId);
+//       res.status(200).json({
+//         message:"Event details fetched succesfully",
+//         payload:response
+//       })
+//     }else{
+//       return res.status(403).json({
+//         message: "You are not authorized to view this event or it doesn't exist."
+//       });
+//     }
+
+//   }catch(e){
+//      console.error(e);
+//     res.status(500).json({
+//       message: "Something went wrong"
+//     });
+//   }
+// })
+eventApp.get('/app/v1/events/:eventId', verifyUser, async (req, res) => {
+  try {
+    const eventId = req.params.eventId;
+
+    const event = await Events.findById(eventId);
+    if (!event) {
       return res.status(403).json({
         message: "You are not authorized to view this event or it doesn't exist."
       });
     }
 
-  }catch(e){
-     console.error(e);
+    // Check if user is enrolled
+    const isEnrolled = event.enrolledStudents.some(
+      (studentObj) => studentObj.studentId.toString() === req.userId
+    );
+
+    res.status(200).json({
+      message: "Event details fetched successfully",
+      payload: event,
+      isEnrolled: isEnrolled
+    });
+
+  } catch (e) {
+    console.error(e);
     res.status(500).json({
       message: "Something went wrong"
     });
   }
-})
+});
+
 eventApp.get('/app/v1/events',verifyUser,async(req,res)=>{
   try{
     const response=await Events.find({
@@ -241,56 +272,53 @@ if (updatedData.faqs) updatedData.faqs = JSON.parse(updatedData.faqs);
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-eventApp.put('/app/v1/event/update/student/:eventId', verifyUser, async (req, res) => {
-  console.log("Reached student update route");
+eventApp.put('/app/v1/update/student/:eventId', verifyUser, async (req, res) => {
   try {
     const { eventId } = req.params;
-    const { content, name, enroll,rewardPoints } = req.body; 
-
+    const { content, name, enroll, rewardPoints } = req.body;
     const event = await Events.findById(eventId);
     if (!event) {
-      return res.status(404).json({
-        message: "Event not found"
-      });
+      return res.status(404).json({ message: "Event not found" });
     }
     if (enroll) {
       const alreadyEnrolled = event.enrolledStudents?.some(
         s => s.studentId.toString() === req.userId
       );
-
       if (alreadyEnrolled) {
         return res.status(400).json({ message: "You have already enrolled in this event" });
       }
-
       event.enrolledStudents.push({
         studentId: req.userId,
         name: name
       });
-
       event.enrolled += 1;
       await event.save();
-      
-      const student=await student.findById({
-        _id:req.userId
-      });
-      if(student){
-        student.eventsEnrolled.push({eventId});
-        student.rewardsEarned+=rewardPoints;
+      console.log("Student added to event");
+      const student = await Student.findById(req.userId);
+      if (student) {
+        const objectIdEvent = new mongoose.Types.ObjectId(eventId);
+        const alreadyInList = student.eventsEnrolled.some(
+          id => id.toString() === eventId
+        );
+        if (!alreadyInList) {
+          student.eventsEnrolled.push(objectIdEvent);
+        }
+        student.rewardsEarned += rewardPoints;
         await student.save();
+      } else {
+        console.log("❌ Student not found by ID:", req.userId);
       }
       return res.status(200).json({
         message: "Enrolled successfully",
         payload: event
       });
     }
-
     if (content && name) {
       event.comments.push({
         content,
         owner: req.userId,
         name,
       });
-
       await event.save();
 
       return res.status(200).json({
@@ -302,11 +330,10 @@ eventApp.put('/app/v1/event/update/student/:eventId', verifyUser, async (req, re
     return res.status(400).json({ message: "Invalid request" });
 
   } catch (e) {
-    console.error(e);
+    console.error("❌ Error in student event update:", e);
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-
 eventApp.put('/app/v1/comment/update/:eventId/:commentId', verifyUser, async (req, res) => {
   try {
     const { eventId, commentId } = req.params;
