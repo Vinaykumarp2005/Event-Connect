@@ -10,7 +10,6 @@ import {userAtom} from '../UserAtom'
 import { MdDelete } from "react-icons/md";
 import { useParams } from 'react-router-dom';
 import { MdModeEditOutline } from "react-icons/md";
-
 function AccordionItem({ question, answer, isExpanded, onToggle }) {
 
   return (
@@ -28,10 +27,11 @@ function AccordionItem({ question, answer, isExpanded, onToggle }) {
   );
 }
 function EventsById() {
-  
+  const [edit,setEdit]=useState(false);
+  const [commentEdit,setCommentEdit]=useState(false);
    const {eventById}=useParams();
   const navigate=useNavigate()
-const { register, handleSubmit, formState: { errors },reset} = useForm();
+const { register, handleSubmit, formState: { errors },reset,setValue} = useForm();
   const [faqs, setFaqs] = useState([{ question: '', answer: '' }]);
   const user=useRecoilValue(userAtom);
   const addFaq = () => setFaqs([...faqs, { question: '', answer: '' }]);
@@ -42,7 +42,7 @@ const { register, handleSubmit, formState: { errors },reset} = useForm();
     setFaqs(updatedFaqs);
   };
   const [isEnrolled, setIsEnrolled] = useState(false);
-
+ const [commentIdstore,setCommentIdstore]=useState();
 
 
 
@@ -93,10 +93,6 @@ const { register, handleSubmit, formState: { errors },reset} = useForm();
     alert('Error updating event');
   }
 }
-
-
-
-
   async function handleFormSubmit(data) {
     console.log('Form submitted:', data);
     console.log('FAQs:', faqs);
@@ -137,9 +133,7 @@ const { register, handleSubmit, formState: { errors },reset} = useForm();
       alert('Something went wrong');
     }
   }
-
     
-    const [edit,setEdit]=useState(false);
     const [expandedID, setExpandedID] = useState(null);
     const [comments, setComments] = useState([]);
     const [currentArticle,setCurrentArticle]=useState();
@@ -157,7 +151,7 @@ useEffect(()=>{
         setIsEnrolled(res.data.isEnrolled);    }
    }
    fetchEvent();
-},[eventById]);
+},[eventById,commentIdstore]);
   const toggleExpand = (id) => {
     setExpandedID(expandedID === id ? null : id);
   };
@@ -227,7 +221,35 @@ async function handleEnroll() {
     alert(err.response?.data?.message || "❌ Failed to enroll in the event.");
   }
 }
+const [commentEditText, setCommentEditText] = useState("");
 
+function handleCommenteditState(commentId,content){
+setCommentIdstore(commentId);
+setCommentEdit(true);
+setCommentEditText(content)
+}
+async function handleEditComment(data){
+  console.log(data.newComment)
+try{
+const res=await axios.put(`http://localhost:3000/event/app/v1/comment/update/${eventById}/${commentIdstore}`,{
+  text:data.newComment
+},{
+  headers:{
+    Authorization:localStorage.getItem('token')
+  }
+});
+if(res.status==200){
+    setComments(res.data.payload); // ✅ this updates frontend with new comments
+
+  setCommentEdit(false);
+  setCommentEditText(null)
+  setCommentIdstore(null);
+  alert(res.data.message);
+}
+}catch(e){
+  alert('error in updating the comment');
+}
+}
         async function deleteComment(commentId){
               try{
               const res=await axios.delete(`http://localhost:3000/event/app/v1/comment/delete/${eventById}/${commentId}`,{
@@ -245,9 +267,7 @@ async function handleEnroll() {
               alert('error deeleting comment',e.message);
               }
           }
-        if (!currentArticle) {
-          return <div className="text-center mt-10 text-gray-500">Loading event details...</div>;
-        }
+     
         async function deleteArticle(){
         const res=await axios.delete(`http://localhost:3000/event/app/v1/event/delete/${eventById}`,{
           headers:{
@@ -260,6 +280,9 @@ async function handleEnroll() {
         }
         }
         // Save to localStorage
+   if (!currentArticle) {
+          return <div className="text-center mt-10 text-gray-500">Loading event details...</div>;
+        }
 
 
   return (
@@ -309,7 +332,8 @@ async function handleEnroll() {
             <p className="text-gray-700 max-w-96 break-words">{currentArticle.venue|| 'N/A'}</p>
             <div className="mt-3">
               {currentArticle.venueAddress ? (
-                <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin" width="600" height="450" style={{border:0}} allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin" width="600" height="450" style={{border:0}} allowfullscreen
+                loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
               ) : (
                 <p className="text-gray-500">Venue location not available.</p>
               )}
@@ -396,20 +420,58 @@ async function handleEnroll() {
                 <div key={index} className="p-2 bg-gray-100 rounded">
                                     
                     <div key={index} className="p-2 bg-gray-100 rounded flex gap-3 items-center">
-                          <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
-                            {comment.name?.charAt(0)}
-                          </div>
+                      {commentIdstore !== comment._id ? (
+  <div className="flex gap-3 items-center">
+    <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
+      {comment.name?.charAt(0)}
+    </div>
+    <div className="flex-1">
+      <p className="font-semibold">{comment.name}</p>
+      <p className="text-gray-700">{comment.content}</p>
+    </div>
 
-                          <div className="flex-1">
-                            <p className="font-semibold">{comment.name}</p>
-                            <p className="text-gray-700">{comment.content}</p>
-                          </div>
-
-                          {user._id === comment.owner && (
-                            <button onClick={() => deleteComment(comment._id)}>
-                              <MdDelete className="text-red-600 mr-4 text-bold" />
-                            </button>
-                          )}
+    {user._id === comment.owner && (
+      <>
+        <button onClick={() => deleteComment(comment._id)}>
+          <MdDelete className="text-red-600 mr-4 text-bold" />
+        </button>
+        <button onClick={() => handleCommenteditState(comment._id,comment.content)}>
+          <MdModeEditOutline className="text-red-600 mr-4 text-bold" />
+        </button>
+      </>
+    )}
+  </div>
+) : (
+  <form
+    onSubmit={handleSubmit(handleEditComment)}
+    className="mt-4 space-y-2 w-full"
+  >
+    <input
+      type="text"
+      placeholder="Edit your comment..."
+      {...register('newComment', { required: true })}
+      className="w-full border px-3 py-2 rounded"
+      
+      
+    />
+    <div className="flex gap-2">
+      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        Save Comment
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          setCommentIdstore(null);
+          setCommentEdit(false);
+        }}
+        className="bg-gray-400 text-white px-4 py-2 rounded"
+      >
+        Cancel
+      </button>
+    </div>
+  </form>
+)}
+  
                     </div>
                </div>
             ))}
@@ -419,6 +481,7 @@ async function handleEnroll() {
         )}
 
             {user._id!==currentArticle.organiser&&<form onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
+              
               <input
                   type="text"
                   placeholder="Write a comment..."
@@ -428,7 +491,7 @@ async function handleEnroll() {
                 <button
                   type="submit"
                   className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
+                 >
                   Add Comment
                 </button>
               </form>}

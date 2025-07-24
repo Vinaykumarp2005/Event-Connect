@@ -320,7 +320,6 @@ eventApp.put('/app/v1/update/student/:eventId', verifyUser, async (req, res) => 
         name,
       });
       await event.save();
-
       return res.status(200).json({
         message: "Comment added successfully",
         payload: event
@@ -335,6 +334,7 @@ eventApp.put('/app/v1/update/student/:eventId', verifyUser, async (req, res) => 
   }
 });
 eventApp.put('/app/v1/comment/update/:eventId/:commentId', verifyUser, async (req, res) => {
+  console.log("reached");
   try {
     const { eventId, commentId } = req.params;
     const { text } = req.body; 
@@ -355,8 +355,9 @@ eventApp.put('/app/v1/comment/update/:eventId/:commentId', verifyUser, async (re
         message: "You are not authorized to update this comment or it doesn't exist.",
       });
     }
-
-    comment.text = text; // update comment's text
+    console.log(text);
+    comment.content= text;
+    event.markModified('comments'); // update comment's text
     await event.save();
 
     res.status(200).json({
@@ -371,6 +372,33 @@ eventApp.put('/app/v1/comment/update/:eventId/:commentId', verifyUser, async (re
 });
 
 
+eventApp.delete('/app/v1/event/delete/:eventId',verifyUser,validPerson,async(req,res)=>{
+  try{
+    const eventId=req.params.eventId;
+    const response=await Events.findOne({
+      _id:eventId,
+      organiser:req.userId
+    })
+    if(response){
+      await Events.findByIdAndDelete(eventId);
+    
+
+      res.status(200).json({
+        message:"Event deleted succesfully"
+      })
+    }else{
+      return res.status(403).json({
+        message: "You are not authorized to delete this event or it doesn't exist."
+      });
+    }
+
+  }catch(e){
+     console.error(e);
+    res.status(500).json({
+      message: "Something went wrong"
+    });
+  }
+})
 eventApp.delete('/app/v1/comment/delete/:eventId/:commentId', verifyUser, async (req, res) => {
   try {
     const { eventId, commentId } = req.params;
@@ -406,33 +434,7 @@ eventApp.delete('/app/v1/comment/delete/:eventId/:commentId', verifyUser, async 
   }
 });
 
-eventApp.delete('/app/v1/event/delete/:eventId',verifyUser,validPerson,async(req,res)=>{
-  try{
-    const eventId=req.params.eventId;
-    const response=await Events.findOne({
-      _id:eventId,
-      organiser:req.userId
-    })
-    if(response){
-      await Events.findByIdAndDelete(eventId);
-    
 
-      res.status(200).json({
-        message:"Event deleted succesfully"
-      })
-    }else{
-      return res.status(403).json({
-        message: "You are not authorized to delete this event or it doesn't exist."
-      });
-    }
-
-  }catch(e){
-     console.error(e);
-    res.status(500).json({
-      message: "Something went wrong"
-    });
-  }
-})
 module.exports={
   eventApp:eventApp
 }

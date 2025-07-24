@@ -8,6 +8,12 @@ const faqSchema=new Schema({
         type:String,
     }
 },{timestamps:true})
+const commentSchema = new Schema({
+  content: String,
+  owner: { type: Schema.Types.ObjectId, ref: "Student" },
+  name: String,
+  createdAt: { type: Date, default: Date.now }
+}, { _id: true, timestamps: true });
 
 const eventSchema= new Schema({
     eventName:{
@@ -78,12 +84,7 @@ const eventSchema= new Schema({
         required:true
     },
     comments: [
-    {
-      content: String,
-      owner: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
-      name: String,
-      createdAt: { type: Date, default: Date.now }
-    }
+   commentSchema
   ],
     venueAddress:{
         type:String
