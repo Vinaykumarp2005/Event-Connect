@@ -279,6 +279,8 @@ if(res.status==200){
           }
      
         async function deleteArticle(){
+      const confirmDelete = window.confirm("Are you sure you want to delete this article?");
+  if (!confirmDelete) return;
         const res=await axios.delete(`http://localhost:3000/event/app/v1/event/delete/${eventById}`,{
           headers:{
             Authorization:localStorage.getItem('token')
@@ -289,8 +291,7 @@ if(res.status==200){
         navigate('../events');
         }
         }
-        // Save to localStorage
-   if (!currentArticle) {
+        if (!currentArticle) {
           return <div className="text-center mt-10 text-gray-500">Loading event details...</div>;
         }
 
@@ -389,7 +390,7 @@ if(res.status==200){
                   <h3 className="font-semibold text-lg mb-2">Reward Points</h3>
                   {currentArticle.rewardPoints || 0} points
                 </div>
-{user._id !== currentArticle.organiser && (
+{user._id !== currentArticle.organiser&&(user.role!=='admin'||user.role!='organizer') && (
  <button
   onClick={handleEnroll}
   disabled={isEnrolled}

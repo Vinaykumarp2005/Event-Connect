@@ -10,6 +10,7 @@ export const userAtom = atom({
     email: '',
     role: '',
     _id: '',
+    isLoggedIn:false
   },
   effects_UNSTABLE: [persistAtom], // 🪄 this makes it persist!
 });

@@ -1,12 +1,15 @@
 
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { userAtom } from '../UserAtom';
 import { useRecoilValue } from 'recoil';
+import Confetti from 'react-confetti';
+import { useWindowSize } from 'react-use';
 function PostEvent() {
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit,reset, formState: { errors } } = useForm();
   const [faqs, setFaqs] = useState([{ question: '', answer: '' }]);
+   const {width,height}=useWindowSize()
   const user=useRecoilValue(userAtom);
   const addFaq = () => setFaqs([...faqs, { question: '', answer: '' }]);
   const removeFaq = (index) => setFaqs(faqs.filter((_, i) => i !== index));
@@ -15,7 +18,7 @@ function PostEvent() {
     updatedFaqs[index][field] = value;
     setFaqs(updatedFaqs);
   };
-
+   const [posted,setposted]=useState(false);
   async function handleFormSubmit(data) {
     console.log('Form submitted:', data);
     console.log('FAQs:', faqs);
@@ -47,7 +50,10 @@ function PostEvent() {
         headers: { 'Content-Type': 'multipart/form-data' ,'Authorization':localStorage.getItem("token")},
       });
       if (res.status === 200) {
-        alert(res.data.message);
+       // alert(res.data.message);
+         setposted(true);
+         reset(); // ← clears the form
+  setFaqs([{ question: '', answer: '' }]); // reset 
       } else {
         alert('Invalid Data');
       }
@@ -56,10 +62,21 @@ function PostEvent() {
       alert('Something went wrong');
     }
   }
+useEffect(() => {
+  if (posted) {
+    const timeout = setTimeout(() => setposted(false), 4000);
+    return () => clearTimeout(timeout);
+  }
+}, [posted]);
 
   return (
     <div className="p-6 w-full">
       <h1 className="text-xl mb-4">Create Event</h1>
+   {posted && (
+  <div className="fixed inset-0 z-50 pointer-events-none">
+    <Confetti width={width} height={height} gravity={0.3} tweenDuration={3000} />
+  </div>
+)}
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 w-full">
 
