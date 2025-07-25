@@ -31,7 +31,10 @@ function EventsById() {
   const [commentEdit,setCommentEdit]=useState(false);
    const {eventById}=useParams();
   const navigate=useNavigate()
-const { register, handleSubmit, formState: { errors },reset,setValue} = useForm();
+const { register, handleSubmit, formState: { errors },reset,setValue} = useForm({
+  defaultValues: {
+    newComment: ''
+  }});
   const [faqs, setFaqs] = useState([{ question: '', answer: '' }]);
   const user=useRecoilValue(userAtom);
   const addFaq = () => setFaqs([...faqs, { question: '', answer: '' }]);
@@ -222,14 +225,21 @@ async function handleEnroll() {
   }
 }
 const [commentEditText, setCommentEditText] = useState("");
+useEffect(() => {
+  if (commentIdstore && commentEditText) {
+    setValue('newComment', commentEditText);
+  }
+}, [commentIdstore, commentEditText, setValue]);
 
 function handleCommenteditState(commentId,content){
 setCommentIdstore(commentId);
-setCommentEdit(true);
-setCommentEditText(content)
+setCommentEditText(content);
+//setValue('newComment', content); 
 }
 async function handleEditComment(data){
-  console.log(data.newComment)
+  //setValue('newComment',data.newComment);
+  console.log(data.newComment);
+  alert(data.newComment)
 try{
 const res=await axios.put(`http://localhost:3000/event/app/v1/comment/update/${eventById}/${commentIdstore}`,{
   text:data.newComment
@@ -332,8 +342,8 @@ if(res.status==200){
             <p className="text-gray-700 max-w-96 break-words">{currentArticle.venue|| 'N/A'}</p>
             <div className="mt-3">
               {currentArticle.venueAddress ? (
-                <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin" width="600" height="450" style={{border:0}} allowfullscreen
-                loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin" width="600" height="450" style={{border:0}} 
+                loading="lazy" ></iframe>
               ) : (
                 <p className="text-gray-500">Venue location not available.</p>
               )}
@@ -443,6 +453,7 @@ if(res.status==200){
   </div>
 ) : (
   <form
+  key={commentIdstore} 
     onSubmit={handleSubmit(handleEditComment)}
     className="mt-4 space-y-2 w-full"
   >
@@ -451,11 +462,11 @@ if(res.status==200){
       placeholder="Edit your comment..."
       {...register('newComment', { required: true })}
       className="w-full border px-3 py-2 rounded"
-      
+      onChange={(e) => setValue("newComment", e.target.value)}
       
     />
     <div className="flex gap-2">
-      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" >
         Save Comment
       </button>
       <button
@@ -480,7 +491,9 @@ if(res.status==200){
           <p className="text-gray-500">No Comments Yet</p>
         )}
 
-            {user._id!==currentArticle.organiser&&<form onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
+            {user._id!==currentArticle.organiser&&<form
+            
+            onSubmit={handleSubmit(handleAddComment)} className="mt-4 space-y-2">
               
               <input
                   type="text"
@@ -586,13 +599,11 @@ if(res.status==200){
           <input type="number" {...register('registrationFee', { required: true })} className="w-full border px-3 py-2 rounded" />
           {errors.registrationFee && <p className="text-red-600">* Registration Fee is required</p>}
         </div>
-
         <div>
           <label>Key Takeaways:</label>
           <textarea placeholder="Describe Key takeways" {...register('keyTakeAways', { required: true })} className="w-full border px-3 py-2 rounded" rows="10"></textarea>
           {errors.keyTakeAways && <p className="text-red-600">* Key Takeaways is required</p>}
         </div>
-
         <div>
           <label>Reward Points:</label>
           <input type="number" {...register('rewardPoints', { required: true })} className="w-full border px-3 py-2 rounded" />
