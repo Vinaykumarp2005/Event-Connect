@@ -47,40 +47,55 @@ const { register, handleSubmit, formState: { errors },reset,setValue} = useForm(
   const [isEnrolled, setIsEnrolled] = useState(false);
  const [commentIdstore,setCommentIdstore]=useState();
 
+  const CLOUDINARY_UPLOAD_PRESET = 'Event-Connect';
+  const CLOUDINARY_CLOUD_NAME = 'dmioqln7q';
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, formData);
+    return res.data.secure_url;
+  };
+
 
 
   async function handleUpdateSubmit(data) {
   console.log('Updating Event:', data);
   console.log('FAQs:', faqs);
-
-  const formData = new FormData();
-  formData.append('eventName', data.eventName);
-  formData.append('description', data.description);
-  formData.append('maxLimit', data.maxLimit);
-  formData.append('category', data.category);
-  formData.append('startDate', data.startDate);
-  formData.append('endDate', data.endDate);
-  formData.append('registrationFee', data.registrationFee);
-  formData.append('venue', data.venue);
-  formData.append('keyTakeAways', data.keyTakeAways);
-  formData.append('rewardPoints', data.rewardPoints);
-  formData.append('registrationForm', data.registrationForm);
-  formData.append('registrationEndDate', data.registrationEndDate);
-  formData.append('endTime', data.endTime);
-  formData.append('venueAddress', data.venueAddress);
-
-  if (data.sampleCertificate?.[0]) {
-    formData.append('sampleCertificate', data.sampleCertificate[0]);
-  }
-  if (data.eventImage?.[0]) {
-    formData.append('eventImage', data.eventImage[0]);
-  }
-
-  formData.append('faqs', JSON.stringify(faqs));
+   const eventImageUrl = data.eventImage?.[0]
+        ? await uploadToCloudinary(data.eventImage[0])
+        : currentArticle?.eventImage || '';
+      const certificateImageUrl = data.sampleCertificate?.[0]
+        ? await uploadToCloudinary(data.sampleCertificate[0])
+        : currentArticle?.sampleCertificate || '';
+ 
+const payload = {
+        eventName: data.eventName,
+        description: data.description,
+        maxLimit: data.maxLimit,
+        enrolled: 0,
+        category: data.category,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        sampleCertificate: certificateImageUrl,
+        registrationFee: data.registrationFee,
+        venue: data.venue,
+        keyTakeAways: data.keyTakeAways,
+        isApproved: false,
+        rewardPoints: data.rewardPoints,
+        registrationForm: data.registrationForm,
+        registrationEndDate: data.registrationEndDate,
+        endTime: data.endTime,
+        eventImage: eventImageUrl,
+        faqs: faqs,
+        venueAddress: data.venueAddress,
+      };
 
   try {
-    const res = await axios.post(`http://localhost:3000/event/app/v1/event/update/${eventById}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data', 'Authorization': localStorage.getItem('token') },
+    const res = await axios.post(`http://localhost:3000/event/app/v1/event/update/${eventById}`, payload, {
+      headers: {  'Authorization': localStorage.getItem('token') },
     });
 
     if (res.status === 200) {
@@ -100,31 +115,61 @@ const { register, handleSubmit, formState: { errors },reset,setValue} = useForm(
     console.log('Form submitted:', data);
     console.log('FAQs:', faqs);
 
-    const formData = new FormData();
+    const eventImageUrl = data.eventImage?.[0]
+        ? await uploadToCloudinary(data.eventImage[0])
+        : '';
+      const certificateImageUrl = data.sampleCertificate?.[0]
+        ? await uploadToCloudinary(data.sampleCertificate[0])
+        : '';
+ const payload = {
+        eventName: data.eventName,
+        description: data.description,
+        maxLimit: data.maxLimit,
+        enrolled: 0,
+        category: data.category,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        sampleCertificate: certificateImageUrl,
+        registrationFee: data.registrationFee,
+        venue: data.venue,
+        keyTakeAways: data.keyTakeAways,
+        isApproved: false,
+        rewardPoints: data.rewardPoints,
+        registrationForm: data.registrationForm,
+        registrationEndDate: data.registrationEndDate,
+        endTime: data.endTime,
+        eventImage: eventImageUrl,
+        faqs: faqs,
+        venueAddress: data.venueAddress,
+      };
 
-    formData.append('eventName', data.eventName);
-    formData.append('description', data.description);
-    formData.append('maxLimit', data.maxLimit);
-    formData.append('enrolled', 0);
-    formData.append('category', data.category);
-    formData.append('startDate', data.startDate);
-    formData.append('endDate', data.endDate);
-    formData.append('sampleCertificate', data.sampleCertificate[0]);
-    formData.append('registrationFee', data.registrationFee);
-    formData.append('venue', data.venue);
-    formData.append('keyTakeAways', data.keyTakeAways);
-    formData.append('isApproved', false);
-    formData.append('rewardPoints', data.rewardPoints);
-    formData.append('registrationForm', data.registrationForm);
-    formData.append('registrationEndDate', data.registrationEndDate);
-    formData.append('endTime', data.endTime);
-    formData.append('eventImage', data.eventImage[0]);
-    formData.append('faqs', JSON.stringify(faqs));
-    formData.append('venueAddress',data.venueAddress);
+     
+
+    // const formData = new FormData();
+
+    // formData.append('eventName', data.eventName);
+    // formData.append('description', data.description);
+    // formData.append('maxLimit', data.maxLimit);
+    // formData.append('enrolled', 0);
+    // formData.append('category', data.category);
+    // formData.append('startDate', data.startDate);
+    // formData.append('endDate', data.endDate);
+    // formData.append('sampleCertificate', data.sampleCertificate[0]);
+    // formData.append('registrationFee', data.registrationFee);
+    // formData.append('venue', data.venue);
+    // formData.append('keyTakeAways', data.keyTakeAways);
+    // formData.append('isApproved', false);
+    // formData.append('rewardPoints', data.rewardPoints);
+    // formData.append('registrationForm', data.registrationForm);
+    // formData.append('registrationEndDate', data.registrationEndDate);
+    // formData.append('endTime', data.endTime);
+    // formData.append('eventImage', data.eventImage[0]);
+    // formData.append('faqs', JSON.stringify(faqs));
+    // formData.append('venueAddress',data.venueAddress);
     
-    try {
-      const res = await axios.post('http://localhost:3000/event/app/v1/create', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' ,'Authorization':localStorage.getItem("token")},
+try {
+      const res = await axios.post('http://localhost:3000/event/app/v1/create', payload, {
+        headers: { 'Authorization':localStorage.getItem("token")},
       });
       if (res.status === 200) {
         alert(res.data.message);
@@ -135,6 +180,20 @@ const { register, handleSubmit, formState: { errors },reset,setValue} = useForm(
       console.error(err);
       alert('Something went wrong');
     }
+
+    // try {
+    //   const res = await axios.post('http://localhost:3000/event/app/v1/create', formData, {
+    //     headers: { 'Content-Type': 'multipart/form-data' ,'Authorization':localStorage.getItem("token")},
+    //   });
+    //   if (res.status === 200) {
+    //     alert(res.data.message);
+    //   } else {
+    //     alert('Invalid Data');
+    //   }
+    // } catch (err) {
+    //   console.error(err);
+    //   alert('Something went wrong');
+    // }
   }
     
     const [expandedID, setExpandedID] = useState(null);
@@ -249,8 +308,7 @@ const res=await axios.put(`http://localhost:3000/event/app/v1/comment/update/${e
   }
 });
 if(res.status==200){
-    setComments(res.data.payload); // ✅ this updates frontend with new comments
-
+    setComments(res.data.payload); 
   setCommentEdit(false);
   setCommentEditText(null)
   setCommentIdstore(null);

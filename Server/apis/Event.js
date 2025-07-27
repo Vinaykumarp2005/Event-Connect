@@ -5,8 +5,6 @@ const express=require('express');
 const eventApp=express.Router();
 const {verifyUser}=require('../middlewares/verifyUser');
 const {Organizer}=require('../models/organizer.model');
-const upload = require('../middlewares/multer.middleware');
-const uploadOnCloudinary = require('../utils/cloudinary');
 const {Events}=require('../models/event.model');
 const {Student}=require('../models/student.model')
 const validEventData=(req,res,next)=>{
@@ -160,10 +158,9 @@ eventApp.get('/app/v1/organiser/events', verifyUser,validPerson, async (req, res
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-eventApp.post('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.fields([
-    { name: 'eventImage', maxCount: 1 },
-    { name: 'sampleCertificate', maxCount: 1 }
-  ]), async (req, res) => {
+
+
+eventApp.post('/app/v1/event/update/:eventId', verifyUser, validPerson, async (req, res) => {
     console.log("hi")
   try {
     const { eventId } = req.params;
@@ -176,7 +173,6 @@ eventApp.post('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.f
 
     const updatedData = { ...req.body };
 
-// Parse numeric fields (FormData sends them as strings)
 if (updatedData.maxLimit) updatedData.maxLimit = parseInt(updatedData.maxLimit);
 if (updatedData.registrationFee) updatedData.registrationFee = parseInt(updatedData.registrationFee);
 if (updatedData.rewardPoints) updatedData.rewardPoints = parseInt(updatedData.rewardPoints);
@@ -187,24 +183,10 @@ if (updatedData.endDate) updatedData.endDate = new Date(updatedData.endDate);
 if (updatedData.registrationEndDate) updatedData.registrationEndDate = new Date(updatedData.registrationEndDate);
 
 // Parse faqs
-if (updatedData.faqs) updatedData.faqs = JSON.parse(updatedData.faqs);
+if (updatedData.faqs) updatedData.faqs = updatedData.faqs;
 
 
-    // If new eventImage is uploaded
-    if (req.files['eventImage'] && req.files['eventImage'][0]) {
-      const uploadResult = await uploadOnCloudinary(req.files['eventImage'][0].path);
-      if (uploadResult) {
-        updatedData.eventImage = [uploadResult.url];
-      }
-    }
-
-    // If new sampleCertificate is uploaded
-    if (req.files['sampleCertificate'] && req.files['sampleCertificate'][0]) {
-      const uploadResult = await uploadOnCloudinary(req.files['sampleCertificate'][0].path);
-      if (uploadResult) {
-        updatedData.sampleCertificate = uploadResult.url;
-      }
-    }
+    
 
     const updatedEvent = await Events.findByIdAndUpdate(
       eventId,
@@ -222,6 +204,72 @@ if (updatedData.faqs) updatedData.faqs = JSON.parse(updatedData.faqs);
     res.status(500).json({ message: "Something went wrong" });
   }
 });
+
+
+// eventApp.post('/app/v1/event/update/:eventId', verifyUser, validPerson, upload.fields([
+//     { name: 'eventImage', maxCount: 1 },
+//     { name: 'sampleCertificate', maxCount: 1 }
+//   ]), async (req, res) => {
+//     console.log("hi")
+//   try {
+//     const { eventId } = req.params;
+//     const existingEvent = await Events.findOne({ _id: eventId, organiser: req.userId });
+//     if (!existingEvent) {
+//       return res.status(403).json({
+//         message: "You are not authorized to update this event or it doesn't exist."
+//       });
+//     }
+
+//     const updatedData = { ...req.body };
+
+// // Parse numeric fields (FormData sends them as strings)
+// if (updatedData.maxLimit) updatedData.maxLimit = parseInt(updatedData.maxLimit);
+// if (updatedData.registrationFee) updatedData.registrationFee = parseInt(updatedData.registrationFee);
+// if (updatedData.rewardPoints) updatedData.rewardPoints = parseInt(updatedData.rewardPoints);
+
+// // Parse dates
+// if (updatedData.startDate) updatedData.startDate = new Date(updatedData.startDate);
+// if (updatedData.endDate) updatedData.endDate = new Date(updatedData.endDate);
+// if (updatedData.registrationEndDate) updatedData.registrationEndDate = new Date(updatedData.registrationEndDate);
+
+// // Parse faqs
+// if (updatedData.faqs) updatedData.faqs = JSON.parse(updatedData.faqs);
+
+
+//     // If new eventImage is uploaded
+//     if (req.files['eventImage'] && req.files['eventImage'][0]) {
+//       const uploadResult = await uploadOnCloudinary(req.files['eventImage'][0].path);
+//       if (uploadResult) {
+//         updatedData.eventImage = [uploadResult.url];
+//       }
+//     }
+
+//     // If new sampleCertificate is uploaded
+//     if (req.files['sampleCertificate'] && req.files['sampleCertificate'][0]) {
+//       const uploadResult = await uploadOnCloudinary(req.files['sampleCertificate'][0].path);
+//       if (uploadResult) {
+//         updatedData.sampleCertificate = uploadResult.url;
+//       }
+//     }
+
+//     const updatedEvent = await Events.findByIdAndUpdate(
+//       eventId,
+//       { $set: updatedData },
+//       { new: true, runValidators: true }
+//     );
+
+//     res.status(200).json({
+//       message: "Event updated successfully",
+//       payload: updatedEvent
+//     });
+
+//   } catch (e) {
+//     console.error(e);
+//     res.status(500).json({ message: "Something went wrong" });
+//   }
+// });
+
+
 eventApp.put('/app/v1/update/student/:eventId', verifyUser, async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -379,7 +427,7 @@ eventApp.delete('/app/v1/comment/delete/:eventId/:commentId', verifyUser, async 
     });
 
   } catch (e) {
-    console.error("Error deleting comment:", e); // ⬅️ log the full error
+    console.error("Error deleting comment:", e); 
     res.status(500).json({ message: "Something went wrong", error: e.message });
   }
 });

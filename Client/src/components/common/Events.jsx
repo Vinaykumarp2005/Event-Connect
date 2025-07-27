@@ -25,7 +25,6 @@ function Events() {
       }
     };
     getEvents()
-//setInterval(getEvents(),getEvents);
   }, []);
   function callEventByid(eventObj){
       navigate(`../${eventObj._id}`,{state:eventObj})
