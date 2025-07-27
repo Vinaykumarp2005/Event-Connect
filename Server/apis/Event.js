@@ -158,7 +158,20 @@ eventApp.get('/app/v1/organiser/events', verifyUser,validPerson, async (req, res
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-
+eventApp.get('/app/v1/events/details/:organiserId', verifyUser, async (req, res) => {
+  console.log("hello")
+  try {
+    const organiserId=req.params.organiserId;
+     const events = await Events.find({ organiser: organiserId });
+     res.status(200).json({
+      message: "Fetched organiser's events successfully",
+      payload: events
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
 
 eventApp.post('/app/v1/event/update/:eventId', verifyUser, validPerson, async (req, res) => {
     console.log("hi")

@@ -33,7 +33,21 @@ organizerApp.put('/update/profiledetails', verifyUser,  async (req, res) => {
     res.status(500).json({ message: "Something went wrong" });
   }
 });
+organizerApp.get('/get/organiserDetails',async(req,res)=>{
+  try{
+const organisers=await Organizer.find({});
+res.status(200).json({
+  organiserDetails:organisers,
+  message:'organizer details'
+})
 
+  }catch(e){
+   res.status(411).json({
+    message:"unable to fetch organizer details"
+   })
+  }
+
+})
 
 module.exports={
   organizerApp:organizerApp

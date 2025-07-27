@@ -7,8 +7,10 @@ import { useNavigate } from 'react-router-dom';
 
 const localizer = momentLocalizer(moment);
 
-function Customcalendar() {
+function CustomCalendar() {
   const [events, setEvents] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [dayEvents, setDayEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const navigate = useNavigate();
 
@@ -27,17 +29,12 @@ function Customcalendar() {
             const start = new Date(event.startDate);
             const end = new Date(event.endDate);
 
-            let status = 'upcoming'; // default
+            let status = '';
+            if (end < now) status = 'completed';
+            else if (start <= now && end >= now) status = 'yettodo';
+            else status = 'upcoming';
 
-            if (event.enrolled) {
-              status = 'enrolled';
-            } else if (end < now) {
-              status = 'completed';
-            } else if (start > now) {
-              status = 'upcoming';
-            } else {
-              status = 'yettodo';
-            }
+            const enrolled = event.enrolled === true;
 
             return {
               title: event.eventName,
@@ -45,6 +42,7 @@ function Customcalendar() {
               end,
               allDay: true,
               status,
+              enrolled,
               ...event,
             };
           });
@@ -59,64 +57,119 @@ function Customcalendar() {
     fetchEvents();
   }, []);
 
+  useEffect(() => {
+    if (selectedDate) {
+      const filtered = events.filter(event =>
+        moment(event.start).isSame(selectedDate, 'day')
+      );
+      setDayEvents(filtered);
+    }
+  }, [selectedDate, events]);
+
+  const getStatusColor = (event) => {
+    if (event.enrolled) return 'bg-green-500';
+    switch (event.status) {
+      case 'completed': return 'bg-yellow-400';
+      case 'yettodo': return 'bg-red-500';
+      case 'upcoming': return 'bg-blue-500';
+      default: return 'bg-gray-400';
+    }
+  };
+
   return (
-    <div className="p-4">
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: '65vh', width: '60vw' }}
-        views={['month', 'week', 'day']}
-        onSelectEvent={(event) => setSelectedEvent(event)}
-        eventPropGetter={(event) => {
-          let backgroundColor = '';
-          switch (event.status) {
-            case 'enrolled':
-              backgroundColor = '#34D399'; // green
-              break;
-            case 'upcoming':
-              backgroundColor = '#3B82F6'; // blue
-              break;
-            case 'completed':
-              backgroundColor = '#FBBF24'; // yellow
-              break;
-            case 'yettodo':
-              backgroundColor = '#EF4444'; // red
-              break;
-            default:
-              backgroundColor = '#9CA3AF'; // gray fallback
-          }
+    <div className="flex flex-col lg:flex-row w-full h-screen bg-white">
+      {/* Calendar Section */}
+      <div className="w-full lg:w-2/3 p-4">
+        <h2 className="text-2xl font-semibold mb-4">Event Calendar</h2>
+        <div className="h-[70vh]">
+          <Calendar
+            localizer={localizer}
+            events={events}
+            startAccessor="start"
+            endAccessor="end"
+            views={['month']}
+            selectable
+            onSelectSlot={(slotInfo) => setSelectedDate(slotInfo.start)}
+            onSelectEvent={(event) => {
+              setSelectedDate(event.start);
+              setSelectedEvent(event);
+            }}
+            eventPropGetter={(event) => {
+              let bg = '';
+              if (event.status === 'completed') bg = '#FBBF24';
+              else if (event.status === 'yettodo') bg = '#EF4444';
+              else if (event.status === 'upcoming') bg = '#3B82F6';
+              if (event.enrolled) bg = '#34D399';
 
-          return {
-            style: {
-              backgroundColor,
-              color: 'white',
-              borderRadius: '6px',
-              paddingLeft: '4px',
-            },
-          };
-        }}
-      />
+              return {
+                style: {
+                  backgroundColor: bg,
+                  color: 'white',
+                  borderRadius: '6px',
+                  paddingLeft: '4px',
+                },
+              };
+            }}
+          />
+        </div>
+      </div>
 
-      {/* Modal Section */}
+      {/* Event List Sidebar */}
+      <div className="w-full lg:w-1/3 border-t lg:border-t-0 lg:border-l px-6 py-4 overflow-y-auto">
+        <h3 className="text-xl font-semibold mb-4">
+          {selectedDate
+            ? `Events on ${moment(selectedDate).format('MMMM D, YYYY')}`
+            : 'Click a date to view events'}
+        </h3>
+
+        {dayEvents.length === 0 ? (
+          <p className="text-gray-500">No events on this date.</p>
+        ) : (
+          <ul className="space-y-4">
+            {dayEvents.map((event) => (
+              <li
+                key={event._id}
+                onClick={() => setSelectedEvent(event)}
+                className="p-4 bg-gray-100 rounded-lg shadow cursor-pointer hover:bg-gray-200 transition"
+              >
+                <div className="flex justify-between items-center">
+                  <h4 className="text-md font-medium">{event.eventName}</h4>
+                  <span className={`text-xs px-2 py-1 rounded-full text-white ${getStatusColor(event)}`}>
+                    {event.enrolled ? 'enrolled' : event.status}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-600">
+                  {moment(event.start).format('hh:mm A')} - {moment(event.end).format('hh:mm A')}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {/* Modal */}
       {selectedEvent && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
           onClick={() => setSelectedEvent(null)}
         >
           <div
-            className="bg-white p-6 rounded-lg w-[400px] shadow-lg"
+            className="bg-white p-6 rounded-lg w-[90%] max-w-md shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-semibold mb-2">{selectedEvent.eventName}</h2>
-      <p className="mb-1"><strong>Start Date:</strong> {new Date(selectedEvent.start).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-<p className="mb-1"><strong>End Date:</strong> {new Date(selectedEvent.end).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-
-            <p className="mb-1"><strong>Description:</strong> {selectedEvent.description || 'No description'}</p>
-            <div className="flex justify-end mt-4">
+            <p className="mb-1">
+              <strong>Start:</strong> {moment(selectedEvent.start).format('MMMM D, YYYY hh:mm A')}
+            </p>
+            <p className="mb-1">
+              <strong>End:</strong> {moment(selectedEvent.end).format('MMMM D, YYYY hh:mm A')}
+            </p>
+            <p className="mb-1">
+              <strong>Description:</strong> {selectedEvent.description || 'No description'}
+            </p>
+            <div className="flex justify-end gap-2 mt-4">
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded mr-2"
+                className="px-4 py-2 bg-gray-300 text-black rounded"
                 onClick={() => setSelectedEvent(null)}
               >
                 Close
@@ -131,24 +184,8 @@ function Customcalendar() {
           </div>
         </div>
       )}
-
-      {/* Legend */}
-      <div className="mt-6 flex gap-6 text-sm">
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 bg-green-400 rounded-sm"></span> Enrolled
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 bg-blue-500 rounded-sm"></span> Upcoming
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 bg-yellow-400 rounded-sm"></span> Completed
-        </span>
-        <span className="flex items-center gap-2">
-          <span className="w-4 h-4 bg-red-500 rounded-sm"></span> Not Participated
-        </span>
-      </div>
     </div>
   );
 }
 
-export default Customcalendar;
+export default CustomCalendar;

@@ -19,6 +19,8 @@ import CreatedEvents from './components/organizer/CreatedEvents.jsx'
 import PostEvent from './components/organizer/PostEvent.jsx'
 import {RecoilRoot} from 'recoil'
 import Customcalendar from './components/common/Customcalender.jsx'
+import GalleryHomePage from './components/common/GalleryHomePage.jsx'
+import ClubEvents from './components/common/ClubEvents.jsx'
 
 function Main(){
 return (
@@ -36,6 +38,8 @@ return (
       <Route path=':eventById' element={<EventsById/>}/>
       <Route path='events' element={<Events/>}/>
       <Route path='calender' element={<Customcalendar/>}/>
+      <Route path='galleryPage' element={<GalleryHomePage/>}/>
+      <Route path='club/:clubById' element={<ClubEvents/>}/>
     </Route>
     <Route path='organizer-profile/:emailId' element={<OrganizerHomePage/>}>
     <Route index  element={<OrganizerDashBoard/>}/>

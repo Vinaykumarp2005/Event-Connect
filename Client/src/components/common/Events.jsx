@@ -16,7 +16,7 @@ function Events() {
       try {
         const res = await axios.get('http://localhost:3000/event/app/v1/events', {
           headers: {
-            'Authorization': localStorage.getItem("token")
+            Authorization: localStorage.getItem("token")
           }
         });
         setEvents(res.data.payload);
