@@ -8,8 +8,9 @@ const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const [role, setRole] = useState('student'); // Default role
 
 
- const CLOUDINARY_UPLOAD_PRESET = 'Event-Connect';
-  const CLOUDINARY_CLOUD_NAME = 'dmioqln7q';
+
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const uploadToCloudinary = async (file) => {
     const formData = new FormData();

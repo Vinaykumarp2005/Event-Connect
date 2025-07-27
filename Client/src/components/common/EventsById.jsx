@@ -47,8 +47,8 @@ const { register, handleSubmit, formState: { errors },reset,setValue} = useForm(
   const [isEnrolled, setIsEnrolled] = useState(false);
  const [commentIdstore,setCommentIdstore]=useState();
 
-  const CLOUDINARY_UPLOAD_PRESET = 'Event-Connect';
-  const CLOUDINARY_CLOUD_NAME = 'dmioqln7q';
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const uploadToCloudinary = async (file) => {
     const formData = new FormData();
@@ -58,6 +58,7 @@ const { register, handleSubmit, formState: { errors },reset,setValue} = useForm(
     const res = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, formData);
     return res.data.secure_url;
   };
+
 
 
 
