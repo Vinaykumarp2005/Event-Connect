@@ -173,7 +173,7 @@ await sendEmail(StudentResponse.email,"Verify Email",url);
  }
 })
 const validOrganiserDataSignup=(req,res,next)=>{
-const {username,clubName,password,email,phoneNumber,collegeName,department,position,role}=req.body;
+const {username,clubName,password,email,phoneNumber,collegeName,department,position,role,logo}=req.body;
   const userProfileSchema=z.object({
     username:z.string().min(3).max(30),
     password:z.string().min(8).refine((val) => {
@@ -192,7 +192,8 @@ collegeName:z.string(),
 department:z.string(),
 clubName:z.string(),
 position:z.string(),
-role:z.string()
+role:z.string(),
+logo:z.string()
 
   });
 
@@ -206,7 +207,7 @@ role:z.string()
     collegeName,
     department,
     position,
-    role
+    role,logo
   };
 
   const result = userProfileSchema.safeParse(parsedData);
@@ -219,13 +220,6 @@ role:z.string()
   req.body = result.data;
 
 
-  // const {success}=userProfileSchema.safeParse(req.body);
-  // if(!success){
-  //   res.status(411).json({
-  //     message:"invalid data"
-  //   })
-  //   return;
-  // }
   next();
 
 }
@@ -257,33 +251,14 @@ authRouter.get('/organizer/:id/verifyOrganizer/:token',async(req,res)=>{
         message:'user verified successfully'
       })
   }catch(e){
-  console.error("Verification error:", e);  // helpful for debugging
+  console.error("Verification error:", e); 
   res.status(500).json({ message: "Internal Server Error" });
   }
 })
 
-authRouter.post('/organizer/signUp',upload.fields([{name:"logo",maxCount:1}]),validOrganiserDataSignup,async(req,res)=>{
-const {username,clubName,password,email,phoneNumber,collegeName,department,position,role}=req.body;
+authRouter.post('/organizer/signUp',validOrganiserDataSignup,async(req,res)=>{
+const {username,clubName,password,email,phoneNumber,collegeName,department,position,role,logo}=req.body;
 const hashedPassword=await bcrypt.hash(password,5);
-
-const logoLocalPath=req.files?.logo[0]?.path
-console.log(logoLocalPath)
-// console.log("req.body", req.body);
-// console.log("req.files", req.files);
-
-if(!logoLocalPath){
-  res.status(400).json({
-    message:"logo is mandatory required"
-  })
-}
-
- const logoPath= await uploadOnCloudinary(logoLocalPath)
-// console.log(logoPath);
-  if(!logoPath){
-   return res.status(400).json({
-    message:"logo is required"
-  })
-  }
 
 
 const Data=await new Organizer({
@@ -295,7 +270,8 @@ const Data=await new Organizer({
   collegeName:collegeName,
   department:department,
   position:position,
-  role:role,logo:logoPath.url
+  role:role,
+  logo:logo
 }).save();
 const token=await new OrganizerToken({
   userId:Data._id,
@@ -316,6 +292,8 @@ if(Data){
   })
 }
 })
+
+
 authRouter.post('/organizer/signin',validUserData,async(req,res)=>{
  const {email,password}=req.body;
  const OrganizerResponse=await Organizer.findOne({

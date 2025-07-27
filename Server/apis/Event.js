@@ -10,7 +10,7 @@ const uploadOnCloudinary = require('../utils/cloudinary');
 const {Events}=require('../models/event.model');
 const {Student}=require('../models/student.model')
 const validEventData=(req,res,next)=>{
-  const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
+const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
  
 const eventSchema = z.object({
   eventName: z.string(),
@@ -57,48 +57,25 @@ const validPerson=async(req,res,next)=>{
     })
   }
 }
-eventApp.post('/app/v1/create',verifyUser,validPerson,upload.fields([
-  { name: 'eventImage', maxCount: 1 },
-  { name: 'sampleCertificate', maxCount: 1 }
-])
-,async(req,res)=>{
- const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
 
-let eventImageUrls = [];
-
-    // Check if file exists
-    if (req.files['eventImage'] && req.files['eventImage'][0]) {
-    const uploadResult = await uploadOnCloudinary(req.files['eventImage'][0].path);
-    if (uploadResult) {
-      eventImageUrls.push(uploadResult.url);
-    }
-  }
-  let sampleCertificateUrl="";
-  // Upload sample certificate PDF if present
-  if (req.files['sampleCertificate'] && req.files['sampleCertificate'][0]) {
-    const uploadResult = await uploadOnCloudinary(req.files['sampleCertificate'][0].path);
-    if (uploadResult) {
-      sampleCertificateUrl = uploadResult.url;
-    }
-  }
-
-
+eventApp.post('/app/v1/create',verifyUser,validPerson,async(req,res)=>{
+ const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime,eventImage,sampleCertificate,venueAddress}=req.body;
 
  const response=await Events.create({
   eventName:eventName,
   description:description,
   maxLimit:maxLimit,
   category:category,
-  faqs:JSON.parse(faqs),
+  faqs:faqs,
   startDate:new Date(startDate),
   endDate:new Date(endDate),
-  eventImage: eventImageUrls, 
-  sampleCertificate: sampleCertificateUrl,
   registrationFee:registrationFee,
   venue:venue,
   keyTakeAways:keyTakeAways,
   rewardPoints:rewardPoints,
   registrationForm:registrationForm,
+  eventImage:eventImage,
+  sampleCertificate:sampleCertificate,
   registrationEndDate:new Date(registrationEndDate),
   endTime:endTime,
   organiser:req.userId,
@@ -118,32 +95,6 @@ if(response){
   })
 }
 })
-
-// eventApp.get('/app/v1/events/:eventId',verifyUser,async(req,res)=>{
-//   try{
-//     const eventId=req.params.eventId;
-//     const response=await Events.findOne({
-//       _id:eventId,
-//     })
-//     if(response){
-//       const response=await Events.findById(eventId);
-//       res.status(200).json({
-//         message:"Event details fetched succesfully",
-//         payload:response
-//       })
-//     }else{
-//       return res.status(403).json({
-//         message: "You are not authorized to view this event or it doesn't exist."
-//       });
-//     }
-
-//   }catch(e){
-//      console.error(e);
-//     res.status(500).json({
-//       message: "Something went wrong"
-//     });
-//   }
-// })
 eventApp.get('/app/v1/events/:eventId', verifyUser, async (req, res) => {
   try {
     const eventId = req.params.eventId;
@@ -155,7 +106,6 @@ eventApp.get('/app/v1/events/:eventId', verifyUser, async (req, res) => {
       });
     }
 
-    // Check if user is enrolled
     const isEnrolled = event.enrolledStudents.some(
       (studentObj) => studentObj.studentId.toString() === req.userId
     );

@@ -7,7 +7,23 @@ export default function SignUp() {
 const { register, handleSubmit, formState: { errors }, setValue } = useForm();
   const [role, setRole] = useState('student'); // Default role
 
+
+ const CLOUDINARY_UPLOAD_PRESET = 'Event-Connect';
+  const CLOUDINARY_CLOUD_NAME = 'dmioqln7q';
+
+  const uploadToCloudinary = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+    const res = await axios.post(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`, formData);
+    return res.data.secure_url;
+  };
+
+
+
   async function handleFormSubmit(data) {
+    try{
     if(role==='student'){
        data.phoneNumber = Number(data.phoneNumber);
         data.year=Number(data.year);
@@ -22,29 +38,31 @@ const { register, handleSubmit, formState: { errors }, setValue } = useForm();
         alert("Invalid data");
        }
     }else{
+
+const logourl = data.logo?.[0]
+        ? await uploadToCloudinary(data.logo[0])
+        : '';
+console.log(logourl);
       console.log(data.role);
       console.log(data)
-               data.phoneNumber = Number(data.phoneNumber);
-               const formData = new FormData();
-    formData.append('username', data.username);
-    formData.append('email', data.email);
-    formData.append('phoneNumber', data.phoneNumber);
-    formData.append('password', data.password);
-    formData.append('collegeName', data.collegeName);
-    formData.append('department', data.department);
-    formData.append('position', data.position);
-    formData.append('clubName', data.clubName);
-    formData.append('role', data.role);
-    formData.append('logo', data.logo[0]); // Get actual File object
+      data.phoneNumber = Number(data.phoneNumber);
+const payload={
+  username:data.username,
+  email:data.email,
+  phoneNumber:data.phoneNumber,
+  password:data.password,
+  collegeName:data.collegeName,
+  department:data.department,
+  position:data.position,
+  clubName:data.clubName,
+  role:data.role,
+  logo:logourl
 
+}
     const res = await axios.post(
       'http://localhost:3000/auth/organizer/signUp',
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      payload
+      
     );
     
 
@@ -53,20 +71,25 @@ const { register, handleSubmit, formState: { errors }, setValue } = useForm();
        }else{
         alert("Invalid data");
        }
+      }
+    }catch(err){
+      console.error(err);
+      alert('Something went wrong');
     }
     
   }
-  console.log("errors object",errors)
+
+  // console.log("errors object",errors)
 useEffect(() => {
   setValue('role', role);
 }, [role, setValue]);
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-3 m-3 rounded-2xl shadow-lg w-full max-w-lg">
         
 
-        {/* Role Selection */}
         
         <div className="flex justify-center mb-6">
           <div className="flex rounded-full bg-gray-800 p-1">
@@ -86,7 +109,6 @@ useEffect(() => {
             </button>
           </div>
         </div>
-        {/* Form */}
         <form onSubmit={handleSubmit(handleFormSubmit)}>
 
           <div className="mb-3">
