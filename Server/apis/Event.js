@@ -6,7 +6,9 @@ const eventApp=express.Router();
 const {verifyUser}=require('../middlewares/verifyUser');
 const {Organizer}=require('../models/organizer.model');
 const {Events}=require('../models/event.model');
-const {Student}=require('../models/student.model')
+const {Student}=require('../models/student.model');
+const { useState } = require('react');
+const { error } = require('console');
 const validEventData=(req,res,next)=>{
 const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,isApproved,rewardPoints,organizer,registrationForm,registrationEndDate,endTime,venueAddress}=req.body;
  
@@ -317,7 +319,7 @@ eventApp.put('/app/v1/update/student/:eventId', verifyUser, async (req, res) => 
         student.rewardsEarned += rewardPoints;
         await student.save();
       } else {
-        console.log("❌ Student not found by ID:", req.userId);
+        console.log(" Student not found by ID:", req.userId);
       }
       return res.status(200).json({
         message: "Enrolled successfully",
@@ -340,7 +342,7 @@ eventApp.put('/app/v1/update/student/:eventId', verifyUser, async (req, res) => 
     return res.status(400).json({ message: "Invalid request" });
 
   } catch (e) {
-    console.error("❌ Error in student event update:", e);
+    console.error("Error in student event update:", e);
     res.status(500).json({ message: "Something went wrong" });
   }
 });
@@ -382,7 +384,21 @@ eventApp.put('/app/v1/comment/update/:eventId/:commentId', verifyUser, async (re
   }
 });
 
+eventApp.get('/students/enroll/:eventId',async(req,res)=>{
+  const {eventId}=req.params;
+  try{
+    const students=await Student.find({eventsEnrolled:eventId}).select('-password');
+    res.status(200).json({
+      payload:students
+    })
 
+  }catch(e){
+    req.status(500).json({
+      message:"unable to fetch student details",
+      error:e.message
+    })
+  }
+})
 eventApp.delete('/app/v1/event/delete/:eventId',verifyUser,validPerson,async(req,res)=>{
   try{
     const eventId=req.params.eventId;
@@ -392,8 +408,6 @@ eventApp.delete('/app/v1/event/delete/:eventId',verifyUser,validPerson,async(req
     })
     if(response){
       await Events.findByIdAndDelete(eventId);
-    
-
       res.status(200).json({
         message:"Event deleted succesfully"
       })
