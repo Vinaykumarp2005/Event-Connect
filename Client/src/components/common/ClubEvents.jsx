@@ -30,7 +30,7 @@ function ClubEvents() {
     }
   }, []);
 function geteventdetails(eventId){
-  navigate(`../${eventId}`);
+  navigate(`../viewevent/${eventId}`);
 }
   return (
     <div className="p-4">

@@ -27,7 +27,7 @@ function Events() {
     getEvents()
   }, []);
   function callEventByid(eventObj){
-      navigate(`../${eventObj._id}`)
+      navigate(`../viewevent/${eventObj._id}`)
   }
 const isActive = (registrationEndDate, enrolled, maxLimit) => {
   const today = new Date();

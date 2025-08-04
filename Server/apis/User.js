@@ -22,6 +22,21 @@ studentApp.get('/getdetails',verifyUser,async(req,res)=>{
       })
   }
 })
+studentApp.get('/enrolledEvents',verifyUser,async(req,res)=>{
+  try{
+  const studentId=req.userId;
+  const events=await Events.find({
+    'enrolledStudents.studentId':studentId
+  });
+  return res.status(200).json({
+    payload:events
+  })
+  }catch(e){
+    return res.status(411).json({
+      message:"unable to fetch events due to internal server error"
+  })
+  }
+})
 studentApp.put('/update/profiledetails',verifyUser,async(req,res)=>{
   try {
      const userId  = req.userId;
