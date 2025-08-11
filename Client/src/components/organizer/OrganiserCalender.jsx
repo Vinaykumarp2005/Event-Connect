@@ -28,11 +28,8 @@ function OrganizerCalendar() {
           const formatted = res.data.payload.map((event) => {
             const start = new Date(event.startDate);
             const end = new Date(event.endDate);
-
-            let status = '';
-            if (end < now) status = 'completed';
-            else if (start <= now && end >= now) status = 'yettodo';
-            else status = 'upcoming';
+            const status =
+              end < now ? 'completed' : start <= now && end >= now ? 'yettodo' : 'upcoming';
 
             return {
               title: event.eventName,
@@ -56,7 +53,7 @@ function OrganizerCalendar() {
 
   useEffect(() => {
     if (selectedDate) {
-      const filtered = events.filter(event =>
+      const filtered = events.filter((event) =>
         moment(event.start).isSame(selectedDate, 'day')
       );
       setDayEvents(filtered);
@@ -64,19 +61,19 @@ function OrganizerCalendar() {
   }, [selectedDate, events]);
 
   const getStatusColor = (status) => {
-    switch (status) {
-      case 'completed': return 'bg-yellow-400';
-      case 'yettodo': return 'bg-red-500';
-      case 'upcoming': return 'bg-blue-500';
-      default: return 'bg-gray-400';
-    }
+    if (status === 'completed') return 'bg-yellow-500';
+    if (status === 'yettodo') return 'bg-red-500';
+    if (status === 'upcoming') return 'bg-blue-600';
+    return 'bg-gray-400';
   };
 
   const eventStyleGetter = (event) => {
-    let bg = '';
-    if (event.status === 'completed') bg = '#FBBF24';
-    else if (event.status === 'yettodo') bg = '#EF4444';
-    else if (event.status === 'upcoming') bg = '#3B82F6';
+    const bg =
+      event.status === 'completed'
+        ? '#facc15'
+        : event.status === 'yettodo'
+        ? '#ef4444'
+        : '#3b82f6';
 
     return {
       style: {
@@ -89,11 +86,11 @@ function OrganizerCalendar() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full h-screen bg-white">
-      {/* Calendar Section */}
-      <div className="w-full lg:w-2/3 p-4">
+    <div className="flex flex-col lg:flex-row w-full min-h-screen bg-white">
+      {/* Calendar */}
+      <div className="w-[950px] p-4">
         <h2 className="text-2xl font-semibold mb-4 text-gray-800">Organizer Created Events</h2>
-        <div className="h-[70vh]">
+        <div className="h-[80vh]">
           <Calendar
             localizer={localizer}
             events={events}
@@ -107,13 +104,14 @@ function OrganizerCalendar() {
               setSelectedEvent(event);
             }}
             eventPropGetter={eventStyleGetter}
+            style={{ height: '100%' ,width:'100%'}}
           />
         </div>
       </div>
 
       {/* Sidebar */}
-      <div className="w-full lg:w-1/3 border-t lg:border-t-0 lg:border-l px-6 py-4 overflow-y-auto">
-        <h3 className="text-xl font-semibold mb-4 text-gray-800">
+      <div className="w-full lg:w-[20%] px-4 py-4 overflow-y-auto border-t lg:border-t-0 lg:border-l border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">
           {selectedDate
             ? `Events on ${moment(selectedDate).format('MMMM D, YYYY')}`
             : 'Click a date to view events'}
@@ -122,25 +120,34 @@ function OrganizerCalendar() {
         {dayEvents.length === 0 ? (
           <p className="text-gray-500">No events on this date.</p>
         ) : (
-          <ul className="space-y-4">
-            {dayEvents.map((event) => (
-              <li
-                key={event._id}
-                onClick={() => setSelectedEvent(event)}
-                className="p-4 bg-gray-100 rounded-lg shadow cursor-pointer hover:bg-gray-200 transition"
-              >
-                <div className="flex justify-between items-center">
-                  <h4 className="text-md font-medium">{event.eventName}</h4>
-                  <span className={`text-xs px-2 py-1 rounded-full text-white ${getStatusColor(event.status)}`}>
-                    {event.status}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600">
-                  {moment(event.start).format('hh:mm A')} - {moment(event.end).format('hh:mm A')}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <ul className="space-y-4 w-full w-full mx-auto overflow-hidden">
+  {dayEvents.map((event) => (
+    <li
+      key={event._id}
+      onClick={() => setSelectedEvent(event)}
+      className="p-4 bg-gray-100 rounded-xl shadow-sm cursor-pointer hover:bg-gray-200 transition w-full"
+    >
+      <div className="flex justify-between items-center mb-1 m-1 gap-4 flex-wrap">
+        <h4 className="text-sm font-medium text-gray-800 break-words">
+          {event.eventName}
+        </h4>
+        <span
+          className={`text-xs px-3 py-1 rounded-full text-white whitespace-nowrap flex-shrink-0 ${getStatusColor(
+            event.status
+          )}`}
+        >
+          {event.status}
+        </span>
+      </div>
+      <p className="text-xs text-gray-600">
+        {moment(event.start).format('hh:mm A')}
+        {!moment(event.start).isSame(event.end) &&
+          ` - ${moment(event.end).format('hh:mm A')}`}
+      </p>
+    </li>
+  ))}
+</ul>
+
         )}
       </div>
 

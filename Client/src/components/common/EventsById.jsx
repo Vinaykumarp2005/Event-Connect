@@ -145,28 +145,6 @@ const payload = {
       };
 
      
-
-    // const formData = new FormData();
-
-    // formData.append('eventName', data.eventName);
-    // formData.append('description', data.description);
-    // formData.append('maxLimit', data.maxLimit);
-    // formData.append('enrolled', 0);
-    // formData.append('category', data.category);
-    // formData.append('startDate', data.startDate);
-    // formData.append('endDate', data.endDate);
-    // formData.append('sampleCertificate', data.sampleCertificate[0]);
-    // formData.append('registrationFee', data.registrationFee);
-    // formData.append('venue', data.venue);
-    // formData.append('keyTakeAways', data.keyTakeAways);
-    // formData.append('isApproved', false);
-    // formData.append('rewardPoints', data.rewardPoints);
-    // formData.append('registrationForm', data.registrationForm);
-    // formData.append('registrationEndDate', data.registrationEndDate);
-    // formData.append('endTime', data.endTime);
-    // formData.append('eventImage', data.eventImage[0]);
-    // formData.append('faqs', JSON.stringify(faqs));
-    // formData.append('venueAddress',data.venueAddress);
     
 try {
       const res = await axios.post('http://localhost:3000/event/app/v1/create', payload, {
@@ -181,20 +159,6 @@ try {
       console.error(err);
       alert('Something went wrong');
     }
-
-    // try {
-    //   const res = await axios.post('http://localhost:3000/event/app/v1/create', formData, {
-    //     headers: { 'Content-Type': 'multipart/form-data' ,'Authorization':localStorage.getItem("token")},
-    //   });
-    //   if (res.status === 200) {
-    //     alert(res.data.message);
-    //   } else {
-    //     alert('Invalid Data');
-    //   }
-    // } catch (err) {
-    //   console.error(err);
-    //   alert('Something went wrong');
-    // }
   }
     
     const [expandedID, setExpandedID] = useState(null);
@@ -281,7 +245,7 @@ async function handleEnroll() {
     }
   } catch (err) {
     console.error("Enrollment error:", err);
-    alert(err.response?.data?.message || "❌ Failed to enroll in the event.");
+    alert(err.response?.data?.message || " Failed to enroll in the event.");
   }
 }
 const [commentEditText, setCommentEditText] = useState("");

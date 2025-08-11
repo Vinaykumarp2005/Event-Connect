@@ -24,6 +24,7 @@ import ClubEvents from './components/common/ClubEvents.jsx'
 import FetchEvents from './components/organizer/FetchEvents.jsx'
 import EventDetails from './components/organizer/EventDetails.jsx'
 import StudentCalender from './components/students/StudentCalender.jsx'
+import OrganiserCalendar from './components/organizer/OrganiserCalender.jsx'
 function Main(){
 return (
   <BrowserRouter>
@@ -52,7 +53,7 @@ return (
       <Route path='createdEvents' element={<CreatedEvents/>}/>
       <Route path='postEvents' element={<PostEvent/>}/>
       <Route path='view/calender' element={<Customcalendar/>}/>
-      
+      <Route path='view/organisercalender' element={<OrganiserCalendar/>}/>
       <Route path='getevents' element={<FetchEvents/>}/>
       <Route path='event/:eventById' element={<EventDetails/>}/>
     </Route>

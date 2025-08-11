@@ -12,22 +12,30 @@ function Header() {
     navigate('/')
   }
   return (
-    <div className='bg-blue-500 p-3  flex justify-between'>
-      <div className='p-1'>
-        <Link to='/'>Logo</Link>
+
+    <div className='fixed top-0 left-0 right-0 z-50  p-3 flex justify-between mx-auto mt-1 text-white'>
+      <div className='p-1 ml-2'>
+        <Link to='/'><h1 className='font- text-xl'>
+          <strong>
+          Event Connect</strong></h1></Link>
       
       </div>
-      <div className='pr-8 bg-red-200'>
+      <div className='pr-8 '>
           <ul className='flex justify-between p-1'>
            {!user.isLoggedIn&& <li className='p-1'>
-              <Link to='/signup'>Get Started</Link>
+             <button className='rounded-md py-1 px-2 text-sm border border-[rgba(8,_112,_184,_0.7)]'>
+               <Link to='/signup'>Get Started</Link>
+             </button>
             </li>}
             <li className='p-1'>
-            {user.isLoggedIn?<button onClick={logout}>
-              Logout
-              </button> :<Link to='/signin'>
-              Signin
-              </Link>}  
+            {user.isLoggedIn?<button onClick={logout} className='py-1 px-2 rounded-md text-sm border border-[rgba(8,_112,_184,_0.7)] '>
+              Log Out
+              </button> :
+              <button className='py-1 px-2 rounded-md text-sm border border-[rgba(8,_112,_184,_0.7)] '>
+                <Link to='/signin'>
+              Sign In
+              </Link>
+              </button>} 
             </li>
           </ul>
       </div>
