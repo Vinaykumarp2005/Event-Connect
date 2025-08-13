@@ -322,7 +322,7 @@ if(res.status==200){
   return (
    <div> 
     {!edit?
-    <div className="p-4  w-full ">
+    <div className="p-4  w-full mt-12">
       {currentArticle.organiser===user._id&& <div className='flex justify-end'>
          <button onClick={() => setEdit(true)}  className='rounded-md  px-3 flex items-center gap-2 py-1 text-md bg-gray-500 text-white m-1'>Edit <MdModeEditOutline className='text-lg'/></button>
     <button className='rounded-md py-1 px-1 ml-2 mr-2 m-1 flex items-center gap-1 bg-red-600 text-white' onClick={()=>deleteArticle()}>Delete <MdDelete className='text-white'/></button>
@@ -331,7 +331,7 @@ if(res.status==200){
         <img
           src={currentArticle.eventImage}
           alt="Event"
-          className="rounded-xl w-full h-full object-cover"
+          className="rounded-xl w-full h-72 object-cover"
         />
       </div>
       <div className="flex flex-col md:flex-row gap-8">
@@ -459,21 +459,24 @@ if(res.status==200){
     <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase">
       {comment.name?.charAt(0)}
     </div>
-    <div className="flex-1">
+    <div className='flex justify-between'>
+      <div className="flex-1">
       <p className="font-semibold">{comment.name}</p>
       <p className="text-gray-700">{comment.content}</p>
     </div>
 
     {user._id === comment.owner && (
-      <>
-        <button onClick={() => deleteComment(comment._id)}>
-          <MdDelete className="text-red-600 mr-4 text-bold" />
+      <div className='ml-[1100px]'>
+        <button onClick={() => deleteComment(comment._id)} className='bg-neutral-400 rounded-lg h-8 min-w-10'>
+          <MdDelete className="text-red-600 mr-2 text-bold m-1 ml-2 py-1 px-1 text-2xl" />
         </button>
-        <button onClick={() => handleCommenteditState(comment._id,comment.content)}>
-          <MdModeEditOutline className="text-red-600 mr-4 text-bold" />
+        <button onClick={() => handleCommenteditState(comment._id,comment.content)} className='bg-neutral-400 m-1 rounded-lg w-10 h-8'>
+          <MdModeEditOutline className="text-neutral-600 mr-2 text-bold ml-2 text-2xl py-1 px-1" />
         </button>
-      </>
+      </div>
     )}
+    </div>
+    
   </div>
 ) : (
   <form

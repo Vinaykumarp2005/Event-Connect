@@ -42,7 +42,7 @@ function EnrolledEvents() {
 
   return (
     <div className="min-h-screen px-6 py-12">
-      <h1 className="text-4xl font-bold text-center mb-10 text-black">Enrolled Events</h1>
+      <h1 className="text-xl font-bold text-center mb-6 text-white mt-10">Enrolled Events</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {enrolledEvents.length === 0 ? (
@@ -51,7 +51,7 @@ function EnrolledEvents() {
           enrolledEvents.map((event, idx) => (
             <div
               key={idx}
-              className="p-6 rounded-2xl border border-gray-700 bg-black text-white shadow hover:shadow-white/20 transition-all"
+              className="p-6 rounded-lg border border-[rgba(8,112,184,0.7)] bg-black text-white shadow hover:shadow-white/20 transition-all"
             >
               <h2 className="text-2xl font-semibold mb-2">{event.eventName}</h2>
               <p className="text-gray-300 text-sm mb-4">
@@ -66,7 +66,7 @@ function EnrolledEvents() {
       </div>
   
               <button
-                className="rounded border border-white px-4 py-2 hover:bg-white hover:text-black transition flex items-center mt-1"
+                className="rounded border border-white px-4 py-2 hover:bg-white hover:text-black transition flex items-center mt-1 hover:border-[rgba(8,112,184,0.7)]"
                 onClick={() => viewdetails(event._id)}
               >
                 View Details <BsArrowUpRightCircle className="ml-2 h-5 w-5" />

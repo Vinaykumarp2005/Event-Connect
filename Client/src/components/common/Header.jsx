@@ -12,7 +12,7 @@ function Header() {
     navigate('/')
   }
   const headerclass = `fixed top-0 left-0 right-0 z-50 p-3 flex justify-between mx-auto text-white  ${
-  user.isLoggedIn ? 'border-b-2 border-[rgba(8,112,184,0.7)] bg-neutral-900' : ''
+  user.isLoggedIn ? 'border-b-2 border-[rgba(8,112,184,0.7)] bg-neutral-900 py-1 px-4 py-2 px-4' : ''
 }`;
 
   return (

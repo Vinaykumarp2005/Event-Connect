@@ -22,7 +22,7 @@ function SidebarIcon({ icon, label }) {
       {/* Tooltip */}
       <div className="
         absolute left-full top-1/2 -translate-y-1/2 ml-2
-        bg-gray-800 text-white text-xs rounded px-2 py-1 z-10
+        bg-gray-800 text-white text-xs rounded px-2 py-1 z-300
         opacity-0 group-hover:opacity-100 invisible group-hover:visible
         transition-all duration-300 whitespace-nowrap
       ">
@@ -43,7 +43,7 @@ function Home() {
         {/* Sidebar */}
         {open ? (
           <div className={`
-            mt-[104px] h-screen fixed bg-neutral-900
+            mt-[93px] h-screen fixed bg-neutral-900
             transition-all duration-800 ease-in-out w-44
           border-r-4 border-[rgba(8,112,184,0.7)]`}>
             <div className='flex justify-end'>
@@ -67,7 +67,7 @@ function Home() {
           </div>
         ) : (
           <div className='
-            mt-[104px] h-screen fixed bg-neutral-900
+            mt-[93px] h-screen fixed bg-neutral-900
             transition-all duration-300 ease-in-out w-20
 border-r-2 border-[rgba(8,112,184,0.7)]'>
             <button onClick={() => setOpen(!open)} >

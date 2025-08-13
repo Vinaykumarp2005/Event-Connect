@@ -4,7 +4,8 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '../UserAtom';
 const localizer = momentLocalizer(moment);
 
 function StudentCalendar() {
@@ -13,7 +14,7 @@ function StudentCalendar() {
   const [dayEvents, setDayEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const navigate = useNavigate();
-
+ const user = useRecoilValue(userAtom);
   useEffect(() => {
     const fetchEnrolledEvents = async () => {
       try {
@@ -75,17 +76,17 @@ function StudentCalendar() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full h-screen bg-white">
+    <div className="flex flex-col lg:flex-row w-108 h-screen bg-black">
       {/* Calendar */}
-      <div className="w-full lg:w-2/3 p-4">
-        <h2 className="text-2xl font-semibold mb-4">Your Enrolled Events</h2>
+      <div className="w-full lg:w-2/3 p-4 mr-4">
+        <h2 className="text-2xl font-semibold mb-4 mt-16">Your Enrolled Events</h2>
         <Calendar
           localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
           views={['month']}
-          style={{ height: '70vh' }}
+          style={{ height: '70vh' ,width:'850px' }}
           selectable
           onSelectSlot={(slotInfo) => setSelectedDate(slotInfo.start)}
           onSelectEvent={(event) => {
@@ -97,8 +98,8 @@ function StudentCalendar() {
       </div>
 
       {/* Sidebar */}
-      <div className="w-full lg:w-1/3 px-6 py-4 overflow-y-auto border-t lg:border-t-0 lg:border-l">
-        <h3 className="text-xl font-semibold mb-4">
+      <div className="w-full lg:w-1/3 px-6 py-4 overflow-y-auto border-t lg:border-t-0 lg:border-l ">
+        <h3 className="text-xl font-semibold mb-4 mt-16">
           {selectedDate
             ? `Events on ${moment(selectedDate).format('MMMM D, YYYY')}`
             : 'Click a date to view your events'}
@@ -112,7 +113,7 @@ function StudentCalendar() {
               <li
                 key={event._id}
                 onClick={() => setSelectedEvent(event)}
-                className="p-4 bg-gray-100 rounded-lg shadow cursor-pointer hover:bg-gray-200 transition"
+                className="p-4 bg-gray-900 rounded-lg shadow cursor-pointer hover:bg-gray-500 transition"
               >
                 <div className="flex justify-between items-center">
                   <h4 className="text-md font-medium">{event.eventName}</h4>
@@ -120,7 +121,7 @@ function StudentCalendar() {
                     {event.status}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 hover:text-white">
                   {moment(event.start).format('hh:mm A')} - {moment(event.end).format('hh:mm A')}
                 </p>
               </li>
@@ -136,7 +137,7 @@ function StudentCalendar() {
           onClick={() => setSelectedEvent(null)}
         >
           <div
-            className="bg-white p-6 rounded-lg w-[90%] max-w-md shadow-xl"
+            className="bg-black border-4 border-[rgba(8,112,184,0.7)] p-6 rounded-lg w-[90%] max-w-md shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-xl font-semibold mb-2">{selectedEvent.eventName}</h2>
@@ -148,8 +149,14 @@ function StudentCalendar() {
                 Close
               </button>
               <button
-                className="px-4 py-2 bg-green-600 text-white rounded"
-                onClick={() => navigate(`../viewevent/${selectedEvent._id}`)}
+                className="px-4 py-2 bg-gray-600 text-white rounded"
+                 onClick={() => {
+        if (user?.email) {
+          navigate(`/student-profile/${user.email}/viewevent/${selectedEvent._id}`);
+        } else {
+          alert("User not logged in.");
+        }
+      }}
               >
                 View Event
               </button>

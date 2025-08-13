@@ -4,7 +4,6 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import { useNavigate } from 'react-router-dom';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import '../common/customcalender.css';
 
 const localizer = momentLocalizer(moment);
 
@@ -62,39 +61,36 @@ function OrganizerCalendar() {
   }, [selectedDate, events]);
 
   const getStatusColor = (status) => {
-    if (status === 'completed') return 'bg-emerald-500';
-    if (status === 'yettodo') return 'bg-rose-500';
+    if (status === 'completed') return 'bg-yellow-500';
+    if (status === 'yettodo') return 'bg-red-500';
     if (status === 'upcoming') return 'bg-blue-600';
-    return 'bg-slate-400';
+    return 'bg-gray-400';
   };
 
   const eventStyleGetter = (event) => {
     const bg =
       event.status === 'completed'
-        ? '#10b981' // emerald-500
+        ? '#facc15'
         : event.status === 'yettodo'
-        ? '#f43f5e' // rose-500
-        : '#2563eb'; // blue-600
+        ? '#ef4444'
+        : '#3b82f6';
 
     return {
       style: {
         backgroundColor: bg,
         color: 'white',
-        borderRadius: '8px',
-        paddingLeft: '8px',
-        fontWeight: '600',
+        borderRadius: '6px',
+        paddingLeft: '4px',
       },
     };
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full min-h-screen bg-black text-white">
+    <div className="flex flex-col lg:flex-row w-full min-h-screen bg-white">
       {/* Calendar */}
-      <div className="w-full lg:w-[75%] p-4 lg:p-6">
-        <h2 className="text-2xl lg:text-3xl font-bold mb-6 text-white">
-          Organizer Created Events
-        </h2>
-        <div className="h-[70vh] lg:h-[80vh] w-full">
+      <div className="w-[950px] p-4">
+        <h2 className="text-2xl font-semibold mb-4 text-gray-800">Organizer Created Events</h2>
+        <div className="h-[80vh]">
           <Calendar
             localizer={localizer}
             events={events}
@@ -108,84 +104,82 @@ function OrganizerCalendar() {
               setSelectedEvent(event);
             }}
             eventPropGetter={eventStyleGetter}
-            style={{ height: '100%', width: '100%' }}
-            className="dark-calendar"
+            style={{ height: '100%' ,width:'100%'}}
           />
         </div>
       </div>
 
       {/* Sidebar */}
-      <div className="w-full lg:w-[25%] px-4 py-4 lg:py-6 overflow-y-auto border-t lg:border-t-0 lg:border-l border-slate-700 bg-slate-900">
-        <h3 className="text-lg lg:text-xl font-semibold mb-6 text-white">
+      <div className="w-full lg:w-[20%] px-4 py-4 overflow-y-auto border-t lg:border-t-0 lg:border-l border-gray-200">
+        <h3 className="text-lg font-semibold mb-4 text-gray-800">
           {selectedDate
             ? `Events on ${moment(selectedDate).format('MMMM D, YYYY')}`
             : 'Click a date to view events'}
         </h3>
 
         {dayEvents.length === 0 ? (
-          <p className="text-slate-400">No events on this date.</p>
+          <p className="text-gray-500">No events on this date.</p>
         ) : (
-          <ul className="space-y-4 w-full">
-            {dayEvents.map((event) => (
-              <li
-                key={event._id}
-                onClick={() => setSelectedEvent(event)}
-                className="p-4 bg-slate-800 rounded-xl shadow-lg cursor-pointer hover:bg-slate-700 transition-all duration-200 w-full border border-slate-600 hover:border-slate-500"
-              >
-                <div className="flex justify-between items-center mb-2 gap-3 flex-wrap">
-                  <h4 className="text-sm font-medium text-white break-words flex-1">
-                    {event.eventName}
-                  </h4>
-                  <span
-                    className={`text-xs px-3 py-1 rounded-full text-white whitespace-nowrap flex-shrink-0 ${getStatusColor(
-                      event.status
-                    )}`}
-                  >
-                    {event.status}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-300">
-                  {moment(event.start).format('hh:mm A')}
-                  {!moment(event.start).isSame(event.end) &&
-                    ` - ${moment(event.end).format('hh:mm A')}`}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <ul className="space-y-4 w-full  mx-auto overflow-hidden">
+  {dayEvents.map((event) => (
+    <li
+      key={event._id}
+      onClick={() => setSelectedEvent(event)}
+      className="p-4 bg-gray-100 rounded-xl shadow-sm cursor-pointer hover:bg-gray-200 transition w-full"
+    >
+      <div className="flex justify-between items-center mb-1 m-1 gap-4 flex-wrap">
+        <h4 className="text-sm font-medium text-gray-800 break-words">
+          {event.eventName}
+        </h4>
+        <span
+          className={`text-xs px-3 py-1 rounded-full text-white whitespace-nowrap flex-shrink-0 ${getStatusColor(
+            event.status
+          )}`}
+        >
+          {event.status}
+        </span>
+      </div>
+      <p className="text-xs text-gray-600">
+        {moment(event.start).format('hh:mm A')}
+        {!moment(event.start).isSame(event.end) &&
+          ` - ${moment(event.end).format('hh:mm A')}`}
+      </p>
+    </li>
+  ))}
+</ul>
+
         )}
       </div>
 
       {/* Modal */}
       {selectedEvent && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-80 flex justify-center items-center z-50 p-4"
+          className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50"
           onClick={() => setSelectedEvent(null)}
         >
           <div
-            className="bg-slate-900 p-6 rounded-xl w-full max-w-md shadow-2xl border border-slate-700"
+            className="bg-white p-6 rounded-lg w-[90%] max-w-md shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold mb-4 text-white">{selectedEvent.eventName}</h2>
-            <div className="space-y-3 mb-6">
-              <p className="text-sm text-slate-300">
-                <strong className="text-white">Start:</strong> {moment(selectedEvent.start).format('MMMM D, YYYY hh:mm A')}
-              </p>
-              <p className="text-sm text-slate-300">
-                <strong className="text-white">End:</strong> {moment(selectedEvent.end).format('MMMM D, YYYY hh:mm A')}
-              </p>
-              <p className="text-sm text-slate-300">
-                <strong className="text-white">Description:</strong> {selectedEvent.description || 'No description'}
-              </p>
-            </div>
-            <div className="flex justify-end gap-3">
+            <h2 className="text-xl font-semibold mb-2 text-gray-800">{selectedEvent.eventName}</h2>
+            <p className="mb-1 text-sm text-gray-700">
+              <strong>Start:</strong> {moment(selectedEvent.start).format('MMMM D, YYYY hh:mm A')}
+            </p>
+            <p className="mb-1 text-sm text-gray-700">
+              <strong>End:</strong> {moment(selectedEvent.end).format('MMMM D, YYYY hh:mm A')}
+            </p>
+            <p className="mb-1 text-sm text-gray-700">
+              <strong>Description:</strong> {selectedEvent.description || 'No description'}
+            </p>
+            <div className="flex justify-end gap-2 mt-4">
               <button
-                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors duration-200 border border-slate-600"
+                className="px-4 py-2 bg-gray-300 text-black rounded"
                 onClick={() => setSelectedEvent(null)}
               >
                 Close
               </button>
               <button
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 border border-blue-500"
+                className="px-4 py-2 bg-blue-600 text-white rounded"
                 onClick={() => navigate(`../viewevent/${selectedEvent._id}`)}
               >
                 View Event
