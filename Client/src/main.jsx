@@ -25,6 +25,7 @@ import FetchEvents from './components/organizer/FetchEvents.jsx'
 import EventDetails from './components/organizer/EventDetails.jsx'
 import StudentCalender from './components/students/StudentCalender.jsx'
 import OrganiserCalendar from './components/organizer/OrganiserCalender.jsx'
+import Home from './components/common/Home.jsx'
 function Main(){
 return (
   <BrowserRouter>
@@ -36,6 +37,7 @@ return (
     <Route path='signin' element={<SignIn/>}/>
      <Route path='verifyPage/:role/:id/:token' element={<VerifyPage/>}/>
     <Route path='student-profile/:emailId'>
+      <Route index element={<Home/>}/>
       <Route path='dashboard' element={<StudentDashBoard/>}/>
       <Route path='enrolledevents' element={<EnrolledEvents/>}/>
       <Route path='viewevent/:eventById' element={<EventsById/>}/>
@@ -46,7 +48,7 @@ return (
       <Route path='club/:clubById' element={<ClubEvents/>}/>
     </Route>
     <Route path='organizer-profile/:emailId' element={<OrganizerHomePage/>}>
-    <Route index  element={<OrganizerDashBoard/>}/>
+       <Route index element={<Home/>}/>
       <Route  path='dashboard' element={<OrganizerDashBoard/>}/>
       <Route path='viewevent/:eventById' element={<EventsById/>}/>
       <Route path='events' element={<Events/>}/>

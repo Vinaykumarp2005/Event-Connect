@@ -55,8 +55,8 @@ export default function SignIn() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white">
       <div
-        className="p-6 m-3 rounded-2xl shadow-lg w-full max-w-lg"
-        style={{ border: `1px solid ${borderColor}`, backgroundColor: '#121212' }}
+        className="p-6 m-3 rounded-2xl shadow-lg w-full max-w-lg mt-20"
+        style={{ border: `1px solid ${borderColor}`, backgroundColor: 'bg-gray-800' }}
       >
         <form onSubmit={handleSubmit(handleFormSubmit)}>
 

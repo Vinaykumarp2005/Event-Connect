@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BsArrowUpRightCircle } from "react-icons/bs";
 import { useNavigate } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '../UserAtom';
 
 function EnrolledEvents() {
   const [enrolledEvents, setEnrolledEvents] = useState([]);
   const navigate = useNavigate();
+  const user = useRecoilValue(userAtom);
 
   useEffect(() => {
     async function getEvents() {
@@ -29,7 +32,12 @@ function EnrolledEvents() {
   }, []);
 
   function viewdetails(eventId) {
-    navigate(`../viewevent/${eventId}`);
+    if (user?.email) {
+  navigate(`/student-profile/${user.email}/viewevent/${eventId}`);
+} else {
+  alert("User not logged in.");
+}
+
   }
 
   return (

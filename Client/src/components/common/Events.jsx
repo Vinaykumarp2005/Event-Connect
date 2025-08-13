@@ -27,7 +27,14 @@ function Events() {
     getEvents()
   }, []);
   function callEventByid(eventObj){
-      navigate(`../viewevent/${eventObj._id}`)
+      if(user?.role === 'student'){
+  navigate(`/student-profile/${user.emailId}/viewevent/${eventObj._id}`);
+} else if(user?.role === 'organizer'){
+  navigate(`/organizer-profile/${user.emailId}/viewevent/${eventObj._id}`);
+} else if(user?.role === 'admin'){
+  navigate(`/admin-profile/${user.emailId}/viewevent/${eventObj._id}`);
+}
+
   }
 const isActive = (registrationEndDate, enrolled, maxLimit) => {
   const today = new Date();
@@ -38,9 +45,10 @@ const isActive = (registrationEndDate, enrolled, maxLimit) => {
     <div className="flex flex-wrap flex-row gap-4 p-4 bg-black h-screen">
       {
         events.map((obj, idx) => (
-          <div key={idx} className='min-h-52 bg-black min-w-60 max-w-60 max-h-80 flex flex-col rounded-lg border border-white mt-12'>
+          <div key={idx} className='min-h-52 bg-black min-w-60 max-w-60 max-h-80 flex flex-col rounded-lg  border border-[rgba(8,112,184,0.7)] 
+mt-24'>
             <div className=''>
-              <img src={obj.eventImage} alt=""  className="w-full h-36 mb-1" style={{ borderRadius: "10px" }} />
+              <img src={obj.eventImage} alt=""  className="w-full h-40 mb-3 rounded-t" />
             </div>
             <div className='px-4 pb-4 text-white'>
               <div className='flex justify-between items-center mb-2'>
@@ -59,7 +67,6 @@ const isActive = (registrationEndDate, enrolled, maxLimit) => {
                   <p className='text-xs text-center text-black ml-1'> Seats Left: <span className='font-semibold text-xs '>{obj.maxLimit - obj.enrolled}</span></p>
                 </div>
   
-
               </div>
       </div>
               

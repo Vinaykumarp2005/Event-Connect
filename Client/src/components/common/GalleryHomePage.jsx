@@ -2,10 +2,14 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { BsArrowUpRightCircle } from "react-icons/bs";
 import { useNavigate } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '../UserAtom';
 
 function GalleryHomePage() {
   const [clubs,setClubs]=useState([]);
   const navigate=useNavigate();
+  const user = useRecoilValue(userAtom);
+
   useEffect(()=>{
     async function getClubs(){
       try{
@@ -23,9 +27,14 @@ function GalleryHomePage() {
     }
     getClubs()
   },[])
-  function ClubEventsNavigate(clubId){
-navigate(`../club/${clubId}`);
+  function ClubEventsNavigate(clubId) {
+  if (user?.email) {
+    navigate(`/student-profile/${user.email}/club/${clubId}`);
+  } else {
+    alert("User not logged in");
   }
+}
+
   return (
     <div>
      {clubs.map((club,idx)=>

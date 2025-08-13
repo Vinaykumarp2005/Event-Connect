@@ -11,9 +11,13 @@ function Header() {
     localStorage.removeItem('token');
     navigate('/')
   }
+  const headerclass = `fixed top-0 left-0 right-0 z-50 p-3 flex justify-between mx-auto text-white  ${
+  user.isLoggedIn ? 'border-b-2 border-[rgba(8,112,184,0.7)] bg-neutral-900' : ''
+}`;
+
   return (
 
-    <div className='fixed top-0 left-0 right-0 z-50  p-3 flex justify-between mx-auto mt-1 text-white'>
+    <div className={headerclass}>
       <div className='p-1 ml-2'>
         <Link to='/'><h1 className='font- text-xl'>
           <strong>

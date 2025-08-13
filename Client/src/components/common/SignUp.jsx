@@ -86,7 +86,7 @@ export default function SignUp() {
     <div className="min-h-screen flex items-center justify-center bg-black text-white">
       <div
         className="p-6 m-4 rounded-2xl shadow-lg w-full max-w-lg mt-20"
-        style={{ border: `1px solid ${borderColor}`,backgroundColor: '#121212' }}
+        style={{ border: `1px solid ${borderColor}`,backgroundColor: 'bg-gray-800' }}
       >
         <div className="flex justify-center mb-6">
           <div className="flex rounded-full bg-gray-800 p-1">
