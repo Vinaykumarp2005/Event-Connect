@@ -64,23 +64,23 @@ function StudentDashBoard() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-white mb-4 text-center mt-16 ml-32">
-        {studentProfile.username} Profile
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 text-center mt-4 sm:mt-8">
+        {studentProfile.username}'s Profile
       </h1>
 
       {!isEditing ? (
-        <div className="bg-neutral-600 text-white shadow-lg rounded-xl p-6 space-y-4 border-2 mx-auto w-[950px] h-[500px] mt-8 ml-32">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-semibold text-white">Profile Overview</h2>
+        <div className="bg-neutral-600 text-white shadow-lg rounded-xl p-4 sm:p-6 space-y-4 border-2 mx-auto w-full max-w-3xl">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Profile Overview</h2>
             <button
               onClick={() => setIsEditing(true)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded transition"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-3 py-1.5 rounded transition"
             >
               Edit
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white-700 text-md">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-white-700 text-sm sm:text-md">
             <p><span className="font-medium">Username:</span> {studentProfile.username}</p>
             <p><span className="font-medium">Email:</span> {studentProfile.email}</p>
             <p><span className="font-medium">Phone Number:</span> {studentProfile.phoneNumber}</p>
@@ -94,18 +94,18 @@ function StudentDashBoard() {
           </div>
         </div>
       ) : (
-        <div className="bg-neutral-600 shadow-lg rounded-xl p-6 border mx-auto w-[950px] mt-8 ml-32">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-white">Edit Profile</h2>
+        <div className="bg-neutral-600 shadow-lg rounded-xl p-4 sm:p-6 border mx-auto w-full max-w-3xl">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Edit Profile</h2>
             <button
               onClick={() => setIsEditing(false)}
-              className="bg-gray-400 hover:bg-gray-500 text-white font-medium px-4 py-2 rounded transition"
+              className="bg-gray-400 hover:bg-gray-500 text-white font-medium px-3 py-1.5 rounded transition"
             >
               Cancel
             </button>
           </div>
 
-          <form onSubmit={handleSubmit(updateProfile)} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit(updateProfile)} className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-white mb-1">Username</label>
               <input

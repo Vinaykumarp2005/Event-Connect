@@ -11,19 +11,31 @@ function OrganizerDashBoard() {
   useEffect(() => {
     async function fetchData() {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error("No authentication token found");
+          return;
+        }
+
         const [detailsRes, eventsRes] = await Promise.all([
           axios.get('http://localhost:3000/organiser/getdetails', {
-            headers: { Authorization: localStorage.getItem('token') },
+            headers: { 
+              'Authorization': token,
+              'Content-Type': 'application/json' 
+            }
           }),
           axios.get('http://localhost:3000/event/app/v1/organiser/events', {
-            headers: { Authorization: localStorage.getItem('token') },
+            headers: { 
+              'Authorization': token,
+              'Content-Type': 'application/json' 
+            }
           }),
         ]);
 
         if (detailsRes.status === 200) setDetails(detailsRes.data.payload);
         if (eventsRes.status === 200) setEvents(eventsRes.data.payload);
       } catch (err) {
-        console.error(err);
+        console.error("Dashboard error:", err);
         alert('Error fetching dashboard data');
       }
     }
@@ -51,15 +63,15 @@ function OrganizerDashBoard() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 ml-36">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center ">
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center ">
         {details.username} Dashboard
       </h1>
 
-      {/* Profile Details */}
-      <div className="bg-white shadow-lg rounded-xl p-6 mb-6 border">
-        <h2 className="text-xl font-semibold text-gray-700 mb-4">Profile Overview</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
+    
+      <div className="bg-white shadow-lg rounded-xl p-4 sm:p-6 mb-6 border">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-700 mb-4">Profile Overview</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-gray-700 text-sm">
           <InfoItem label="Username" value={details.username} />
           <InfoItem label="Email" value={details.email} />
           <InfoItem label="Phone Number" value={details.phoneNumber} />
@@ -72,25 +84,25 @@ function OrganizerDashBoard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
         <StatCard label="Total Events Created" count={events.length} bg="bg-black" text="text-white" />
       </div>
 
       {/* Ongoing Events Section */}
       {ongoingEvents.length > 0 && (
         <>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Ongoing Events</h2>
-          <div className="flex flex-wrap justify-start gap-4 mb-8">
+          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Ongoing Events</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {ongoingEvents.map((event) => (
-              <div key={event._id} className="w-60 bg-green-50 border border-green-200 rounded-lg shadow-md overflow-hidden">
+              <div key={event._id} className="bg-green-50 border border-green-200 rounded-lg shadow-md overflow-hidden">
                 <img
                   src={event.eventImage}
                   alt={event.eventName}
                   className="w-full h-36 object-cover"
                 />
                 <div className="p-4">
-                  <h3 className="text-md font-semibold text-gray-800 mb-1">{event.eventName}</h3>
-                  <p className="text-sm text-gray-600">
+                  <h3 className="text-md font-semibold text-gray-800 mb-1 truncate">{event.eventName}</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">
                     <strong>Start:</strong>{' '}
                     {new Date(event.startDate).toLocaleDateString('en-IN', {
                       day: 'numeric',
@@ -98,7 +110,7 @@ function OrganizerDashBoard() {
                       year: 'numeric',
                     })}
                   </p>
-                  <p className="text-sm text-gray-600 mb-3">
+                  <p className="text-xs sm:text-sm text-gray-600 mb-3">
                     <strong>End:</strong>{' '}
                     {new Date(event.endDate).toLocaleDateString('en-IN', {
                       day: 'numeric',
@@ -107,7 +119,7 @@ function OrganizerDashBoard() {
                     })}
                   </p>
                   <button
-                    className="flex items-center bg-green-600 text-white text-sm px-3 py-1 rounded-md hover:bg-green-700"
+                    className="flex items-center bg-green-600 text-white text-xs sm:text-sm px-3 py-1.5 rounded-md hover:bg-green-700"
                     onClick={() => gotoEvent(event._id)}
                   >
                     Get Details <BsArrowUpRightCircle className="ml-2" />

@@ -2,10 +2,13 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BsArrowUpRightCircle } from "react-icons/bs";
 import { useNavigate } from 'react-router-dom';
+import { useRecoilValue } from 'recoil';
+import { userAtom } from '../UserAtom';
 
 function CreatedEvents() {
   const [createdEvents, setCreatedEvents] = useState([]);
   const navigate = useNavigate();
+  const user = useRecoilValue(userAtom);
 
   useEffect(() => {
     async function getDetails() {
@@ -29,7 +32,14 @@ function CreatedEvents() {
   }, []);
 
   function viewdetails(eventId) {
-    navigate(`../viewevent/${eventId}`);
+    // Fix the navigation by using absolute path with the user's email
+    if (user?.email) {
+      navigate(`/organizer-profile/${user.email}/viewevent/${eventId}`);
+    } else {
+      console.error("User email not available for navigation");
+      // Fallback to relative path if user email isn't available
+      navigate(`../viewevent/${eventId}`);
+    }
   }
 
   return (

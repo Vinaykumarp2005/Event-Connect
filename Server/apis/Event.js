@@ -126,22 +126,13 @@ eventApp.get('/app/v1/events/:eventId', verifyUser, async (req, res) => {
 
 eventApp.get('/app/v1/events',verifyUser,async(req,res)=>{
   try{
-    const response=await Events.find({
-    })
-    if(response){
-      const response=await Events.find();
-      res.status(200).json({
-        message:"Events details fetched succesfully",
-        payload:response
-      })
-    }else{
-      return res.status(403).json({
-        message: "You are not authorized to view this event or it doesn't exist."
-      });
-    }
-
+    const events = await Events.find({});
+    res.status(200).json({
+      message:"Events details fetched successfully",
+      payload: events
+    });
   }catch(e){
-     console.error(e);
+    console.error(e);
     res.status(500).json({
       message: "Something went wrong"
     });
