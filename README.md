@@ -32,7 +32,7 @@ Event Connect is designed to solve the problem of scattered event information in
 
 ⚙️ Installation & Setup
 1. Clone the repository
-git clone [https://github.com/your-username/event-connect.git](https://github.com/Vinaykumarp2005/Event-Connect.git)
+git clone [https://github.com/Vinaykumarp2005/event-connect.git](https://github.com/Vinaykumarp2005/Event-Connect.git)
 cd event-connect
 2. Install dependencies
 npm install
