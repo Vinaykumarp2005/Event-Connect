@@ -43,35 +43,40 @@ role:z.string()
 
 }
 authRouter.post('/student/signUp',validStudentDataSignup,async(req,res)=>{
-  console.log(req.body);
-const {username,password,email,phoneNumber,collegeName,department,year,role}=req.body;
-const hashedPassword=await bcrypt.hash(password,5);
-const Data=await new Student({
-  username:username,
-  password:hashedPassword,
-  email:email,
-  phoneNumber:phoneNumber,
-  collegeName:collegeName,
-  department:department,
-  year:year,
-  role:role
-}).save();
-const token=await new StudentToken({
-  userId:Data._id,
-  token:crypto.randomBytes(32).toString("hex"),
-}).save();
-const url=`${process.env.BASE_URL}/verifyPage/${Data.role}/${Data._id}/${token.token}`;
-await sendEmail(Data.email,"Verify Email",url);
-if(Data){
-  res.status(200).json({
-    message:"An Email sent to your please verify email",
-    payload:Data
-  })
-}else{
-  res.status(404).json({
-    message:"user not created"
-  })
-}
+  try {
+    console.log(req.body);
+    const {username,password,email,phoneNumber,collegeName,department,year,role}=req.body;
+    const hashedPassword=await bcrypt.hash(password,5);
+    const Data=await new Student({
+      username:username,
+      password:hashedPassword,
+      email:email,
+      phoneNumber:phoneNumber,
+      collegeName:collegeName,
+      department:department,
+      year:year,
+      role:role
+    }).save();
+    const token=await new StudentToken({
+      userId:Data._id,
+      token:crypto.randomBytes(32).toString("hex"),
+    }).save();
+    const url=`${process.env.BASE_URL}/verifyPage/${Data.role}/${Data._id}/${token.token}`;
+    await sendEmail(Data.email,"Verify Email",url);
+    if(Data){
+      res.status(200).json({
+        message:"An Email sent to your please verify email",
+        payload:Data
+      })
+    }else{
+      res.status(404).json({
+        message:"user not created"
+      })
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
 })
 const validUserData=(req,res,next)=>{
   const {email,password,role}=req.body;
@@ -123,52 +128,57 @@ authRouter.get('/student/:id/verifyStudent/:token',async(req,res)=>{
   }
 })
 authRouter.post('/student/signin',validUserData,async(req,res)=>{
- const {email,password}=req.body;
- const StudentResponse=await Student.findOne({
-  email:email
- })
- if(StudentResponse){
- const validPassword=await bcrypt.compare(password,StudentResponse.password);
- 
- if(validPassword){
-  if(!StudentResponse.verified){
-  let emailtoken=await StudentToken.findOne({userId:StudentResponse._id});
-  if(!emailtoken){
-   const token=await new StudentToken({
-  userId:StudentResponse._id,
-  token:crypto.randomBytes(32).toString("hex"),
-}).save();
-const url=`${process.env.BASE_URL}/verifyPage/${StudentResponse.role}/${StudentResponse._id}/${token.token}`;
-await sendEmail(StudentResponse.email,"Verify Email",url);
-
+  try {
+    const {email,password}=req.body;
+    const StudentResponse=await Student.findOne({
+     email:email
+    })
+    if(StudentResponse){
+    const validPassword=await bcrypt.compare(password,StudentResponse.password);
+    
+    if(validPassword){
+     if(!StudentResponse.verified){
+     let emailtoken=await StudentToken.findOne({userId:StudentResponse._id});
+     if(!emailtoken){
+      const token=await new StudentToken({
+     userId:StudentResponse._id,
+     token:crypto.randomBytes(32).toString("hex"),
+   }).save();
+   const url=`${process.env.BASE_URL}/verifyPage/${StudentResponse.role}/${StudentResponse._id}/${token.token}`;
+   await sendEmail(StudentResponse.email,"Verify Email",url);
+   
+     }
+     return res.status(400).send({
+       messages:'An email sent to your account please'
+     })
+    }
+     const secret=process.env.JWT_SECRET;
+     const token=jwt.sign({userId:StudentResponse._id},secret);
+     if(token){
+       res.status(200).json({
+         message:"sign in successfully",
+         token:token,
+         payload:StudentResponse
+       })
+     }else{
+       res.status(404).json({
+         message:'backend crashed'
+       })
+     }
+    }else{
+       res.status(411).json({
+         message:'Incorrect Password'
+       })
+    }
+    }else{
+       res.status(411).json({
+         message:'Invalid Details',
+       })
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: 'Something went wrong' });
   }
-  return res.status(400).send({
-    messages:'An email sent to your account please'
-  })
- }
-  const secret=process.env.JWT_SECRET;
-  const token=jwt.sign({userId:StudentResponse._id},secret);
-  if(token){
-    res.status(200).json({
-      message:"sign in successfully",
-      token:token,
-      payload:StudentResponse
-    })
-  }else{
-    res.status(404).json({
-      message:'backend crashed'
-    })
-  }
- }else{
-    res.status(411).json({
-      message:'Incorrect Password'
-    })
- }
- }else{
-    res.status(411).json({
-      message:'Invalid Details',
-    })
- }
 })
 const validOrganiserDataSignup=(req,res,next)=>{
 const {username,clubName,password,email,phoneNumber,collegeName,department,position,role,logo}=req.body;
@@ -255,89 +265,99 @@ authRouter.get('/organizer/:id/verifyOrganizer/:token',async(req,res)=>{
 })
 
 authRouter.post('/organizer/signUp',validOrganiserDataSignup,async(req,res)=>{
-const {username,clubName,password,email,phoneNumber,collegeName,department,position,role,logo}=req.body;
-const hashedPassword=await bcrypt.hash(password,5);
-
-
-const Data=await new Organizer({
-  username:username,
-  clubName:clubName,
-  password:hashedPassword,
-  email:email,
-  phoneNumber:phoneNumber,
-  collegeName:collegeName,
-  department:department,
-  position:position,
-  role:role,
-  logo:logo
-}).save();
-const token=await new OrganizerToken({
-  userId:Data._id,
-  token:crypto.randomBytes(32).toString("hex"),
-}).save();
-const url=`${process.env.BASE_URL}/verifyPage/${Data.role}/${Data._id}/${token.token}`;
-await sendOrganiserEmail(Data.email,"Verify Email",url);
-
-
-if(Data){
-  res.status(200).json({
-    message:"Email sent to your email id please verify forn 2 step authentication",
-    payload:Data
-  })
-}else{
-  res.status(404).json({
-    message:"user not created"
-  })
-}
+  try {
+    const {username,clubName,password,email,phoneNumber,collegeName,department,position,role,logo}=req.body;
+    const hashedPassword=await bcrypt.hash(password,5);
+    
+    
+    const Data=await new Organizer({
+      username:username,
+      clubName:clubName,
+      password:hashedPassword,
+      email:email,
+      phoneNumber:phoneNumber,
+      collegeName:collegeName,
+      department:department,
+      position:position,
+      role:role,
+      logo:logo
+    }).save();
+    const token=await new OrganizerToken({
+      userId:Data._id,
+      token:crypto.randomBytes(32).toString("hex"),
+    }).save();
+    const url=`${process.env.BASE_URL}/verifyPage/${Data.role}/${Data._id}/${token.token}`;
+    await sendOrganiserEmail(Data.email,"Verify Email",url);
+    
+    
+    if(Data){
+      res.status(200).json({
+        message:"Email sent to your email id please verify forn 2 step authentication",
+        payload:Data
+      })
+    }else{
+      res.status(404).json({
+        message:"user not created"
+      })
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
 })
 
 
 authRouter.post('/organizer/signin',validUserData,async(req,res)=>{
- const {email,password}=req.body;
- const OrganizerResponse=await Organizer.findOne({
-  email:email
- })
- if(OrganizerResponse){
- const validPassword=await bcrypt.compare(password,OrganizerResponse.password);
- if(validPassword){
-  if(!OrganizerResponse.verified){
-  let emailtoken=await OrganizerToken.findOne({userId:OrganizerResponse._id});
-  if(!emailtoken){
-   const token=await new OrganizerToken({
-  userId:OrganizerResponse._id,
-  token:crypto.randomBytes(32).toString("hex"),
-}).save();
-const url=`${process.env.BASE_URL}/verifyPage/${OrganizerResponse.role}/${OrganizerResponse._id}/${token.token}`;
-await sendOrganiserEmail(OrganizerResponse.email,"Verify Email",url);
-
+  try {
+    const {email,password}=req.body;
+    const OrganizerResponse=await Organizer.findOne({
+     email:email
+    })
+    if(OrganizerResponse){
+    const validPassword=await bcrypt.compare(password,OrganizerResponse.password);
+    if(validPassword){
+     if(!OrganizerResponse.verified){
+     let emailtoken=await OrganizerToken.findOne({userId:OrganizerResponse._id});
+     if(!emailtoken){
+      const token=await new OrganizerToken({
+     userId:OrganizerResponse._id,
+     token:crypto.randomBytes(32).toString("hex"),
+   }).save();
+   const url=`${process.env.BASE_URL}/verifyPage/${OrganizerResponse.role}/${OrganizerResponse._id}/${token.token}`;
+   await sendOrganiserEmail(OrganizerResponse.email,"Verify Email",url);
+   
+     }
+     return res.status(400).send({
+       messages:'An email sent to your account please'
+     })
+    }
+     const secret=process.env.JWT_SECRET;
+     const token=jwt.sign({userId:OrganizerResponse._id},secret,{expiresIn:"1h"});
+     if(token){
+       res.status(200).json({
+         message:"sign in successfully",
+         token:token,
+         payload:OrganizerResponse
+       })
+     }else{
+       res.status(404).json({
+         message:'backend crashed'
+       })
+     }
+    }else{
+       res.status(411).json({
+         message:'Incorrect Password'
+       })
+    }
+    }else{
+       res.status(411).json({
+         message:'Invalid Details',
+       })
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: 'Something went wrong' });
   }
-  return res.status(400).send({
-    messages:'An email sent to your account please'
-  })
- }
-  const secret=process.env.JWT_SECRET;
-  const token=jwt.sign({userId:OrganizerResponse._id},secret,{expiresIn:"1h"});
-  if(token){
-    res.status(200).json({
-      message:"sign in successfully",
-      token:token,
-      payload:OrganizerResponse
-    })
-  }else{
-    res.status(404).json({
-      message:'backend crashed'
-    })
-  }
- }else{
-    res.status(411).json({
-      message:'Incorrect Password'
-    })
- }
- }else{
-    res.status(411).json({
-      message:'Invalid Details',
-    })
- }
 })
 module.exports={
   authApp:authRouter

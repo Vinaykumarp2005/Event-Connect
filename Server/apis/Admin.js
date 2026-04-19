@@ -49,6 +49,7 @@ const validAdmin=async(req,res,next)=>{
 }
 
 adminApp.post("/signUp",validateAdminData,async(req,res)=>{
+    try {
         const {name,email,password}=req.body;
         const hashedPassword=await bcrypt.hash(password,5)
         const Data=await Admin.create({
@@ -66,8 +67,13 @@ adminApp.post("/signUp",validateAdminData,async(req,res)=>{
             message:"Admin not created"
         })
         }
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
 })
 adminApp.post("/signin",async(req,res)=>{
+    try {
         const {email,password}=req.body;
         const response= await Admin.findOne({
             email:email
@@ -100,7 +106,10 @@ adminApp.post("/signin",async(req,res)=>{
                 payload:response
             })
         }
-
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ message: 'Something went wrong' });
+    }
 })
 
 

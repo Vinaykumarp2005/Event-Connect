@@ -61,7 +61,7 @@ const isActive = (registrationEndDate, enrolled, maxLimit) => {
   return regEndDate >= today && enrolled < maxLimit;
 };
   return (
-    <div className="flex flex-wrap gap-4 p-4 bg-black overflow-visible">
+    <div className="flex flex-wrap gap-4 p-4 m-4 bg-black overflow-visible">
       {events.length === 0 ? (
         <div className="w-full text-center py-10">
           <p className="text-gray-400">Loading events...</p>

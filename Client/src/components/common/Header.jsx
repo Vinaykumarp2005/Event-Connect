@@ -1,22 +1,28 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useRecoilValue, useResetRecoilState } from 'recoil'
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useRecoilValue, useResetRecoilState } from 'recoil';
 import { userAtom } from '../UserAtom';
+import { sidebarOpenState } from '../atoms/sidebarAtom';
+
 function Header() {
-  const user=useRecoilValue(userAtom);
-  const navigate=useNavigate()
-  const resetUser=useResetRecoilState(userAtom);
-  function logout(){
+  const user = useRecoilValue(userAtom);
+  const navigate = useNavigate();
+  const resetUser = useResetRecoilState(userAtom);
+  const setSidebarOpen = useResetRecoilState(sidebarOpenState);
+
+  function logout() {
     resetUser();
+    setSidebarOpen(false); // Ensure sidebar is closed on logout
     localStorage.removeItem('token');
-    navigate('/')
+    navigate('/');
   }
-  const headerclass = `fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-3 sm:px-6 py-2 text-white ${
-  user.isLoggedIn ? 'border-b-2 border-[rgba(8,112,184,0.7)] bg-neutral-900' : ''
-}`;
+
+  const headerClass = `fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-3 sm:px-6 py-2 text-white ${
+    user.isLoggedIn ? 'border-b-2 border-[rgba(8,112,184,0.7)] bg-neutral-900' : ''
+  }`;
 
   return (
-    <div className={headerclass}>
+    <div className={headerClass}>
       <div className='py-1'>
         <Link to='/'>
           <h1 className='font-bold text-lg sm:text-xl'>Event Connect</h1>
@@ -24,27 +30,28 @@ function Header() {
       </div>
       <div>
         <ul className='flex items-center gap-2 sm:gap-4'>
-          {!user.isLoggedIn && 
+          {!user.isLoggedIn && (
             <li>
               <button className='rounded-md py-1 px-2 text-xs sm:text-sm border border-[rgba(8,_112,_184,_0.7)] hover:bg-neutral-800 transition-colors'>
                 <Link to='/signup'>Get Started</Link>
               </button>
             </li>
-          }
+          )}
           <li>
-            {user.isLoggedIn ? 
+            {user.isLoggedIn ? (
               <button onClick={logout} className='py-1 px-2 rounded-md text-xs sm:text-sm border border-[rgba(8,_112,_184,_0.7)] hover:bg-neutral-800 transition-colors'>
                 Log Out
-              </button> :
+              </button>
+            ) : (
               <button className='py-1 px-2 rounded-md text-xs sm:text-sm border border-[rgba(8,_112,_184,_0.7)] hover:bg-neutral-800 transition-colors'>
                 <Link to='/signin'>Sign In</Link>
               </button>
-            } 
+            )}
           </li>
         </ul>
       </div>
     </div>
-  )
+  );
 }
 
-export default Header
+export default Header;

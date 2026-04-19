@@ -29,11 +29,11 @@ function RootLayout() {
   }, [location.pathname, user, setSidebarOpen]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-black overflow-x-hidden">
+    <div className=" ">
       <Header/>
       <div className="flex-grow flex relative">
         <Sidebar />
-        <div className={`flex-grow transition-all duration-300 ${sidebarOpen ? 'md:ml-48' : 'md:ml-16'} pt-14 overflow-y-auto`}>
+        <div className={`flex-grow transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-16'} pt-14 overflow-y-auto`}>
           <main className="w-full px-2 sm:px-4 md:px-6 py-4">
             <Outlet/>
           </main>
