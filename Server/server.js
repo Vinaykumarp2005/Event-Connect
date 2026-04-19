@@ -16,7 +16,7 @@ mongoose.connect(dbUrl).then(()=>{
 }).catch((e)=>{
   console.log(e)
 })
-const port=process.env.port||4000;
+const port=process.env.PORT||4000;
 // require("dotenv").config(); 
 app.use('/auth',authApp);
 app.use('/event',eventApp);
