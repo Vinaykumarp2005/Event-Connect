@@ -14,7 +14,7 @@ function ClubEvents() {
   useEffect(() => {
     async function getEvents() {
       try {
-        const res = await axios.get(`http://localhost:3000/event/app/v1/events/details/${clubById}`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/event/app/v1/events/details/${clubById}`, {
           headers: {
             Authorization: localStorage.getItem('token'),
           },

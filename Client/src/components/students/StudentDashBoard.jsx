@@ -11,7 +11,7 @@ function StudentDashBoard() {
   useEffect(() => {
     async function getDetails() {
       try {
-        const res = await axios.get('http://localhost:3000/student/getdetails', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/student/getdetails`, {
           headers: {
             Authorization: localStorage.getItem('token')
           }
@@ -36,7 +36,7 @@ function StudentDashBoard() {
   const updateProfile = async (data) => {
     try {
       const res = await axios.put(
-        'http://localhost:3000/student/update/profiledetails',
+        `${import.meta.env.VITE_API_URL}/student/update/profiledetails`,
         data,
         {
           headers: {

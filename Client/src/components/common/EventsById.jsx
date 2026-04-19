@@ -96,7 +96,7 @@ const payload = {
       };
 
   try {
-    const res = await axios.post(`http://localhost:3000/event/app/v1/event/update/${eventById}`, payload, {
+    const res = await axios.post(`${import.meta.env.VITE_API_URL}/event/app/v1/event/update/${eventById}`, payload, {
       headers: {  'Authorization': localStorage.getItem('token') },
     });
 
@@ -148,7 +148,7 @@ const payload = {
      
     
 try {
-      const res = await axios.post('http://localhost:3000/event/app/v1/create', payload, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/event/app/v1/create`, payload, {
         headers: { 'Authorization':localStorage.getItem("token")},
       });
       if (res.status === 200) {
@@ -167,7 +167,7 @@ try {
     const [currentArticle,setCurrentArticle]=useState();
 useEffect(()=>{
    const fetchEvent=async ()=>{
-    const res=await axios.get(`http://localhost:3000/event/app/v1/events/${eventById}`,{
+    const res=await axios.get(`${import.meta.env.VITE_API_URL}/event/app/v1/events/${eventById}`,{
       headers:{
         Authorization:localStorage.getItem('token')
       }
@@ -187,7 +187,7 @@ useEffect(()=>{
 
   console.log(user.username);
   const handleAddComment = async (data) => {
-    const res=await axios.put(`http://localhost:3000/event/app/v1/update/student/${eventById}`,{
+    const res=await axios.put(`${import.meta.env.VITE_API_URL}/event/app/v1/update/student/${eventById}`,{
        content: data.newComment,
         owner: user._id,
         name: user.username,
@@ -227,7 +227,7 @@ useEffect(()=>{
 async function handleEnroll() {
   try {
     const res = await axios.put(
-      `http://localhost:3000/event/app/v1/update/student/${eventById}`,
+      `${import.meta.env.VITE_API_URL}/event/app/v1/update/student/${eventById}`,
       {
         enroll: true,
         name: user.username,
@@ -266,7 +266,7 @@ async function handleEditComment(data){
   console.log(data.newComment);
   alert(data.newComment)
 try{
-const res=await axios.put(`http://localhost:3000/event/app/v1/comment/update/${eventById}/${commentIdstore}`,{
+const res=await axios.put(`${import.meta.env.VITE_API_URL}/event/app/v1/comment/update/${eventById}/${commentIdstore}`,{
   text:data.newComment
 },{
   headers:{
@@ -286,7 +286,7 @@ if(res.status==200){
 }
         async function deleteComment(commentId){
               try{
-              const res=await axios.delete(`http://localhost:3000/event/app/v1/comment/delete/${eventById}/${commentId}`,{
+              const res=await axios.delete(`${import.meta.env.VITE_API_URL}/event/app/v1/comment/delete/${eventById}/${commentId}`,{
                 headers:{
                   Authorization:localStorage.getItem('token')
                 }
@@ -305,7 +305,7 @@ if(res.status==200){
         async function deleteArticle(){
       const confirmDelete = window.confirm("Are you sure you want to delete this article?");
   if (!confirmDelete) return;
-        const res=await axios.delete(`http://localhost:3000/event/app/v1/event/delete/${eventById}`,{
+        const res=await axios.delete(`${import.meta.env.VITE_API_URL}/event/app/v1/event/delete/${eventById}`,{
           headers:{
             Authorization:localStorage.getItem('token')
           }

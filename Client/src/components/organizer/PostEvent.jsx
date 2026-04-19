@@ -65,7 +65,7 @@ const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
         venueAddress: data.venueAddress,
       };
 
-      const res = await axios.post('http://localhost:3000/event/app/v1/create', payload, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/event/app/v1/create`, payload, {
         headers: {
           Authorization: localStorage.getItem('token'),
         },

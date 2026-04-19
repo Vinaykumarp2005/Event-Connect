@@ -9,7 +9,7 @@ function VerifyPage() {
     async function verifyUser(){
 try{      
    if(param.role==='student'){
-    const res=await axios.get(`http://localhost:3000/auth/student/${param.id}/verifyStudent/${param.token}`);
+    const res=await axios.get(`${import.meta.env.VITE_API_URL}/auth/student/${param.id}/verifyStudent/${param.token}`);
     if(res.status===200){
       alert(res.data.message);
               setTimeout(() => navigate('/signin'), 2000); // Auto-redirect after 2s
@@ -18,7 +18,7 @@ try{
       alert('invalid url')
     }
   }else if(param.role==='organizer'){
-    const res=await axios.get(`http://localhost:3000/auth/organizer/${param.id}/verifyOrganizer/${param.token}`);
+    const res=await axios.get(`${import.meta.env.VITE_API_URL}/auth/organizer/${param.id}/verifyOrganizer/${param.token}`);
     if(res.status===200){
       alert(res.data.message);
               setTimeout(() => navigate('/signin'), 2000); // Auto-redirect after 2s

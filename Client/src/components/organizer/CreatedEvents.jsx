@@ -13,7 +13,7 @@ function CreatedEvents() {
   useEffect(() => {
     async function getDetails() {
       try {
-        const res = await axios.get('http://localhost:3000/event/app/v1/organiser/events', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/event/app/v1/organiser/events`, {
           headers: {
             Authorization: localStorage.getItem('token'),
           },

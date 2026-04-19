@@ -18,7 +18,7 @@ function EventParticipants() {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        const res = await axios.get('http://localhost:3000/event/app/v1/organiser/events', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/event/app/v1/organiser/events`, {
           headers: {
             Authorization: token,
             'Content-Type': 'application/json'
@@ -42,7 +42,7 @@ function EventParticipants() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get(`http://localhost:3000/event/students/enroll/${eventId}`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/event/students/enroll/${eventId}`, {
         headers: {
           Authorization: token,
           'Content-Type': 'application/json'

@@ -13,7 +13,7 @@ function EnrolledEvents() {
   useEffect(() => {
     async function getEvents() {
       try {
-        const res = await axios.get('http://localhost:3000/student/enrolledEvents', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/student/enrolledEvents`, {
           headers: {
             Authorization: localStorage.getItem('token'),
           },

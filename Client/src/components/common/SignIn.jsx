@@ -15,11 +15,11 @@ export default function SignIn() {
     try {
       let res;
       if (data.role === 'student') {
-        res = await axios.post('http://localhost:3000/auth/student/signin', data);
+        res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/student/signin`, data);
       } else if (data.role === 'admin') {
-        res = await axios.post('http://localhost:3000/admin/signin', data);
+        res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/admin/signin`, data);
       } else {
-        res = await axios.post('http://localhost:3000/auth/organizer/signin', data);
+        res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/organizer/signin`, data);
       }
 
       if (res.status === 200) {

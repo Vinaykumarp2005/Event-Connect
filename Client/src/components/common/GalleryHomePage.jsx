@@ -13,7 +13,7 @@ function GalleryHomePage() {
   useEffect(()=>{
     async function getClubs(){
       try{
-      const res=await axios.get('http://localhost:3000/organiser/get/organiserDetails',{
+      const res=await axios.get(`${import.meta.env.VITE_API_URL}/organiser/get/organiserDetails`,{
         headers:{
           Authorization:localStorage.getItem('token')
         }

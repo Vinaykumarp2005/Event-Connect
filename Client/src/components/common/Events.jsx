@@ -22,7 +22,7 @@ function Events() {
           return;
         }
 
-        const res = await axios.get('http://localhost:3000/event/app/v1/events', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/event/app/v1/events`, {
           headers: {
             'Authorization': token,
             'Content-Type': 'application/json'
