@@ -1,6 +1,7 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'motion/react'
 import axios from 'axios'
 import { userAtom } from '../UserAtom'
 import { useSetRecoilState } from 'recoil'
@@ -9,7 +10,7 @@ import { toast } from 'react-toastify';
 export default function SignIn() {
   const navigate = useNavigate();
   const setUser = useSetRecoilState(userAtom);
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm();
 
   async function handleFormSubmit(data) {
     try {
@@ -50,35 +51,40 @@ export default function SignIn() {
     }
   }
 
-  const borderColor = 'rgba(8, 112, 184, 0.7)';
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white">
-      <div
-        className="p-6 m-3 rounded-2xl shadow-lg w-full max-w-lg mt-20"
-        style={{ border: `1px solid ${borderColor}`, backgroundColor: 'bg-gray-800' }}
+    <div className="flex min-h-[calc(100svh-3.5rem)] items-center justify-center px-1 py-10 text-white">
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="glass-strong w-full max-w-md rounded-[28px] p-6 sm:p-8"
       >
-        <form onSubmit={handleSubmit(handleFormSubmit)}>
+        <div className="mb-8 text-center">
+          <h1 className="text-gradient text-3xl font-bold tracking-tight">Welcome back</h1>
+          <p className="mt-2 text-sm text-neutral-400">Sign in to continue to Event Connect</p>
+        </div>
 
-          <div className="mb-4">
-            <label className="block mb-1" htmlFor="email">Email</label>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
+          <div>
+            <label className="field-label" htmlFor="email">Email</label>
             <input
               type="email"
               id="email"
+              placeholder="you@college.edu"
               {...register('email', { required: true })}
-              className="w-full px-4 py-2 rounded-md bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
+              className="field"
             />
             {errors.email?.type === 'required' && (
-              <p className="text-red-600 mt-1">*Email is required</p>
+              <p className="field-error">Email is required</p>
             )}
           </div>
 
-          <div className="mb-4">
-            <label className="block mb-1" htmlFor="password">Password</label>
+          <div>
+            <label className="field-label" htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
+              placeholder="••••••••"
               {...register('password', {
                 required: 'Password is required',
                 pattern: {
@@ -90,39 +96,39 @@ export default function SignIn() {
                   message: "Password must be at least 8 characters"
                 }
               })}
-              className="w-full px-4 py-2 rounded-md bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
+              className="field"
             />
             {errors.password && (
-              <p className="text-red-600 mt-1">*{errors.password.message}</p>
+              <p className="field-error">{errors.password.message}</p>
             )}
           </div>
 
-          <div className="mb-4">
-            <label className="block mb-1" htmlFor="role">Select Role</label>
+          <div>
+            <label className="field-label" htmlFor="role">Sign in as</label>
             <select
               id="role"
               {...register('role', { required: true })}
-              className="w-full px-4 py-2 rounded-md bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
+              className="field"
             >
-              <option value="student" className="bg-black text-white">student</option>
-              <option value="organizer" className="bg-black text-white">organizer</option>
-              <option value="admin" className="bg-black text-white">admin</option>
+              <option value="student">Student</option>
+              <option value="organizer">Organizer</option>
+              <option value="admin">Admin</option>
             </select>
             {errors.role?.type === 'required' && (
-              <p className="text-red-600 mt-1">*Role is required</p>
+              <p className="field-error">Role is required</p>
             )}
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-neutral-200 hover:bg-white text-black py-2 px-4 rounded-md transition-colors duration-300"
-          >
-            Sign In
+          <button type="submit" disabled={isSubmitting} className="btn-primary w-full py-3">
+            {isSubmitting ? 'Signing in…' : 'Sign In'}
           </button>
         </form>
-      </div>
+
+        <p className="mt-6 text-center text-sm text-neutral-400">
+          New here?{' '}
+          <Link to="/signup" className="font-medium text-white underline-offset-4 hover:underline">Create an account</Link>
+        </p>
+      </motion.div>
     </div>
   )
 }

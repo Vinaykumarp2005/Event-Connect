@@ -1,28 +1,62 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { IoPricetags } from 'react-icons/io5';
-import { BsCalendarDate } from 'react-icons/bs';
-import { IoMdTime } from 'react-icons/io';
 import {useForm} from 'react-hook-form'
 import {useRecoilValue} from 'recoil'
 import axios from 'axios';
+import { AnimatePresence, motion } from 'motion/react';
+import {
+  IconCalendarEvent,
+  IconCertificate,
+  IconChevronDown,
+  IconClock,
+  IconExternalLink,
+  IconHourglass,
+  IconMapPin,
+  IconPencil,
+  IconPlus,
+  IconSend,
+  IconTag,
+  IconTrash,
+  IconTrophy,
+} from '@tabler/icons-react';
 import {userAtom} from '../UserAtom'
-import { MdDelete } from "react-icons/md";
 import { useParams } from 'react-router-dom';
-import { MdModeEditOutline } from "react-icons/md";
+import { Page } from '../ui/Page';
 
 function AccordionItem({ question, answer, isExpanded, onToggle }) {
   return (
-    <div className="rounded-xl bg-gray-800 overflow-hidden border border-gray-700">
-      <div className="flex justify-between items-center p-4 cursor-pointer text-white" onClick={onToggle}>
-        <div className="font-medium">{question}</div>
-        <i className={`bx bx-chevron-right text-white transition-transform duration-300 ${isExpanded ? "rotate-90" : ""}`}></i>
-      </div>
-      {isExpanded && (
-        <div className="px-4 pb-4 text-gray-300 border-t border-gray-700">
-          {answer}
-        </div>
-      )}
+    <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03]">
+      <button type="button" className="flex w-full items-center justify-between gap-3 p-4 text-left text-white" onClick={onToggle}>
+        <span className="font-medium">{question}</span>
+        <motion.span animate={{ rotate: isExpanded ? 180 : 0 }} transition={{ duration: 0.25 }} className="shrink-0 text-neutral-400">
+          <IconChevronDown size={18} />
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="border-t border-white/[0.06] px-4 py-4 text-sm text-neutral-400">{answer}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+const longDate = (d) => new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+// Small glass panel for the details sidebar
+function InfoPanel({ title, children }) {
+  return (
+    <div className="glass rounded-3xl p-5">
+      <h3 className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">{title}</h3>
+      {children}
     </div>
   );
 }
@@ -317,157 +351,162 @@ if(res.status==200){
         }
         if (!currentArticle) {
           return (
-            <div className="flex justify-center items-center min-h-screen bg-black">
-              <div className="animate-pulse flex flex-col items-center">
-                <div className="h-12 w-48 bg-gray-800 rounded mb-4"></div>
-                <div className="h-64 w-full max-w-3xl bg-gray-800 rounded"></div>
-              </div>
+            <div className="mx-auto w-full max-w-6xl animate-pulse space-y-5">
+              <div className="h-64 w-full rounded-[28px] bg-white/[0.05] sm:h-96"></div>
+              <div className="h-10 w-2/3 rounded-xl bg-white/[0.05]"></div>
+              <div className="h-40 w-full rounded-3xl bg-white/[0.05]"></div>
             </div>
           );
         }
 
+  const heroImage = Array.isArray(currentArticle.eventImage) ? currentArticle.eventImage[0] : currentArticle.eventImage;
+  const fillPct = currentArticle.maxLimit ? Math.min((currentArticle.enrolled / currentArticle.maxLimit) * 100, 100) : 0;
 
   return (
-   <div className="bg-black text-white"> 
+   <Page className="max-w-6xl">
     {!edit ? (
-      <div className="p-4 max-w-6xl mx-auto mt-6 lg:mt-12">
-          {currentArticle.organiser===user._id&& <div className='flex justify-end gap-2 mb-4'>
-         <button 
-                onClick={() => setEdit(true)} 
-                className='rounded-md px-3 py-1.5 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white transition'
-              >
-                Edit <MdModeEditOutline className='text-lg'/>
-              </button>
-              <button 
-                className='rounded-md py-1.5 px-3 flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white transition' 
-                onClick={deleteArticle}
-              >
-                Delete <MdDelete />
-              </button>
-       </div>}
-      
-          <div className="mb-6 rounded-xl overflow-hidden shadow-lg border border-gray-800">
-            <img
-              src={currentArticle.eventImage}
-              alt={currentArticle.eventName}
-              className="w-full h-64 sm:h-80 md:h-96 object-cover"
-            />
-          </div>
-          
-          <div className="flex flex-col lg:flex-row gap-6">
-            <div className="flex-1 space-y-6">
-              <div className="flex flex-wrap gap-2">
-                <span className="text-xs bg-blue-900 text-blue-200 rounded-full px-3 py-1 flex items-center">
-                  <IoPricetags className="mr-1" /> {currentArticle.category}
+      <div>
+          {/* Hero */}
+          <div className="relative mb-6 overflow-hidden rounded-[28px] border border-white/10">
+            {heroImage ? (
+              <motion.img
+                initial={{ scale: 1.08 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                src={heroImage}
+                alt={currentArticle.eventName}
+                className="h-64 w-full object-cover sm:h-80 md:h-[26rem]"
+              />
+            ) : (
+              <div className="h-64 w-full bg-gradient-to-br from-neutral-800 to-neutral-950 sm:h-80" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between sm:p-8">
+              <div>
+                <span className="mb-3 inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-xs font-semibold capitalize text-black">
+                  <IconTag size={13} stroke={2} /> {currentArticle.category}
                 </span>
+                <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">{currentArticle.eventName}</h1>
+              </div>
+              {currentArticle.organiser===user._id&& <div className='flex shrink-0 gap-2'>
+                <button onClick={() => setEdit(true)} className='btn-primary'>
+                  <IconPencil size={16} /> Edit
+                </button>
+                <button className='btn-ghost backdrop-blur-md' onClick={deleteArticle}>
+                  <IconTrash size={16} /> Delete
+                </button>
+              </div>}
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-5 lg:flex-row">
+            <div className="flex-1 space-y-5">
+              <div className="glass rounded-3xl p-6">
+                <h2 className="mb-3 text-lg font-semibold text-white">About</h2>
+                <p className="whitespace-pre-line leading-relaxed text-neutral-300">{currentArticle.description}</p>
               </div>
 
-              <h1 className="text-3xl font-bold text-white">{currentArticle.eventName}</h1>
+              {currentArticle.keyTakeAways && (
+                <div className="glass rounded-3xl p-6">
+                  <h2 className="mb-3 text-lg font-semibold text-white">Key Takeaways</h2>
+                  <p className="whitespace-pre-line leading-relaxed text-neutral-300">{currentArticle.keyTakeAways}</p>
+                </div>
+              )}
 
-              <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-                <h2 className="text-xl font-semibold mb-2 text-white">About</h2>
-                <p className="text-gray-300">{currentArticle.description}</p>
-              </div>
-              
-              <div className="bg-gray-900 rounded-lg p-4 space-y-2 border border-gray-800">
-                <p className="flex items-center gap-2 text-gray-300">
-                  <BsCalendarDate className="text-blue-400" /> 
-                  <b className="text-white">Registration End Date:</b> {new Date(currentArticle.registrationEndDate).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
-                <p className="flex items-center gap-2 text-gray-300">
-                  <IoMdTime className="text-blue-400" /> 
-                  <b className="text-white">End Time:</b> {currentArticle.endTime}
-                </p>
-              </div>
-              
-
-              <div className="bg-gray-900 rounded-lg p-4 border border-gray-800">
-                <h2 className="text-xl font-semibold mb-2 break-words text-white">Venue</h2>
-                <p className="text-gray-300 max-w-96 break-words">{currentArticle.venue || 'N/A'}</p>
-                <div className="mt-3 rounded-lg overflow-hidden">
+              <div className="glass rounded-3xl p-6">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                  <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+                    <IconMapPin size={18} /> {currentArticle.venue || 'N/A'}
+                  </h2>
+                  {currentArticle.venueAddress && (
+                    <a href={currentArticle.venueAddress} target="_blank" rel="noreferrer" className="btn-ghost px-4 py-1.5 text-xs">
+                      Open in Maps <IconExternalLink size={14} />
+                    </a>
+                  )}
+                </div>
+                <div className="overflow-hidden rounded-2xl border border-white/[0.06]">
                   {currentArticle.venueAddress ? (
-                    <iframe 
-                      src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin" 
-                      width="100%" 
-                      height="300" 
-                      style={{border:0}} 
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m16!1m12!1m3!1d25418.28499136932!2d78.56582081300171!3d17.421640627684678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!2m1!1svnr%20map!5e1!3m2!1sen!2sin!4v1752216320713!5m2!1sen!2sin"
+                      width="100%"
+                      height="300"
+                      style={{border:0}}
+                      className="[filter:grayscale(1)] dark:[filter:grayscale(1)_invert(0.92)_contrast(0.9)]"
                       loading="lazy"
-                      className="rounded-lg"
                     ></iframe>
                   ) : (
-                    <p className="text-gray-500">Venue location not available.</p>
+                    <p className="p-4 text-neutral-500">Venue location not available.</p>
                   )}
                 </div>
               </div>
             </div>
-            
-            <div className="lg:w-1/3 space-y-4">
-              <div className="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                <h3 className="font-semibold text-lg mb-3 text-white border-b border-gray-700 pb-2">Date & Time</h3>
-                <div className="space-y-2">
-                  <p className="flex items-center gap-2 text-gray-300">
-                    <BsCalendarDate className="text-blue-400" /> 
-                    <b className="text-white">Start:</b> {new Date(currentArticle.startDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
-                  <p className="flex items-center gap-2 text-gray-300">
-                    <IoMdTime className="text-blue-400" /> 
-                    <b className="text-white">End:</b> {new Date(currentArticle.endDate).toLocaleDateString('en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
+
+            <div className="space-y-4 lg:w-1/3">
+              <InfoPanel title="Date & Time">
+                <div className="space-y-2 text-sm text-neutral-300">
+                  <p className="flex items-center gap-2"><IconCalendarEvent size={16} className="text-neutral-500" /> {longDate(currentArticle.startDate)} – {longDate(currentArticle.endDate)}</p>
+                  <p className="flex items-center gap-2"><IconClock size={16} className="text-neutral-500" /> Ends at {currentArticle.endTime}</p>
+                  <p className="flex items-center gap-2"><IconHourglass size={16} className="text-neutral-500" /> Register by {longDate(currentArticle.registrationEndDate)}</p>
                 </div>
+              </InfoPanel>
+
+              <div className="grid grid-cols-2 gap-4">
+                <InfoPanel title="Cost">
+                  <p className="text-2xl font-bold text-white">₹{currentArticle.registrationFee || 0}</p>
+                </InfoPanel>
+                <InfoPanel title="Rewards">
+                  <p className="flex items-center gap-1.5 text-2xl font-bold text-white"><IconTrophy size={20} /> {currentArticle.rewardPoints || 0}</p>
+                </InfoPanel>
               </div>
 
-              <div className="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                <h3 className="font-semibold text-lg mb-3 text-white border-b border-gray-700 pb-2">Cost</h3>
-                <p className="text-2xl font-bold text-white">₹{currentArticle.registrationFee || 0}</p>
-              </div>
-
-              <div className="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                <h3 className="font-semibold text-lg mb-3 text-white border-b border-gray-700 pb-2">Availability</h3>
-                <div className="w-full bg-gray-700 h-3 rounded-full mt-2">
-                  <div
-                    className="bg-blue-600 h-3 rounded-full"
-                    style={{ width: `${(currentArticle.enrolled / currentArticle.maxLimit) * 100}%` }}
-                  ></div>
+              <InfoPanel title="Availability">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${fillPct}%` }}
+                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+                    className="h-full rounded-full bg-white"
+                  />
                 </div>
-                <p className="mt-2 text-sm text-gray-300">{currentArticle.enrolled}/{currentArticle.maxLimit} spots filled</p>
-              </div>
+                <p className="mt-2 text-sm text-neutral-400">{currentArticle.enrolled}/{currentArticle.maxLimit} spots filled</p>
+              </InfoPanel>
 
-              <div className="bg-gray-900 rounded-lg p-4 shadow-lg border border-gray-800">
-                <h3 className="font-semibold text-lg mb-3 text-white border-b border-gray-700 pb-2">Reward Points</h3>
-                <p className="text-2xl font-bold text-blue-400">{currentArticle.rewardPoints || 0} points</p>
-              </div>
+              {currentArticle.sampleCertificate && (
+                <InfoPanel title="Sample Certificate">
+                  <a href={currentArticle.sampleCertificate} target="_blank" rel="noreferrer" className="group block overflow-hidden rounded-2xl border border-white/[0.06]">
+                    <img src={currentArticle.sampleCertificate} alt="Sample certificate" className="h-36 w-full object-cover transition duration-500 group-hover:scale-105" />
+                  </a>
+                  <p className="mt-2 flex items-center gap-1.5 text-xs text-neutral-500"><IconCertificate size={14} /> Awarded to participants</p>
+                </InfoPanel>
+              )}
 
               {user._id !== currentArticle.organiser && (user.role !== 'admin' && user.role !== 'organizer') && (
-                <button
+                <motion.button
+                  whileHover={!isEnrolled ? { scale: 1.02 } : undefined}
+                  whileTap={!isEnrolled ? { scale: 0.97 } : undefined}
                   onClick={handleEnroll}
                   disabled={isEnrolled}
-                  className={`w-full px-4 py-3 rounded-lg text-white font-medium transition ${
-                    isEnrolled 
-                      ? "bg-gray-700 cursor-not-allowed" 
-                      : "bg-blue-600 hover:bg-blue-700"
+                  className={`w-full rounded-full px-4 py-3.5 font-semibold transition ${
+                    isEnrolled
+                      ? "cursor-not-allowed border border-white/15 bg-white/[0.04] text-neutral-400"
+                      : "bg-white text-black shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:bg-neutral-200"
                   }`}
                 >
                   {isEnrolled ? "Already Enrolled" : "Enroll Now"}
-                </button>
+                </motion.button>
+              )}
+
+              {currentArticle.registrationForm && (
+                <a href={currentArticle.registrationForm} target="_blank" rel="noreferrer" className="btn-ghost w-full py-3">
+                  Registration Form <IconExternalLink size={16} />
+                </a>
               )}
             </div>
           </div>
 
-          <div className="mt-8 rounded-lg p-6 ">
-            <h2 className="text-xl font-semibold mb-4  text-white">Frequently Asked Questions </h2>
-            <div className=" space-y-4">
+          <div className="glass mt-5 rounded-3xl p-6">
+            <h2 className="mb-4 text-lg font-semibold text-white">Frequently Asked Questions</h2>
+            <div className="space-y-3">
               {currentArticle.faqs && currentArticle.faqs.length > 0 ? (
                 currentArticle.faqs.map((faq, index) => (
                   <AccordionItem
@@ -479,40 +518,50 @@ if(res.status==200){
                   />
                 ))
               ) : (
-                <p className="text-gray-400 text-center py-4">No FAQs available.</p>
+                <p className="py-4 text-center text-neutral-500">No FAQs available.</p>
               )}
             </div>
           </div>
 
-          <div className="mt-8 rounded-lg p-6 ">
-            <h2 className="text-xl font-semibold mb-4 text-white">Comments</h2>
+          <div className="glass mt-5 rounded-3xl p-6">
+            <h2 className="mb-4 text-lg font-semibold text-white">Comments <span className="text-neutral-500">· {comments.length}</span></h2>
             {comments.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
+                <AnimatePresence initial={false}>
                 {comments.map((comment, index) => (
-                  <div key={index} className="rounded-lg bg-gray-800 border border-gray-700">
+                  <motion.div
+                    key={comment._id || index}
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="rounded-2xl border border-white/[0.08] bg-white/[0.03]"
+                  >
                     {commentIdstore !== comment._id ? (
                       <div className="p-4">
-                        <div className="flex gap-3 items-start">
-                          <div className="w-10 h-10 bg-blue-600 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-lg uppercase">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-lg font-bold uppercase text-black">
                             {comment.name?.charAt(0)}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-white">{comment.name}</p>
-                            <p className="text-gray-300 break-words">{comment.content}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold capitalize text-white">{comment.name}</p>
+                            <p className="break-words text-sm text-neutral-300">{comment.content}</p>
                           </div>
                           {user._id === comment.owner && (
-                            <div className="flex space-x-2">
-                              <button 
-                                onClick={() => deleteComment(comment._id)} 
-                                className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded-full transition"
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => handleCommenteditState(comment._id, comment.content)}
+                                aria-label="Edit comment"
+                                className="rounded-full p-2 text-neutral-400 transition hover:bg-white/10 hover:text-white"
                               >
-                                <MdDelete className="text-red-500 text-xl" />
+                                <IconPencil size={16} />
                               </button>
-                              <button 
-                                onClick={() => handleCommenteditState(comment._id, comment.content)} 
-                                className="p-1.5 bg-gray-700 hover:bg-gray-600 rounded-full transition"
+                              <button
+                                onClick={() => deleteComment(comment._id)}
+                                aria-label="Delete comment"
+                                className="rounded-full p-2 text-neutral-400 transition hover:bg-white/10 hover:text-white"
                               >
-                                <MdModeEditOutline className="text-blue-400 text-xl" />
+                                <IconTrash size={16} />
                               </button>
                             </div>
                           )}
@@ -522,20 +571,17 @@ if(res.status==200){
                       <form
                         key={commentIdstore}
                         onSubmit={handleSubmit(handleEditComment)}
-                        className="p-4 space-y-3"
+                        className="space-y-3 p-4"
                       >
                         <input
                           type="text"
                           placeholder="Edit your comment..."
                           {...register('newComment', { required: true })}
-                          className="w-full bg-gray-700 border border-gray-600 px-4 py-2 rounded-lg text-white"
+                          className="field"
                           onChange={(e) => setValue("newComment", e.target.value)}
                         />
                         <div className="flex gap-2">
-                          <button 
-                            type="submit" 
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-                          >
+                          <button type="submit" className="btn-primary px-4 py-2">
                             Save Comment
                           </button>
                           <button
@@ -544,85 +590,65 @@ if(res.status==200){
                               setCommentIdstore(null);
                               setCommentEdit(false);
                             }}
-                            className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition"
+                            className="btn-ghost px-4 py-2"
                           >
                             Cancel
                           </button>
                         </div>
                       </form>
                     )}
-                  </div>
+                  </motion.div>
                 ))}
+                </AnimatePresence>
               </div>
             ) : (
-              <p className="text-gray-400 py-4">No comments yet. Be the first to comment!</p>
+              <p className="py-4 text-neutral-500">No comments yet. Be the first to comment!</p>
             )}
 
             {user._id !== currentArticle.organiser && (
               <form
-                onSubmit={handleSubmit(handleAddComment)} 
-                className="mt-6 space-y-3"
+                onSubmit={handleSubmit(handleAddComment)}
+                className="mt-5 flex gap-2"
               >
                 <input
                   type="text"
                   placeholder="Write a comment..."
                   {...register('newComment', { required: true })}
-                  className="w-full bg-gray-800 border border-gray-700 px-4 py-3 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  className="field rounded-full px-5"
                 />
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
-                >
-                  Add Comment
+                <button type="submit" aria-label="Add comment" className="btn-primary shrink-0 px-4">
+                  <IconSend size={16} /> <span className="hidden sm:inline">Post</span>
                 </button>
               </form>
             )}
           </div>
         </div>
       ) : (
-        // Update form styling
-        <div className='p-6 bg-black text-white max-w-4xl mx-auto'>
-          <h1 className="text-2xl font-bold mb-6 text-white">Update Event</h1>
+        <div className='mx-auto max-w-4xl'>
+          <h1 className="text-gradient mb-6 text-2xl font-bold tracking-tight sm:text-3xl">Update Event</h1>
 
-          <form onSubmit={handleSubmit(handleUpdateSubmit)} className="space-y-5">
-            {/* Form fields with improved styling */}
-            <div>
-              <label className="block text-gray-300 mb-2">Event Name:</label>
-              <input 
-                type="text" 
-                {...register('eventName', { required: true, minLength: 3, maxLength: 30 })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.eventName && <p className="text-red-500 mt-1">* Event Name is required (3-30 characters)</p>}
+          <form onSubmit={handleSubmit(handleUpdateSubmit)} className="glass grid grid-cols-1 gap-5 rounded-[28px] p-5 sm:grid-cols-2 sm:p-8">
+            <div className="sm:col-span-2">
+              <label className="field-label">Event Name</label>
+              <input type="text" {...register('eventName', { required: true, minLength: 3, maxLength: 30 })} className="field" />
+              {errors.eventName && <p className="field-error">Event Name is required (3-30 characters)</p>}
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="field-label">Description</label>
+              <textarea placeholder="Describe your event" {...register('description', { required: true })} className="field" rows="4"></textarea>
+              {errors.description && <p className="field-error">Description is required</p>}
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-2">Description:</label>
-              <textarea 
-                placeholder="Describe your event" 
-                {...register('description', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-                rows="4"
-              ></textarea>
-              {errors.description && <p className="text-red-500 mt-1">* Description is required</p>}
+              <label className="field-label">Max Limit</label>
+              <input type="number" {...register('maxLimit', { required: true })} className="field" />
+              {errors.maxLimit && <p className="field-error">Max Limit is required</p>}
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-2">Max Limit:</label>
-              <input 
-                type="number" 
-                {...register('maxLimit', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.maxLimit && <p className="text-red-500 mt-1">* Max Limit is required</p>}
-            </div>
-
-            <div>
-              <label className="block text-gray-300 mb-2">Category:</label>
-              <select 
-                {...register('category', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white"
-              >
+              <label className="field-label">Category</label>
+              <select {...register('category', { required: true })} className="field">
                 <option value="">-- Select --</option>
                 <option value="hackathon">Hackathon</option>
                 <option value="codingcontest">Coding Contest</option>
@@ -630,186 +656,122 @@ if(res.status==200){
                 <option value="seminar">Seminar</option>
                 <option value="bootcamp">Bootcamp</option>
               </select>
-              {errors.category && <p className="text-red-500 mt-1">* Category is required</p>}
+              {errors.category && <p className="field-error">Category is required</p>}
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-2">Start Date:</label>
-              <input 
-                type="date" 
-                {...register('startDate', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.startDate && <p className="text-red-500 mt-1">* Start Date is required</p>}
+              <label className="field-label">Start Date</label>
+              <input type="date" {...register('startDate', { required: true })} className="field [color-scheme:dark]" />
+              {errors.startDate && <p className="field-error">Start Date is required</p>}
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-2">End Date:</label>
-              <input 
-                type="date" 
-                {...register('endDate', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.endDate && <p className="text-red-500 mt-1">* End Date is required</p>}
+              <label className="field-label">End Date</label>
+              <input type="date" {...register('endDate', { required: true })} className="field [color-scheme:dark]" />
+              {errors.endDate && <p className="field-error">End Date is required</p>}
             </div>
 
             <div>
-  <label className="block text-gray-300 mb-2">Event Image:</label>
-  <div className="flex items-center gap-4">
-    <input type="file" {...register('eventImage')} accept=".pdf,.jpg,.jpeg,.png" className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white" />
-    {currentArticle?.eventImage && (
-      <img src={currentArticle.eventImage} alt="Event" className="h-20 w-20 object-cover rounded" />
-    )}
-  </div>
-</div>
-
-
-            <div>
-  <label className="block text-gray-300 mb-2">Sample Certificate:</label>
-  <div className="flex items-center gap-4">
-    <input type="file" {...register('sampleCertificate')} accept=".pdf,.jpg,.jpeg,.png" className="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white" />
-    {currentArticle?.sampleCertificate && (
-      <img src={currentArticle.sampleCertificate} alt="Certificate" className="h-20 w-20 object-cover rounded" />
-    )}
-  </div>
-</div>
-
-            <div>
-              <label className="block text-gray-300 mb-2">Venue:</label>
-              <input 
-                type="text" 
-                {...register('venue', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.venue && <p className="text-red-500 mt-1">* Venue is required</p>}
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Venue Address (Link) :</label>
-              <input 
-                type="text" 
-                {...register('venueAddress', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-                placeholder='paste google maps address of your college'
-              />
-              {errors.venueAddress && <p className="text-red-500 mt-1">* Venue Address is required</p>}
+              <label className="field-label">Event Image</label>
+              <div className="flex items-center gap-3">
+                <input type="file" {...register('eventImage')} accept=".pdf,.jpg,.jpeg,.png" className="field" />
+                {heroImage && (
+                  <img src={heroImage} alt="Event" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                )}
+              </div>
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-2">Registration Fee:</label>
-              <input 
-                type="number" 
-                {...register('registrationFee', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.registrationFee && <p className="text-red-500 mt-1">* Registration Fee is required</p>}
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Key Takeaways:</label>
-              <textarea 
-                placeholder="Describe Key takeaways" 
-                {...register('keyTakeAways', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-                rows="10"
-              ></textarea>
-              {errors.keyTakeAways && <p className="text-red-500 mt-1">* Key Takeaways is required</p>}
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Reward Points:</label>
-              <input 
-                type="number" 
-                {...register('rewardPoints', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.rewardPoints && <p className="text-red-500 mt-1">* Reward Points is required</p>}
+              <label className="field-label">Sample Certificate</label>
+              <div className="flex items-center gap-3">
+                <input type="file" {...register('sampleCertificate')} accept=".pdf,.jpg,.jpeg,.png" className="field" />
+                {currentArticle?.sampleCertificate && (
+                  <img src={currentArticle.sampleCertificate} alt="Certificate" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+                )}
+              </div>
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-2">Registration Form (Link):</label>
-              <input 
-                type="text" 
-                {...register('registrationForm', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.registrationForm && <p className="text-red-500 mt-1">* Registration Form link is required</p>}
+              <label className="field-label">Venue</label>
+              <input type="text" {...register('venue', { required: true })} className="field" />
+              {errors.venue && <p className="field-error">Venue is required</p>}
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-2">Registration End Date:</label>
-              <input 
-                type="date" 
-                {...register('registrationEndDate', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.registrationEndDate && <p className="text-red-500 mt-1">* Registration End Date is required</p>}
+              <label className="field-label">Venue Address (Link)</label>
+              <input type="text" {...register('venueAddress', { required: true })} className="field" placeholder='paste google maps address of your college' />
+              {errors.venueAddress && <p className="field-error">Venue Address is required</p>}
             </div>
 
             <div>
-              <label className="block text-gray-300 mb-2">End Time:</label>
-              <input 
-                type="time" 
-                {...register('endTime', { required: true })} 
-                className="w-full bg-gray-800 border border-gray-700 px-4 py-2 rounded-lg text-white" 
-              />
-              {errors.endTime && <p className="text-red-500 mt-1">* End Time is required</p>}
+              <label className="field-label">Registration Fee</label>
+              <input type="number" {...register('registrationFee', { required: true })} className="field" />
+              {errors.registrationFee && <p className="field-error">Registration Fee is required</p>}
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-white">FAQs</h3>
-              {faqs.map((faq, index) => (
-                <div key={index} className="flex flex-col gap-3 mb-4 p-4 bg-gray-800 rounded-lg border border-gray-700">
-                  <input 
-                    type="text" 
-                    placeholder="Question" 
-                    value={faq.question} 
-                    onChange={(e) => handleFaqChange(index, 'question', e.target.value)} 
-                    className="w-full bg-gray-700 border border-gray-600 px-4 py-2 rounded-lg text-white" 
-                  />
-                  <input 
-                    type="text" 
-                    placeholder="Answer" 
-                    value={faq.answer} 
-                    onChange={(e) => handleFaqChange(index, 'answer', e.target.value)} 
-                    className="w-full bg-gray-700 border border-gray-600 px-4 py-2 rounded-lg text-white" 
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => removeFaq(index)} 
-                    className="self-end px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
-                  >
-                    Remove FAQ
-                  </button>
-                </div>
-              ))}
-              <button 
-                type="button" 
-                onClick={addFaq} 
-                className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center"
-              >
-                <span className="mr-1">+</span> Add FAQ
+              <label className="field-label">Reward Points</label>
+              <input type="number" {...register('rewardPoints', { required: true })} className="field" />
+              {errors.rewardPoints && <p className="field-error">Reward Points is required</p>}
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="field-label">Key Takeaways</label>
+              <textarea placeholder="Describe Key takeaways" {...register('keyTakeAways', { required: true })} className="field" rows="6"></textarea>
+              {errors.keyTakeAways && <p className="field-error">Key Takeaways is required</p>}
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="field-label">Registration Form (Link)</label>
+              <input type="text" {...register('registrationForm', { required: true })} className="field" />
+              {errors.registrationForm && <p className="field-error">Registration Form link is required</p>}
+            </div>
+
+            <div>
+              <label className="field-label">Registration End Date</label>
+              <input type="date" {...register('registrationEndDate', { required: true })} className="field [color-scheme:dark]" />
+              {errors.registrationEndDate && <p className="field-error">Registration End Date is required</p>}
+            </div>
+
+            <div>
+              <label className="field-label">End Time</label>
+              <input type="time" {...register('endTime', { required: true })} className="field [color-scheme:dark]" />
+              {errors.endTime && <p className="field-error">End Time is required</p>}
+            </div>
+
+            <div className="sm:col-span-2">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-neutral-300">FAQs</h3>
+                <button type="button" onClick={addFaq} className="btn-ghost px-4 py-1.5 text-xs">
+                  <IconPlus size={14} /> Add FAQ
+                </button>
+              </div>
+              <div className="space-y-3">
+                {faqs.map((faq, index) => (
+                  <div key={index} className="flex flex-col gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 sm:flex-row">
+                    <input type="text" placeholder="Question" value={faq.question} onChange={(e) => handleFaqChange(index, 'question', e.target.value)} className="field" />
+                    <input type="text" placeholder="Answer" value={faq.answer} onChange={(e) => handleFaqChange(index, 'answer', e.target.value)} className="field" />
+                    <button type="button" onClick={() => removeFaq(index)} aria-label="Remove FAQ" className="flex shrink-0 items-center justify-center gap-1 rounded-xl px-3 py-2 text-sm text-neutral-400 transition-colors hover:bg-white/10 hover:text-white">
+                      <IconTrash size={16} /> <span className="sm:hidden">Remove</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2 sm:col-span-2">
+              <button type='submit' className='btn-primary flex-1 py-3'>
+                <IconPencil size={16} /> Update Event
               </button>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button 
-                type='submit' 
-                className='px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center gap-2'
-              >
-                Update Event <MdModeEditOutline className='text-lg'/>
-              </button>
-              <button 
-                type='button' 
-                onClick={() => setEdit(false)} 
-                className='px-6 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition'
-              >
+              <button type='button' onClick={() => setEdit(false)} className='btn-ghost flex-1 py-3'>
                 Cancel
               </button>
             </div>
           </form>
         </div>
       )}
-    </div>
+    </Page>
   );
 }
 
 export default EventsById;
-

@@ -8,14 +8,18 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { sidebarOpenState } from './components/atoms/sidebarAtom';
 import { userAtom } from './components/UserAtom';
+import { themeAtom } from './components/theme/useTheme';
 
 function RootLayout() {
   const sidebarOpen = useRecoilValue(sidebarOpenState);
   const setSidebarOpen = useSetRecoilState(sidebarOpenState);
   const user = useRecoilValue(userAtom);
+  const theme = useRecoilValue(themeAtom);
   const location = useLocation();
   const initialLoadRef = useRef(true);
-  
+  // Mirrors the Sidebar's own visibility rule so public pages use the full width
+  const sidebarVisible = user?.isLoggedIn && !['/', '/signin', '/signup'].includes(location.pathname);
+
   // Modified effect to only force sidebar open on initial load, not during navigation
   useEffect(() => {
     // Only set sidebar open on initial load, not during navigation within organizer profile
@@ -28,10 +32,13 @@ function RootLayout() {
     }
   }, [location.pathname, user, setSidebarOpen]);
 
+  // Floating sidebar: width (w-56 / w-16) + 1rem gap on each side
+  const contentOffset = sidebarVisible ? (sidebarOpen ? 'md:ml-64' : 'md:ml-24') : '';
+
   return (
     <div className=" ">
       <Header/>
-      <div className="flex-grow flex relative">
+      <div className="relative flex flex-grow">
         <Sidebar />
         <div className={`flex-grow transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-16'} pt-14 overflow-y-auto`}>
           <main className="w-full px-2 sm:px-4 md:px-6 py-4">
@@ -49,7 +56,8 @@ function RootLayout() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        theme="colored"
+        theme={theme === 'light' ? 'light' : 'dark'}
+        style={{ top: '5.5rem' }}
       />
     </div>
   )

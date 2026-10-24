@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useRecoilValue, useRecoilState } from 'recoil';
+import { AnimatePresence, motion } from 'motion/react';
 import { userAtom } from '../UserAtom';
 import { sidebarOpenState } from '../atoms/sidebarAtom';
 import {
-  IconLayoutSidebarRightFilled,
+  IconLayoutSidebarLeftCollapse,
+  IconLayoutSidebarLeftExpand,
   IconPictureInPicture,
   IconAperture,
   IconCalendar,
@@ -15,63 +17,38 @@ import {
   IconPlus,
   IconList,
   IconUsers,
-  IconClipboardList
 } from '@tabler/icons-react';
-
-function SidebarIcon({ icon, label }) {
-  return (
-    <div className="relative group">
-      <div className="flex items-center justify-center mb-4 text-xl sm:text-2xl cursor-pointer">
-        {icon}
-        <div 
-        className="
-    absolute left-full ml-3 top-1/2 -translate-y-1/2
-    bg-gray-800 text-white text-xs rounded-md px-2 py-1
-    opacity-0 group-hover:opacity-100 invisible group-hover:visible
-    transition-opacity duration-200 ease-in-out z-[999]
-    whitespace-nowrap border border-gray-700 shadow-lg
-    after:content-[''] after:absolute after:top-1/2 after:-translate-y-1/2
-    after:right-full after:border-8 after:border-solid
-    after:border-transparent after:border-r-gray-800
-  "
-        >
-         {label}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Sidebar() {
   const [open, setOpen] = useRecoilState(sidebarOpenState);
   const location = useLocation();
   const navigate = useNavigate();
   const user = useRecoilValue(userAtom);
-  
+
   const isOrganizer = user?.role === 'organizer';
   const isStudent = user?.role === 'student';
   const isAdmin = user?.role === 'admin';
-  
+
   // Force sidebar closed on mobile when navigating
   useEffect(() => {
     if (window.innerWidth < 768) {
       setOpen(false);
     }
   }, [location.pathname, setOpen]);
-  
+
   // Don't render sidebar for non-logged in users or on auth pages
-  if (!user?.isLoggedIn || 
-      location.pathname === '/' || 
-      location.pathname === '/signin' || 
+  if (!user?.isLoggedIn ||
+      location.pathname === '/' ||
+      location.pathname === '/signin' ||
       location.pathname === '/signup') {
     return null;
   }
-  
+
   let basePath = '';
   if (isStudent && user?.email) basePath = `/student-profile/${user.email}`;
   if (isOrganizer && user?.email) basePath = `/organizer-profile/${user.email}`;
   if (isAdmin && user?.email) basePath = `/admin-profile/${user.email}`;
-  
+
   // Modified to not toggle sidebar state on navigation
   const handleNavigation = (path, shouldToggleSidebar = false) => {
     // Only navigate if we're not already on this path
@@ -79,7 +56,7 @@ function Sidebar() {
       // Fix the calendar path for organizers
       if (isOrganizer && path === '/view/organisercalender') {
         navigate(`${basePath}${path}`);
-      } 
+      }
       else if (isOrganizer && path === '/calender') {
         navigate(`${basePath}/view/calender`);
       }
@@ -87,201 +64,109 @@ function Sidebar() {
         navigate(`${basePath}${path}`);
       }
     }
-    
+
     // Only toggle sidebar if explicitly requested or on mobile
     if (shouldToggleSidebar || window.innerWidth < 768) {
       setOpen(false);
     }
   };
-  
+
   // Toggle sidebar without navigation
   const toggleSidebar = () => {
     setOpen(!open);
   };
 
-  const activeLinkStyle = "bg-[rgba(8,112,184,0.2)] border-l-2 border-[rgba(8,112,184,0.7)]";
-  
+  const p = location.pathname;
+  const links = [
+    { path: '', label: 'Home', icon: IconHome, active: p === basePath, show: true },
+    { path: '/events', label: 'Events', icon: IconPictureInPicture, active: p.includes('/events') && !p.includes('/enrolled'), show: true },
+    { path: '/enrolledevents', label: 'Enrolled Events', icon: IconAperture, active: p.includes('/enrolledevents'), show: isStudent },
+    { path: '/studentCalender', label: 'My Calendar', icon: IconCalendarEvent, active: p.includes('/studentCalender'), show: isStudent },
+    { path: '/galleryPage', label: 'Gallery', icon: IconLibraryPhoto, active: p.includes('/galleryPage'), show: isStudent },
+    { path: '/postEvents', label: 'Post Event', icon: IconPlus, active: p.includes('/postEvents'), show: isOrganizer },
+    { path: '/createdEvents', label: 'Created Events', icon: IconList, active: p.includes('/createdEvents'), show: isOrganizer },
+    { path: '/eventDetails', label: 'Participants', icon: IconUsers, active: p.includes('/eventDetails'), show: isOrganizer },
+    { path: '/view/organisercalender', label: 'My Calendar', icon: IconCalendarEvent, active: p.includes('/organisercalender'), show: isOrganizer },
+    { path: '/calender', label: 'Calendar', icon: IconCalendar, active: p.includes('/calender') && !p.includes('/organisercalender'), show: true },
+    { path: '/dashboard', label: 'Dashboard', icon: IconLayoutDashboard, active: p.includes('/dashboard'), show: true },
+  ].filter((link) => link.show);
+
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="fixed top-16 left-0 z-40 md:hidden p-2">
-        <button onClick={toggleSidebar} aria-label="Toggle sidebar">
-          <IconLayoutSidebarRightFilled
-            size={28}
-            stroke={2}
-            className='text-white transition-transform duration-300'
-            style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-          />
-        </button>
-      </div>
-
-      {/* Sidebar */}
-      <div className={`
-        fixed top-0 left-0 h-screen bg-neutral-900
-        transition-all duration-300 ease-in-out z-30
-        border-r-2 md:border-r-4 border-[rgba(8,112,184,0.7)]
-        pt-16 md:pt-20 overflow-visible 
-        ${open ? 'w-60 translate-x-0 shadow-xl' : 'w-16 -translate-x-full md:translate-x-0 '}
+      {/* Floating sidebar (mobile toggle lives in the Header) */}
+      <aside className={`
+        glass-bar fixed bottom-3 left-3 top-20 z-40 flex flex-col rounded-3xl
+        transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
+        md:bottom-4 md:left-4 md:top-24 md:z-30
+        ${open ? 'w-56 translate-x-0' : 'w-16 -translate-x-[calc(100%+1rem)] md:translate-x-0'}
       `}>
         {/* Desktop sidebar toggle */}
-        <div className='hidden md:flex justify-end'>
-          <button onClick={toggleSidebar} className="p-2" aria-label="Toggle sidebar">
-            <IconLayoutSidebarRightFilled
-              size={28}
-              stroke={2}
-              className='text-white transition-transform duration-300'
-              style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-            />
+        <div className={`hidden px-3 pb-2 pt-2 md:flex ${open ? 'justify-end' : 'justify-center'}`}>
+          <button
+            onClick={toggleSidebar}
+            aria-label="Toggle sidebar"
+            className="flex h-9 w-9 items-center justify-center rounded-xl text-neutral-400 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            {open ? <IconLayoutSidebarLeftCollapse size={20} stroke={1.8} /> : <IconLayoutSidebarLeftExpand size={20} stroke={1.8} />}
           </button>
         </div>
 
         {/* Sidebar content */}
-        <div className='flex flex-col px-3 pt-4 h-full no-scrollbar'>
-          {open ? (
-            <>
-              {/* Common links for all users */}
-              <button 
-                onClick={() => handleNavigation('')}
-                className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname === basePath ? activeLinkStyle : ''}`}
-              >
-                <IconHome size={24} className='mr-2'/> Home
-              </button>
-              
-              <button 
-                onClick={() => handleNavigation('/events')}
-                className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/events') && !location.pathname.includes('/enrolled') ? activeLinkStyle : ''}`}
-              >
-                <IconPictureInPicture size={24} className='mr-2'/> Events
-              </button>
-              
-              {/* Student-specific links */}
-              {isStudent && (
-                <>
-                  <button 
-                    onClick={() => handleNavigation('/enrolledevents')}
-                    className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/enrolledevents') ? activeLinkStyle : ''}`}
-                  >
-                    <IconAperture size={24} className='mr-2'/> Enrolled Events
-                  </button>
-                  <button 
-                    onClick={() => handleNavigation('/studentCalender')}
-                    className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/studentCalender') ? activeLinkStyle : ''}`}
-                  >
-                    <IconCalendar size={24} className='mr-2'/> Events Calendar
-                  </button>
-                  <button 
-                    onClick={() => handleNavigation('/galleryPage')}
-                    className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/galleryPage') ? activeLinkStyle : ''}`}
-                  >
-                    <IconLibraryPhoto size={24} className='mr-2'/> Gallery
-                  </button>
-                </>
+        <nav className='no-scrollbar flex flex-1 flex-col gap-1 px-2 pb-3 pt-2 md:pt-0'>
+          {links.map(({ path, label, icon: Icon, active }) => (
+            <button
+              key={path + label}
+              onClick={() => handleNavigation(path)}
+              title={open ? undefined : label}
+              className={`group relative flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition-colors duration-200 ${
+                open ? 'px-3' : 'justify-center px-0'
+              } ${active ? 'text-black' : 'text-neutral-400 hover:bg-white/[0.06] hover:text-white'}`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="sidebar-active-pill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-0 rounded-xl bg-white"
+                />
               )}
+              <Icon size={20} stroke={1.7} className="relative z-10 shrink-0" />
+              <AnimatePresence initial={false}>
+                {open && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -6 }}
+                    transition={{ duration: 0.2 }}
+                    className="relative z-10 whitespace-nowrap"
+                  >
+                    {label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
 
-              {/* Organizer-specific links */}
-              {isOrganizer && (
-                <>
-                  <button 
-                    onClick={() => handleNavigation('/postEvents')}
-                    className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/postEvents') ? activeLinkStyle : ''}`}
-                  >
-                    <IconPlus size={24} className='mr-2'/> Post Event
-                  </button>
-                  <button 
-                    onClick={() => handleNavigation('/createdEvents')}
-                    className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/createdEvents') ? activeLinkStyle : ''}`}
-                  >
-                    <IconList size={24} className='mr-2'/> Created Events
-                  </button>
-                  <button 
-                    onClick={() => handleNavigation('/eventDetails')}
-                    className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/eventDetails') ? activeLinkStyle : ''}`}
-                  >
-                    <IconUsers size={24} className='mr-2'/> Event Participants
-                  </button>
-                  <button 
-                    onClick={() => handleNavigation('/view/organisercalender')}
-                    className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/organisercalender') ? activeLinkStyle : ''}`}
-                  >
-                    <IconCalendarEvent size={24} className='mr-2'/> Organizer Calendar
-                  </button>
-                </>
+              {/* Tooltip when collapsed */}
+              {!open && (
+                <span className="glass-strong pointer-events-none invisible absolute left-full z-[999] ml-3 whitespace-nowrap rounded-lg px-2.5 py-1 text-xs text-white opacity-0 transition-opacity duration-200 group-hover:visible group-hover:opacity-100">
+                  {label}
+                </span>
               )}
-
-              {/* Common links continued */}
-              <button 
-                onClick={() => handleNavigation('/calender')}
-                className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${(location.pathname.includes('/calender') && !location.pathname.includes('/organisercalender')) ? activeLinkStyle : ''}`}
-              >
-                <IconCalendar size={24} className='mr-2'/> Calendar
-              </button>
-              
-              <button 
-                onClick={() => handleNavigation('/dashboard')}
-                className={`flex items-center mb-4 text-lg text-white hover:bg-neutral-800 px-2 py-1 rounded transition-colors ${location.pathname.includes('/dashboard') ? activeLinkStyle : ''}`}
-              >
-                <IconLayoutDashboard size={24} className='mr-2'/> Dashboard
-              </button>
-            </>
-          ) : (
-            <div className='flex flex-col items-center'>
-              <button onClick={() => handleNavigation('')} className={`mb-4 ${location.pathname === basePath ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                <SidebarIcon icon={<IconHome size={24} stroke={1.5} />} label="Home" />
-              </button>
-              
-              <button onClick={() => handleNavigation('/events')} className={`mb-4 ${location.pathname.includes('/events') && !location.pathname.includes('/enrolled') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                <SidebarIcon icon={<IconPictureInPicture size={24} stroke={1.5} />} label="Events" />
-              </button>
-              
-              {isStudent && (
-                <>
-                  <button onClick={() => handleNavigation('/enrolledevents')} className={`mb-4 ${location.pathname.includes('/enrolledevents') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                    <SidebarIcon icon={<IconAperture size={24} stroke={1.5} />} label="Enrolled Events" />
-                  </button>
-                  <button onClick={() => handleNavigation('/studentCalender')} className={`mb-4 ${location.pathname.includes('/studentCalender') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                    <SidebarIcon icon={<IconCalendar size={24} stroke={1.5} />} label="Events Calendar" />
-                  </button>
-                  <button onClick={() => handleNavigation('/galleryPage')} className={`mb-4 ${location.pathname.includes('/galleryPage') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                    <SidebarIcon icon={<IconLibraryPhoto size={24} stroke={1.5} />} label="Gallery" />
-                  </button>
-                </>
-              )}
-
-              {isOrganizer && (
-                <>
-                  <button onClick={() => handleNavigation('/postEvents')} className={`mb-4 ${location.pathname.includes('/postEvents') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                    <SidebarIcon icon={<IconPlus size={24} stroke={1.5} />} label="Post Event" />
-                  </button>
-                  <button onClick={() => handleNavigation('/createdEvents')} className={`mb-4 ${location.pathname.includes('/createdEvents') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                    <SidebarIcon icon={<IconList size={24} stroke={1.5} />} label="Created Events" />
-                  </button>
-                  <button onClick={() => handleNavigation('/eventDetails')} className={`mb-4 ${location.pathname.includes('/eventDetails') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                    <SidebarIcon icon={<IconUsers size={24} stroke={1.5} />} label="Event Participants" />
-                  </button>
-                  <button onClick={() => handleNavigation('/view/organisercalender')} className={`mb-4 ${location.pathname.includes('/organisercalender') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                    <SidebarIcon icon={<IconCalendarEvent size={24} stroke={1.5} />} label="Organizer Calendar" />
-                  </button>
-                </>
-              )}
-
-              <button onClick={() => handleNavigation('/calender')} className={`mb-4 ${location.pathname.includes('/calender') && !location.pathname.includes('/organisercalender') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                <SidebarIcon icon={<IconCalendar size={24} stroke={1.5} />} label="Calendar" />
-              </button>
-              <button onClick={() => handleNavigation('/dashboard')} className={`mb-4 ${location.pathname.includes('/dashboard') ? 'text-[rgba(8,112,184,0.7)]' : 'text-white'}`}>
-                <SidebarIcon icon={<IconLayoutDashboard size={24} stroke={1.5} />} label="Dashboard" />
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+            </button>
+          ))}
+        </nav>
+      </aside>
 
       {/* Overlay for mobile */}
-      {open && (
-        <div 
-          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
-          onClick={() => setOpen(false)}
-        ></div>
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm md:hidden"
+            onClick={() => setOpen(false)}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

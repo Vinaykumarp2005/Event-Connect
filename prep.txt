@@ -1,0 +1,145 @@
+-------------------------------
+PROJECT INTERVIEW INTRO
+-------------------------------
+I built a campus event management platform that helps students discover events, enroll in them, and keep track of what they have joined. It also gives organizers a way to create events, update them, see participants, and manage event details, while admins can approve events and moderate comments. The app also handles email verification for new users, login by role, event comments, calendars, and participant export. On the frontend I used React with Vite, React Router, Recoil, React Hook Form, Tailwind, and libraries like react-big-calendar, jsPDF, and xlsx. On the backend I used Express, MongoDB, Mongoose, JWT, bcrypt, Zod, and Nodemailer. The main technical highlight is that the backend is split cleanly by role, with separate routes for students, organizers, admins, and auth, so the app stays easy to extend.
+
+-------------------------------
+FOLLOW-UP QUESTIONS
+-------------------------------
+Q1: How does signup and login work in your project?
+A1: The project supports three roles: student, organizer, and admin.
+For students and organizers, signup creates a MongoDB record, hashes the password, and sends a verification email with a token link.
+Signin checks the password with bcrypt and then creates a JWT token.
+The frontend stores that token in localStorage and keeps the user data in Recoil.
+
+Q2: How did you handle email verification?
+A2: I created separate token collections for students and organizers.
+After signup, the backend saves a random token with the user id and sends a verification link by Nodemailer.
+When the user opens the link, the backend checks the token and marks the account as verified.
+If the account is not verified, signin is blocked and a verification email can be sent again.
+
+Q3: What can a student do in the app?
+A3: A student can view events, open event details, enroll in an event, and add comments.
+The student profile and enrolled events are fetched from protected routes using the JWT token.
+The app also shows student-specific pages like dashboard, enrolled events, calendar, and gallery.
+When a student enrolls, the backend adds the event to the student record and increases reward points.
+
+Q4: What can an organizer do?
+A4: An organizer can create events, edit them, delete them, and view the list of enrolled participants.
+Event creation includes fields like dates, fee, venue, registration form, FAQs, images, and reward points.
+The organizer dashboard also has calendar views and a participant page.
+For participant lists, the frontend can export the data to Excel or PDF.
+
+Q5: What does the admin part do?
+A5: Admin has its own signin and protected actions.
+The admin routes can approve event updates and delete comments.
+The admin checks the JWT token and then verifies that the user id belongs to an admin record.
+So even though the token is shared by role, access still depends on the user collection.
+
+Q6: How are event images handled?
+A6: The frontend uploads images directly to Cloudinary from the browser.
+That is used for user logos and event images.
+After upload, the app stores the returned secure URL in MongoDB.
+So the backend only receives URLs, not raw image files.
+
+Q7: How did you manage UI state?
+A7: I used Recoil for shared auth and sidebar state.
+The user atom is persisted with recoil-persist, so login survives refresh.
+React Hook Form handles most forms, which keeps the form logic simple.
+For page navigation, React Router is used with nested routes for student, organizer, and admin dashboards.
+
+Q8: How do you prevent unauthorized access?
+A8: The backend has a verifyUser middleware that reads the token from the Authorization header.
+It verifies the JWT with the secret and attaches the user id to the request.
+Then each role route checks whether that user id belongs to a student, organizer, or admin record.
+That gives role-based access control on top of token validation.
+
+Q9: What kinds of event workflows are supported?
+A9: The app supports event creation, approval, viewing, enrollment, commenting, editing, and deletion.
+Students can enroll and see whether they are already enrolled.
+Organizers can view their own events and participant lists.
+Admins can moderate event comments and approve event changes.
+
+Q10: Did you use any AI model like Gemini or LLaMA?
+A10: No, this codebase does not integrate an AI model.
+There are no Gemini, LLaMA, OpenAI, or LangChain calls in the backend or frontend.
+The external services here are Cloudinary for uploads and Nodemailer with Gmail SMTP for email verification.
+So the project is a normal full-stack event platform, not an AI app.
+
+-------------------------------
+STANDARD PROJECT QUESTIONS
+-------------------------------
+Q: Why did you build this project?
+A: I built it to solve a campus event management problem.
+Students needed one place to find events, enroll, and track participation.
+Organizers needed a simple way to create events and see participants.
+Admins also needed moderation and approval control in the same system.
+
+Q: What challenges did you face?
+A: The main challenge was handling three roles in one app without mixing their flows.
+I solved that by splitting the backend into separate routers for auth, event, student, organizer, and admin.
+Another challenge was keeping event data consistent across enrollment, comments, and profile updates.
+I used Mongoose updates and role checks to keep those flows separated.
+
+Q: How did you handle scalability?
+A: The backend is already split by responsibility, so it is easy to add more routes later.
+The data model also keeps students, organizers, admins, and events in separate collections.
+That makes the system easier to extend than putting everything into one large controller.
+The frontend also uses nested routes, so each role can grow independently.
+
+Q: How is your backend structured?
+A: The backend starts in server.js and mounts modular routers under /auth, /event, /organiser, /student, and /admin.
+There is a verifyUser middleware for JWT validation.
+The app also has Mongoose models for users, tokens, events, and admin data.
+Utility files handle email sending.
+
+Q: How did you integrate AI models?
+A: I did not integrate any AI model in this project.
+There is no Gemini, LLaMA, or similar API in the codebase.
+The project instead focuses on backend authentication, event workflows, and file uploads.
+If I wanted AI later, I would add it as a separate service instead of mixing it into the current flow.
+
+Q: What would you improve if given more time?
+A: I would tighten validation between frontend and backend so all route names and payloads are fully consistent.
+I would also add pagination and search for large event lists.
+Another improvement would be better error handling and a more polished notification flow.
+I would also add rate limiting and stronger token expiry handling.
+
+Q: What makes this project different?
+A: It is not just a list of events.
+It supports three user roles, email verification, enrollment tracking, reward points, participant exports, and calendar views.
+The organizer can manage events, the student can enroll and comment, and the admin can moderate.
+That makes it closer to a real campus workflow than a simple CRUD demo.
+
+-------------------------------
+DEEP-DIVE QUESTIONS
+-------------------------------
+Q: Why did you split the backend into separate routers?
+A: Each role has different responsibilities, so splitting routers keeps the code easier to read.
+Auth handles signup, signin, and verification.
+Student, organizer, and admin each have their own profile and action routes.
+That means changes in one area do not easily break another area.
+
+Q: How does enrollment update both the event and the student?
+A: The enrollment route first checks whether the event exists and whether the student is already enrolled.
+Then it pushes the student into the event’s enrolledStudents array and increments the event count.
+After that, it updates the student record by adding the event id to eventsEnrolled and increasing rewardsEarned.
+So the relation is stored on both sides.
+
+Q: What is the security model for protected routes?
+A: The app uses JWT-based protection with a shared verifyUser middleware.
+The token is read from the Authorization header and verified with the server secret.
+After that, the route checks the user against the correct model for that role.
+It is simple, but it gives role-based access control across the app.
+
+Q: How did you handle participant exports?
+A: The participant page fetches all students enrolled in a selected event.
+Then it lets the organizer export that table as Excel or PDF.
+For Excel, it uses xlsx, and for PDF, it uses jsPDF with jspdf-autotable.
+That gives organizers a practical admin-style workflow without writing their own export backend.
+
+Q: What would you say about performance and limitations?
+A: The app is fine for a campus-scale project, but it is still a straightforward monolith.
+There is no caching, no queue system, and no rate limiting yet.
+Some pages fetch data directly from Mongo on every request, so pagination would help later.
+I would improve those areas if the user base grew.

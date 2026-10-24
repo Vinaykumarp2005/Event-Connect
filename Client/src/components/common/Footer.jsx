@@ -2,6 +2,16 @@ import React from 'react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from 'react-icons/fa';
 
 function Footer() {
+  const user = useRecoilValue(userAtom);
+  const year = new Date().getFullYear();
+
+  const links = user.isLoggedIn
+    ? []
+    : [
+        { to: '/signup', label: 'Create account' },
+        { to: '/signin', label: 'Sign in' },
+      ];
+
   return (
     <footer className="bg-gray-800 text-white py-8 ">
       <div className="container mx-auto px-2 ">

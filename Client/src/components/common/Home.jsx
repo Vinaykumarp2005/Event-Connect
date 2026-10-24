@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { AnimatePresence, motion } from 'motion/react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { userAtom } from '../UserAtom';
 import Events from './Events';
 import EnrolledEvents from '../students/EnrolledEvents';
@@ -11,82 +14,97 @@ import GalleryHomePage from './GalleryHomePage';
 import PostEvent from '../organizer/PostEvent';
 import CreatedEvents from '../organizer/CreatedEvents';
 
+import Dock from '../ui/Dock';
 import {
-  IconLayoutSidebarRightFilled,
-  IconPictureInPicture,
-  IconAperture,
-  IconCalendar,
-  IconLibraryPhoto,
-  IconPlus,
-  IconList,
-  IconCalendarEvent,
-  IconLayoutDashboard,
-} from '@tabler/icons-react';
+  CalendarDays,
+  CalendarHeart,
+  Compass,
+  FolderKanban,
+  Images,
+  LayoutDashboard,
+  SquarePlus,
+  Ticket,
+} from 'lucide-react';
 
-// Sidebar icon tooltip component
-function SidebarIcon({ icon, label }) {
-  return (
-    <div className="relative group mt-2">
-      <div className="flex mt-1 mb-4 text-xl sm:text-2xl">{icon}</div>
-      <div
-        className="
-          absolute left-full top-1/2 -translate-y-1/2 ml-2
-          bg-gray-800 text-white text-xs rounded px-2 py-1 z-50
-          opacity-0 group-hover:opacity-100 invisible group-hover:visible
-          transition-all duration-300 whitespace-nowrap
-        "
-      >
-        {label}
-      </div>
-    </div>
-  );
-}
+gsap.registerPlugin(useGSAP);
+
+// Every tab and which roles see it (icon = lucide component, rendered by the Dock)
+const tabs = [
+  { id: 'Events', label: 'Events', icon: Compass, roles: ['student', 'organizer'] },
+  { id: 'EnrolledEvents', label: 'Enrolled', icon: Ticket, roles: ['student'] },
+  { id: 'StudentCalender', label: 'My Calendar', icon: CalendarHeart, roles: ['student'] },
+  { id: 'PostEvent', label: 'Post Event', icon: SquarePlus, roles: ['organizer'] },
+  { id: 'CreatedEvents', label: 'Created', icon: FolderKanban, roles: ['organizer'] },
+  { id: 'Calender', label: 'Calendar', icon: CalendarDays, roles: ['student', 'organizer'] },
+  { id: 'Gallery', label: 'Gallery', icon: Images, roles: ['student'] },
+  { id: 'Dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['student', 'organizer'] },
+];
 
 function Home() {
-  const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('Events');
   const user = useRecoilValue(userAtom);
+  const container = useRef(null);
 
   const isOrganizer = user?.role === 'organizer';
   const isStudent = user?.role === 'student';
 
-  // Mobile menu button
-  const mobileMenuButton = (
-    <div className="fixed top-16 left-0 z-40 md:hidden p-2">
-      <button onClick={() => setOpen(!open)}>
-        <IconLayoutSidebarRightFilled
-          size={28}
-          stroke={4}
-          className="transition-transform duration-300"
-          style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        />
-      </button>
-    </div>
-  );
+  const roleTabs = tabs.filter((t) => t.roles.includes(user?.role));
+  const visibleTabs = roleTabs.length ? roleTabs : tabs.filter((t) => t.id === 'Events');
+  const active = visibleTabs.find((t) => t.id === tab) ?? visibleTabs[0];
+
+  // Intro: heading, toolbar and panel ease in one after another
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      // clearProps: leftover transforms would trap position:fixed modals inside the panel
+      gsap.timeline({ defaults: { ease: 'expo.out', clearProps: 'all' } })
+        .from('.home-intro', { y: 24, opacity: 0, duration: 1, stagger: 0.1 })
+        .from('.home-panel', { y: 40, opacity: 0, duration: 1.1 }, '-=0.7');
+    });
+    return () => mm.revert();
+  }, { scope: container });
 
   return (
-    <div className="bg-black min-h-screen w-full text-white">
-      <div className="flex relative">
-        {mobileMenuButton}
+    <div ref={container} className='relative min-h-[calc(100svh-3.5rem)] w-full text-white'>
+      <div className='relative z-10 mx-auto flex max-w-7xl flex-col gap-5 pb-4'>
+        <div className='home-intro px-1'>
+          <h1 className='text-gradient text-2xl font-bold tracking-tight sm:text-3xl'>
+            Welcome back{user?.username ? <>, <span className='capitalize'>{user.username}</span></> : ''}
+          </h1>
+          <p className='mt-1 text-sm text-neutral-400'>
+            {isOrganizer
+              ? 'Publish new events and keep an eye on your participants.'
+              : 'Discover something new on campus today.'}
+          </p>
+        </div>
 
-      
-        {/* Main Content */}
-        <div
-          className={`
-            w-full transition-all duration-300 ease-in-out pt-16
-            px-2 sm:px-4 md:px-6
-            md:ml-16
-          `}
-        >
-          {tab === 'Events' && <Events />}
-          {tab === 'EnrolledEvents' && <EnrolledEvents />}
-          {tab === 'StudentCalender' && <StudentCalender />}
-          {tab === 'Calender' && <Customcalender />}
-          {tab === 'Dashboard' &&
-            (isStudent ? <StudentDashBoard /> : isOrganizer ? <OrganizerDashBoard /> : null)}
-          {tab === 'Gallery' && <GalleryHomePage />}
-          {tab === 'PostEvent' && <PostEvent />}
-          {tab === 'CreatedEvents' && <CreatedEvents />}
+        {/* macOS Dock–style tab bar, centered */}
+        <div className='home-intro sticky top-24 z-30'>
+          <Dock items={visibleTabs} activeId={active.id} onSelect={setTab} />
+        </div>
+
+        {/* Content panel */}
+        <div className='home-panel glass min-h-[60vh] rounded-[24px]'>
+          <AnimatePresence mode='wait'>
+            <motion.div
+              key={active.id}
+              initial={{ opacity: 0, y: 16, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)', transitionEnd: { filter: 'none' } }}
+              exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className='px-2 py-4 sm:px-4 md:px-6'
+            >
+              {active.id === 'Events' && <Events />}
+              {active.id === 'EnrolledEvents' && <EnrolledEvents />}
+              {active.id === 'StudentCalender' && <StudentCalender />}
+              {active.id === 'Calender' && <Customcalender />}
+              {active.id === 'Dashboard' &&
+                (isStudent ? <StudentDashBoard /> : isOrganizer ? <OrganizerDashBoard /> : null)}
+              {active.id === 'Gallery' && <GalleryHomePage />}
+              {active.id === 'PostEvent' && <PostEvent />}
+              {active.id === 'CreatedEvents' && <CreatedEvents />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </div>
@@ -94,4 +112,3 @@ function Home() {
 }
 
 export default Home;
-
