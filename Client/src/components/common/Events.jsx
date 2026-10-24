@@ -23,7 +23,7 @@ function Events() {
           return;
         }
 
-        const res = await axios.get('http://localhost:4000/event/app/v1/events', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/event/app/v1/events`, {
           headers: {
             'Authorization': token,
             'Content-Type': 'application/json'
@@ -60,12 +60,11 @@ function Events() {
   }
 
   return (
-    <Page>
-      <PageHeader title="All Events" subtitle="Everything happening across campus" />
-      {loading ? (
-        <Spinner label="Loading events…" />
-      ) : events.length === 0 ? (
-        <EmptyState title="No events yet" text="Check back soon — clubs are cooking something up." />
+    <div className="flex flex-wrap gap-4 p-4 m-4 bg-black overflow-visible">
+      {events.length === 0 ? (
+        <div className="w-full text-center py-10">
+          <p className="text-gray-400">Loading events...</p>
+        </div>
       ) : (
         <motion.div
           variants={listVariants}

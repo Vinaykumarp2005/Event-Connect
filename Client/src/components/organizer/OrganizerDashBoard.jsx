@@ -22,14 +22,14 @@ function OrganizerDashBoard() {
         }
 
         const [detailsRes, eventsRes] = await Promise.all([
-          axios.get('http://localhost:4000/organiser/getdetails', {
-            headers: {
+          axios.get(`${import.meta.env.VITE_API_URL}/organiser/getdetails`, {
+            headers: { 
               'Authorization': token,
               'Content-Type': 'application/json'
             }
           }),
-          axios.get('http://localhost:4000/event/app/v1/organiser/events', {
-            headers: {
+          axios.get(`${import.meta.env.VITE_API_URL}/event/app/v1/organiser/events`, {
+            headers: { 
               'Authorization': token,
               'Content-Type': 'application/json'
             }

@@ -23,8 +23,8 @@ function OrganizerCalendar() {
           console.error("No authentication token found");
           return;
         }
-
-        const res = await axios.get('http://localhost:4000/event/app/v1/events', {
+        
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/event/app/v1/events`, {
           headers: {
             'Authorization': token,
             'Content-Type': 'application/json'

@@ -17,7 +17,7 @@ function StudentCalendar() {
   useEffect(() => {
     const fetchEnrolledEvents = async () => {
       try {
-        const res = await axios.get('http://localhost:4000/student/enrolledEvents', {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/student/enrolledEvents`, {
           headers: {
             Authorization: localStorage.getItem('token'),
           },

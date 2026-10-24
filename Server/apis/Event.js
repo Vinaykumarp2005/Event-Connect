@@ -59,41 +59,46 @@ const validPerson=async(req,res,next)=>{
 }
 
 eventApp.post('/app/v1/create',verifyUser,validPerson,async(req,res)=>{
- const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime,eventImage,sampleCertificate,venueAddress}=req.body;
-
- const response=await Events.create({
-  eventName:eventName,
-  description:description,
-  maxLimit:maxLimit,
-  category:category,
-  faqs:faqs,
-  startDate:new Date(startDate),
-  endDate:new Date(endDate),
-  registrationFee:registrationFee,
-  venue:venue,
-  keyTakeAways:keyTakeAways,
-  rewardPoints:rewardPoints,
-  registrationForm:registrationForm,
-  eventImage:eventImage,
-  sampleCertificate:sampleCertificate,
-  registrationEndDate:new Date(registrationEndDate),
-  endTime:endTime,
-  organiser:req.userId,
-  venueAddress:venueAddress
- })
-
-
-
-if(response){
-  res.status(200).json({
-    message:"event is created succesfully",
-    payload:response
-  })
-}else{
-  res.status(411).json({
-    message:"evenet is not created"
-  })
-}
+  try {
+    const {eventName,description,maxLimit,category,faqs,startDate,endDate,registrationFee,venue,keyTakeAways,rewardPoints,registrationForm,registrationEndDate,endTime,eventImage,sampleCertificate,venueAddress}=req.body;
+ 
+    const response=await Events.create({
+     eventName:eventName,
+     description:description,
+     maxLimit:maxLimit,
+     category:category,
+     faqs:faqs,
+     startDate:new Date(startDate),
+     endDate:new Date(endDate),
+     registrationFee:registrationFee,
+     venue:venue,
+     keyTakeAways:keyTakeAways,
+     rewardPoints:rewardPoints,
+     registrationForm:registrationForm,
+     eventImage:eventImage,
+     sampleCertificate:sampleCertificate,
+     registrationEndDate:new Date(registrationEndDate),
+     endTime:endTime,
+     organiser:req.userId,
+     venueAddress:venueAddress
+    })
+   
+   
+   
+   if(response){
+     res.status(200).json({
+       message:"event is created succesfully",
+       payload:response
+     })
+   }else{
+     res.status(411).json({
+       message:"evenet is not created"
+     })
+   }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: 'Something went wrong' });
+  }
 })
 eventApp.get('/app/v1/events/:eventId', verifyUser, async (req, res) => {
   try {

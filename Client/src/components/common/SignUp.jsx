@@ -28,7 +28,7 @@ export default function SignUp() {
         data.year = Number(data.year);
 
         const res = await axios.post(
-          'http://localhost:4000/auth/student/signUp',
+          `${import.meta.env.VITE_API_URL}/auth/student/signUp`,
           data
         );
 
@@ -60,7 +60,7 @@ export default function SignUp() {
         };
 
         const res = await axios.post(
-          'http://localhost:4000/auth/organizer/signUp',
+          `${import.meta.env.VITE_API_URL}/auth/organizer/signUp`,
           payload
         );
 
