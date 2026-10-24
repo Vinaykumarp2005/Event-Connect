@@ -4,27 +4,32 @@ A full-stack **campus event management platform**. Students discover and enroll 
 
 Built with **React + Vite** on the frontend and **Node.js + Express + MongoDB** on the backend, with JWT authentication, email verification over Gmail SMTP, and image uploads to Cloudinary.
 
+The interface is a clean **black & white glass design** with **dark and light themes**, a floating rounded header, a macOS Dock–style tab bar on the home screen, and smooth, restrained animation built with **Framer Motion** and **GSAP**. It is responsive from phones to wide desktops.
+
+> Every change to the project is logged step by step in [`plan.md`](plan.md).
+
 ---
 
 ## Table of Contents
 
 1. [Features](#features)
 2. [Tech Stack](#tech-stack)
-3. [Project Structure](#project-structure)
-4. [High-Level Design (HLD)](#high-level-design-hld)
-5. [Low-Level Design (LLD)](#low-level-design-lld)
+3. [UI & Design System](#ui--design-system)
+4. [Project Structure](#project-structure)
+5. [High-Level Design (HLD)](#high-level-design-hld)
+6. [Low-Level Design (LLD)](#low-level-design-lld)
    - [Data Model (ER Diagram)](#data-model-er-diagram)
    - [Backend Class / Module Diagram](#backend-class--module-diagram)
    - [Frontend Component Tree](#frontend-component-tree)
    - [Sequence Diagrams](#sequence-diagrams)
-   - [Auth & Verification State Machine](#auth--verification-state-machine)
-6. [API Reference](#api-reference)
-7. [Frontend Routes](#frontend-routes)
-8. [Validation Rules](#validation-rules)
-9. [Getting Started](#getting-started)
-10. [Environment Variables](#environment-variables)
-11. [Known Issues & Limitations](#known-issues--limitations)
-12. [Future Improvements](#future-improvements)
+   - [Auth & Verification State Machine](#auth-and-verification-state-machine)
+7. [API Reference](#api-reference)
+8. [Frontend Routes](#frontend-routes)
+9. [Validation Rules](#validation-rules)
+10. [Getting Started](#getting-started)
+11. [Environment Variables](#environment-variables)
+12. [Known Issues & Limitations](#known-issues--limitations)
+13. [Future Improvements](#future-improvements)
 
 ---
 
@@ -47,8 +52,8 @@ Built with **React + Vite** on the frontend and **Node.js + Express + MongoDB** 
 - **Earn reward points** on every enrollment (added to `rewardsEarned`).
 - **Comments**: add, edit, and delete your own comments on an event.
 - **Enrolled events** page.
-- **Personal calendar** of enrolled events (react-big-calendar).
-- **Global events calendar** of all events.
+- **Personal calendar** of enrolled events, and a **global events calendar** of all events. Both open on today and have a side panel listing every event running on the selected day, including multi-day events, with a details pop-up.
+- **Home screen** with a centered macOS Dock–style tab bar to switch between Events, Enrolled, My Calendar, Calendar, Gallery and Dashboard.
 - **Club gallery**: browse every organizer/club by logo and open a club page listing its events.
 - **Dashboard**: view and edit your profile (username, phone, department, year), and see reward points.
 
@@ -58,19 +63,24 @@ Built with **React + Vite** on the frontend and **Node.js + Express + MongoDB** 
 - **Edit / delete** your own events. Ownership is checked on the server.
 - **Created events** list.
 - **Event participants**: choose one of your events to see the enrolled students, then **export the list to Excel (xlsx) or PDF (jsPDF + autotable)**.
-- **Organizer calendar** of your own events, plus the global calendar.
-- **Dashboard**: profile info and stats (total, ongoing, upcoming, and completed events).
+- **Organizer calendar** of your own events (upcoming, in progress, or completed), plus the global calendar.
+- **Dashboard**: profile info and stats (total, ongoing, upcoming, and completed events), plus a list of ongoing events.
+- **Home screen** Dock with Events, Post Event, Created, Calendar and Dashboard.
 
 ### Admin features
-- Admin signup and signin (API).
-- **Approve or update any event** (`isApproved` flag).
-- **Moderate comments**: delete any comment on any event.
-- Browse all events and view event details.
+- Admin signup (API) and signin.
+- **Approve or update any event** (`isApproved` flag), through the API.
+- **Moderate comments**: delete any comment on any event, through the API.
+- **Admin dashboard** with shortcuts to All Events, Approvals and Moderation. Browse all events and view event details.
 
 ### UI / UX
-- Dark theme with Tailwind CSS, responsive layout, and a collapsible role-aware sidebar (Recoil `sidebarOpenState`).
-- Toast notifications (react-toastify), animations (`motion`), carousel, and icon sets (Tabler, Lucide, React Icons).
-- Forms built with React Hook Form.
+- **Dark and light themes** with a sun/moon toggle in the header. The choice is saved, applied before the page paints (no flash), and switched with a circular reveal. See [UI & Design System](#ui--design-system).
+- **Floating rounded header** with space around it, and a **floating rounded sidebar** that is role-aware and collapsible (Recoil `sidebarOpenState`). On phones the sidebar slides in from a button in the header.
+- **Glass surfaces**: translucent, blurred cards and bars that work in both themes.
+- **Home Dock**: a macOS-style tab bar with gentle magnification and a sliding active indicator.
+- **Polished calendars**: custom toolbar, today badge, selected-day highlight, themed events and "+N more" pop-up.
+- Loading spinners and friendly empty states on every list. Toasts follow the theme.
+- Forms built with React Hook Form, with shared input/button styles.
 
 ---
 
@@ -82,8 +92,10 @@ Built with **React + Vite** on the frontend and **Node.js + Express + MongoDB** 
 | Routing | React Router v6 (nested, role-scoped routes) |
 | State | Recoil + recoil-persist |
 | Forms | React Hook Form |
-| Styling | Tailwind CSS 3, PostCSS, Autoprefixer, `clsx`, `tailwind-merge` |
-| UI libraries | react-big-calendar, date-fns, react-toastify, react-confetti, pure-react-carousel, motion, @tabler/icons-react, lucide-react, react-icons |
+| Styling | Tailwind CSS 3 (theme colours via CSS variables, `darkMode: 'class'`), PostCSS, Autoprefixer, `clsx`, `tailwind-merge`, Inter font |
+| Animation | **Framer Motion** (`motion` package, `motion/react`), **GSAP** + `@gsap/react` (`useGSAP`, ScrollTrigger) |
+| Icons | lucide-react (Home Dock), @tabler/icons-react (everywhere else), react-icons |
+| UI libraries | react-big-calendar (+ moment, which it installs), date-fns, react-toastify, react-confetti, react-use, pure-react-carousel |
 | Exports | xlsx (Excel), jsPDF + jspdf-autotable (PDF) |
 | HTTP client | Axios |
 | Backend | Node.js, Express 5 |
@@ -95,27 +107,89 @@ Built with **React + Vite** on the frontend and **Node.js + Express + MongoDB** 
 
 ---
 
+## UI & Design System
+
+### Look and feel
+- **Monochrome**: black, white and greys only, with no accent colour.
+- **Glass**: translucent surfaces with backdrop blur (`.glass`, `.glass-strong`, `.glass-bar` in `index.css`).
+- **Type**: Inter, tight tracking, a soft white-to-grey gradient on headings (`.text-gradient`).
+- **Shared controls**: `.field`, `.field-label`, `.field-error`, `.btn-primary`, `.btn-ghost`, `.chip`.
+
+### Theming (dark / light)
+
+Tailwind's `white`, `black` and `neutral-*` colours resolve to CSS variables. In light mode the variables swap: "white" becomes the ink colour, "black" becomes the paper colour, and the grey scale reverses. Ordinary classes like `text-white`, `bg-white/10` and `text-neutral-400` therefore work in both themes without per-component changes.
+
+```mermaid
+flowchart LR
+    T["ThemeToggle<br/>(header)"] -->|toggleTheme| H["useTheme hook"]
+    H -->|set| A["themeAtom<br/>(Recoil, persisted)"]
+    H -->|"html.dark / html.light"| R[":root CSS variables<br/>--c-white · --c-black · --c-n50…950<br/>--glass-* · --page-bg"]
+    R --> TW["Tailwind colours<br/>white · black · neutral"]
+    TW --> UI["Every component"]
+    A -.->|"recoil-persist → localStorage"| S["index.html inline script<br/>applies saved theme before React (no flash)"]
+    H -->|"View Transitions API"| V["Circular reveal<br/>(instant fallback)"]
+```
+
+| Piece | File |
+|---|---|
+| Colour tokens, light palette, glass, calendar styles | `Client/src/index.css` |
+| Tailwind colour mapping (`rgb(var(--c-*) / <alpha-value>)`) | `Client/tailwind.config.js` |
+| Theme state + toggle logic | `Client/src/components/theme/useTheme.js` |
+| Sun/moon button | `Client/src/components/theme/ThemeToggle.jsx` |
+| No-flash script | `Client/index.html` |
+
+### Layout
+- **Header**: a floating `rounded-full` glass pill, inset from the edges (`top-4`, side gaps). It holds the brand, role badge, theme toggle and auth buttons, and gains a soft shadow once the page scrolls. On phones it also holds the sidebar button.
+- **Sidebar**: a floating rounded glass panel (`left-4 top-24 bottom-4`), collapsible on desktop and a slide-in drawer on phones. The active item has a white pill that slides between links.
+- **Content**: `pt-24` clears the floating header, and the left margin follows the sidebar width.
+
+### Animation
+Animation is deliberately simple: one-time entrances, gentle hovers, and no looping or decorative effects.
+
+| Library | Where |
+|---|---|
+| **GSAP** | Landing intro (hero copy, then sample cards); one-time scroll fade-ups (features, call to action); Home intro; Dock click press |
+| **Framer Motion** | Header and page fade-ins; staggered card grids; small hover lift on cards; sliding active pills (sidebar, sign-up role switch); Dock magnification and active indicator; hero word swap; modal, FAQ and comment transitions; theme icon swap |
+
+- `MotionConfig reducedMotion="user"` and GSAP `matchMedia` respect the OS "reduce motion" setting.
+- Effects that rely on hovering are turned off on touch screens.
+
+### Shared UI components (`Client/src/components/ui/`)
+| Component | Purpose |
+|---|---|
+| `Page.jsx` | `Page` (fade-up wrapper), `PageHeader`, `EmptyState`, `Spinner`, stagger variants |
+| `EventCard.jsx` | Glass event card used by every event list |
+| `Stat.jsx` | `StatTile`, `InfoRow`, `Avatar` for the dashboards |
+| `CalendarView.jsx` | Shared calendar: custom toolbar, month grid, day panel, details pop-up (portaled) |
+| `Dock.jsx` | macOS Dock–style tab bar for Home: scale-only magnification (no layout shift), always-visible labels, sliding active indicator |
+
+---
+
 ## Project Structure
 
 ```
 Event-Connect/
 ├── Client/                         # React + Vite frontend
 │   ├── src/
-│   │   ├── main.jsx                # App entry + all route definitions
-│   │   ├── RootLayout.jsx          # Header + Sidebar + <Outlet/> + Footer + Toasts
+│   ├── index.html                  # Inter font + no-flash theme script
+│   ├── src/
+│   │   ├── main.jsx                # App entry + all route definitions (+ MotionConfig)
+│   │   ├── RootLayout.jsx          # Header + Sidebar + <Outlet/> + Footer + themed Toasts
+│   │   ├── index.css               # Theme tokens, glass, shared form/button styles, calendar styles
 │   │   ├── components/
 │   │   │   ├── UserAtom.js         # Recoil user atom (persisted)
 │   │   │   ├── atoms/sidebarAtom.js
-│   │   │   ├── common/             # Shared pages: Landing, SignIn/Up, Verify, Events,
-│   │   │   │                       # EventsById, Calendars, Gallery, ClubEvents, Header, Sidebar…
+│   │   │   ├── theme/              # useTheme (themeAtom + toggle), ThemeToggle
+│   │   │   ├── common/             # Shared pages: Landing, Home, SignIn/Up, Verify, Events,
+│   │   │   │                       # EventsById, Customcalender, Gallery, ClubEvents, Header, Sidebar, Footer
 │   │   │   ├── students/           # StudentDashBoard, EnrolledEvents, StudentCalender
 │   │   │   ├── organizer/          # OrganizerDashBoard, PostEvent, CreatedEvents,
 │   │   │   │                       # EventParticipants, OrganiserCalender, FetchEvents
-│   │   │   ├── admin/              # AdminDashBoard, ManageEvents (placeholders)
-│   │   │   └── ui/sidebar.jsx
+│   │   │   ├── admin/              # AdminDashBoard (shortcuts), ManageEvents (coming soon)
+│   │   │   └── ui/                 # Page, EventCard, Stat, CalendarView, Dock (+ legacy sidebar.jsx)
 │   │   ├── hooks/use-outside-click.js
 │   │   └── lib/utils.jsx
-│   ├── tailwind.config.js
+│   ├── tailwind.config.js          # darkMode: 'class', theme colours → CSS variables
 │   └── vite.config.js              # '@' alias → src/
 │
 ├── Server/                         # Express backend
@@ -138,6 +212,8 @@ Event-Connect/
 │       ├── sendUserEmail.js        # Nodemailer transport (students)
 │       └── sendOrganiserEmail.js   # Nodemailer transport (organizers)
 │
+├── plan.md                         # Change plan + step-by-step log of every change
+├── README.md
 └── prep.txt                        # Interview prep notes for the project
 ```
 
@@ -151,7 +227,7 @@ Event-Connect/
 flowchart LR
     subgraph Browser["Browser (React SPA – Vite)"]
         UI["Pages & Components<br/>(Student / Organizer / Admin)"]
-        RS["Recoil Store<br/>userAtom (persisted) · sidebarOpenState"]
+        RS["Recoil Store<br/>userAtom · themeAtom (persisted) · sidebarOpenState"]
         LS[("localStorage<br/>JWT token · recoil-persist")]
         EX["Client-side Exporters<br/>xlsx · jsPDF"]
         UI <--> RS
@@ -462,7 +538,7 @@ classDiagram
 
 ```mermaid
 flowchart TB
-    Root["main.jsx<br/>RecoilRoot → BrowserRouter"] --> RL["RootLayout<br/>Header · Sidebar · Outlet · Footer · ToastContainer"]
+    Root["main.jsx<br/>RecoilRoot → MotionConfig → BrowserRouter"] --> RL["RootLayout<br/>Header (ThemeToggle) · Sidebar · Outlet · Footer · ToastContainer"]
 
     RL --> Pub["Public"]
     Pub --> LP[LandingPage]
@@ -471,29 +547,29 @@ flowchart TB
     Pub --> VP["VerifyPage<br/>/verifyPage/:role/:id/:token"]
 
     RL --> SP["/student-profile/:emailId"]
-    SP --> SH[Home]
+    SP --> SH["Home<br/>Dock tabs → Events · Enrolled · My Calendar · Calendar · Gallery · Dashboard"]
     SP --> SD["StudentDashBoard<br/>profile + edit + rewards"]
     SP --> EE[EnrolledEvents]
     SP --> EV[Events]
     SP --> EB["EventsById<br/>details · enroll · comments"]
-    SP --> CC["Customcalender (all events)"]
-    SP --> SC["StudentCalender (enrolled)"]
+    SP --> CC["Customcalender (all events)<br/>→ CalendarView"]
+    SP --> SC["StudentCalender (enrolled)<br/>→ CalendarView"]
     SP --> GH["GalleryHomePage (clubs)"]
     SP --> CE["ClubEvents/:clubById"]
 
     RL --> OP["/organizer-profile/:emailId"]
-    OP --> OH[Home]
+    OP --> OH["Home<br/>Dock tabs → Events · Post Event · Created · Calendar · Dashboard"]
     OP --> OD["OrganizerDashBoard<br/>profile + stats"]
     OP --> PE["PostEvent<br/>form + uploads + confetti"]
     OP --> CR[CreatedEvents]
     OP --> EB2["EventsById<br/>edit · delete"]
     OP --> EP["EventParticipants<br/>Excel / PDF export"]
-    OP --> OC[OrganiserCalender]
+    OP --> OC["OrganiserCalender<br/>→ CalendarView"]
     OP --> FE[FetchEvents]
 
     RL --> AP["/admin-profile/:emailId"]
-    AP --> AD[AdminDashBoard]
-    AP --> ME[ManageEvents]
+    AP --> AD["AdminDashBoard<br/>shortcut cards"]
+    AP --> ME["ManageEvents<br/>(coming soon)"]
     AP --> EV3[Events]
     AP --> EB3[EventsById]
 ```
@@ -889,10 +965,12 @@ curl -X POST http://localhost:4000/admin/signUp \
 
 ## Known Issues & Limitations
 
-- **`bcrypt` vs `bcryptjs`**: `Server/apis/Auth.js` calls `require('bcrypt')`, but only `bcryptjs` is in `package.json`. Either run `npm i bcrypt` or change the import to `bcryptjs`. Otherwise the server fails to start.
+- **`bcrypt` vs `bcryptjs`**: `Server/apis/Auth.js` calls `require('bcrypt')`, but only `bcryptjs` is in `Server/package.json`. It works on the original machine only because `bcrypt` is installed in a parent folder (`~/node_modules`). On a fresh clone the server fails to start. Fix it with `npm i bcrypt` in `Server/`, or change the import to `bcryptjs`.
 - **Port**: the server runs on its default port `4000`, and the client calls `http://localhost:4000`. If you set `port` in `Server/.env`, update the client URLs to match. On Windows, env var names are case-insensitive, so `port` and the SMTP `PORT` share one value.
+- **Port 3000 conflicts**: if another program (e.g. Docker/WSL) owns port 3000 and the client is pointed there, the browser reports a misleading **CORS** error. The client was moved to port 4000 for this reason.
 - **Hard-coded API URL**: the client has `http://localhost:4000` in each component. Moving it to a `VITE_API_URL` variable would make deployment easier.
-- **Admin UI**: `AdminDashBoard` and `ManageEvents` are placeholders. Event approval and comment moderation are available only through the API.
+- **Admin UI**: the admin dashboard shows shortcut cards, and `ManageEvents` is a "coming soon" page. Event approval and comment moderation are available only through the API.
+- **Theme transition**: the circular reveal needs the View Transitions API (Chrome/Edge). Other browsers switch themes instantly.
 - **Approval is not enforced**: events are listed whether or not `isApproved` is set.
 - **Student / admin JWTs never expire**. Only organizer tokens have `expiresIn: 1h`.
 - **Role guards**: if the user is not found, `validPerson` and `validAdmin` never respond, so the request hangs instead of returning 403.
@@ -905,7 +983,7 @@ curl -X POST http://localhost:4000/admin/signUp \
 
 ## Future Improvements
 
-- Admin dashboard UI for approvals, moderation, and analytics.
+- Admin UI for approvals, moderation, and analytics (the dashboard shortcuts are already in place).
 - Show only approved events to students, and enforce seat and deadline limits on the server.
 - Central Axios instance with base URL and interceptors (auth header, 401 → logout).
 - Refresh tokens and consistent JWT expiry across roles.

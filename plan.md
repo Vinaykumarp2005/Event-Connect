@@ -250,6 +250,25 @@ Home tab icons switched from Tabler to cleaner **lucide-react** icons (already a
 
 Verified: esbuild parse, ESLint `no-undef`, Tailwind compile ✅
 
+---
+
+## Phase 9 — README update (done)
+
+Brought `README.md` in line with Phases 2–8:
+| Section | Change |
+|---|---|
+| Intro | Describes the B&W glass UI, dark/light themes, floating header, Dock, Framer + GSAP; links `plan.md` |
+| Table of contents | Added **UI & Design System**; renumbered |
+| Features | Calendars (opens on today, multi-day day panel), Home Dock (student & organizer), admin dashboard shortcuts; UI/UX list rewritten |
+| Tech stack | Added an Animation row (Framer Motion, GSAP + `@gsap/react`) and an Icons row (lucide for the Dock, Tabler elsewhere); noted that moment comes with react-big-calendar |
+| **New: UI & Design System** | Look and feel, theming explanation + Mermaid diagram + file table, layout, animation inventory, shared `ui/` components |
+| Project structure | Added `theme/`, `ui/` (Page, EventCard, Stat, CalendarView, Dock), `index.css`, `index.html`, `plan.md` |
+| HLD / component tree | `themeAtom` in the store; `MotionConfig`, ThemeToggle, Home Dock tabs, CalendarView, admin pages |
+| Known issues | `bcrypt` explained accurately (it resolves only from `~/node_modules` on this machine); port 3000 / misleading CORS note; admin UI status; View Transitions note |
+| Future improvements | Admin item reworded |
+
+Checked: all table-of-contents links resolve to headings (fixed a pre-existing broken "Auth & Verification State Machine" link); 14 Mermaid blocks intact.
+
 ### Notes / limitations
 - The circular theme reveal needs the View Transitions API (Chromium). Elsewhere it falls back to an instant switch.
 - 3D tilt turns off on touch screens and for reduced-motion users.
