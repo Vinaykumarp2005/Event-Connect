@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
+import { AnimatePresence, motion } from 'motion/react';
+import { IconAperture, IconCircleCheck, IconPencil, IconTrophy } from '@tabler/icons-react';
+import { Page, Spinner, listVariants } from '../ui/Page';
+import { Avatar, InfoRow, StatTile } from '../ui/Stat';
 
 function StudentDashBoard() {
   const [studentProfile, setStudentProfile] = useState(null);
@@ -11,7 +15,7 @@ function StudentDashBoard() {
   useEffect(() => {
     async function getDetails() {
       try {
-        const res = await axios.get('http://localhost:3000/student/getdetails', {
+        const res = await axios.get('http://localhost:4000/student/getdetails', {
           headers: {
             Authorization: localStorage.getItem('token')
           }
@@ -36,7 +40,7 @@ function StudentDashBoard() {
   const updateProfile = async (data) => {
     try {
       const res = await axios.put(
-        'http://localhost:3000/student/update/profiledetails',
+        'http://localhost:4000/student/update/profiledetails',
         data,
         {
           headers: {
@@ -60,102 +64,119 @@ function StudentDashBoard() {
   };
 
   if (!studentProfile) {
-    return <div className="text-center py-10 text-gray-600">Loading...</div>;
+    return <Spinner label="Loading your profile…" />;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 text-center mt-4 sm:mt-8">
-        {studentProfile.username}'s Profile
-      </h1>
-
-      {!isEditing ? (
-        <div className="bg-neutral-600 text-white shadow-lg rounded-xl p-4 sm:p-6 space-y-4 border-2 mx-auto w-full max-w-3xl">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
-            <h2 className="text-lg sm:text-xl font-semibold text-white">Profile Overview</h2>
-            <button
-              onClick={() => setIsEditing(true)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-3 py-1.5 rounded transition"
-            >
-              Edit
-            </button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-white-700 text-sm sm:text-md">
-            <p><span className="font-medium">Username:</span> {studentProfile.username}</p>
-            <p><span className="font-medium">Email:</span> {studentProfile.email}</p>
-            <p><span className="font-medium">Phone Number:</span> {studentProfile.phoneNumber}</p>
-            <p><span className="font-medium">College:</span> {studentProfile.collegeName}</p>
-            <p><span className="font-medium">Department:</span> {studentProfile.department}</p>
-            <p><span className="font-medium">Year:</span> {studentProfile.year}</p>
-            <p><span className="font-medium">Rewards:</span> {studentProfile.rewardsEarned}</p>
-            <p><span className="font-medium">Events Enrolled:</span> {studentProfile.eventsEnrolled.length}</p>
-            <p><span className="font-medium">Verified:</span> {studentProfile.verified ? "Yes" : "No"}</p>
-            <p><span className="font-medium">Role:</span> {studentProfile.role}</p>
+    <Page className="max-w-5xl">
+      {/* Profile header */}
+      <div className="glass-strong mb-5 flex flex-col gap-5 rounded-[28px] p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+        <div className="flex items-center gap-4">
+          <Avatar name={studentProfile.username} />
+          <div className="min-w-0">
+            <h1 className="text-gradient truncate text-2xl font-bold capitalize tracking-tight sm:text-3xl">
+              {studentProfile.username}
+            </h1>
+            <p className="truncate text-sm text-neutral-400">{studentProfile.email}</p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <span className="chip capitalize">{studentProfile.role}</span>
+              {studentProfile.verified && <span className="chip"><IconCircleCheck size={12} /> Verified</span>}
+            </div>
           </div>
         </div>
-      ) : (
-        <div className="bg-neutral-600 shadow-lg rounded-xl p-4 sm:p-6 border mx-auto w-full max-w-3xl">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-white">Edit Profile</h2>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="bg-gray-400 hover:bg-gray-500 text-white font-medium px-3 py-1.5 rounded transition"
-            >
-              Cancel
-            </button>
-          </div>
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className={isEditing ? 'btn-ghost' : 'btn-primary'}
+        >
+          {isEditing ? 'Cancel' : <><IconPencil size={16} /> Edit Profile</>}
+        </button>
+      </div>
 
-          <form onSubmit={handleSubmit(updateProfile)} className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">Username</label>
-              <input
-                {...register('username')}
-                placeholder="Enter username"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-            </div>
+      {/* Stats */}
+      <motion.div variants={listVariants} initial="hidden" animate="show" className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <StatTile label="Reward Points" value={studentProfile.rewardsEarned} icon={IconTrophy} />
+        <StatTile label="Events Enrolled" value={studentProfile.eventsEnrolled.length} icon={IconAperture} />
+      </motion.div>
 
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">Phone Number</label>
-              <input
-                type="number"
-                {...register('phoneNumber')}
-                placeholder="Enter phone number"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
+      <AnimatePresence mode="wait">
+        {!isEditing ? (
+          <motion.div
+            key="overview"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}
+            className="glass rounded-[28px] p-6 sm:p-8"
+          >
+            <h2 className="mb-5 text-lg font-semibold text-white">Profile Overview</h2>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <InfoRow label="Username" value={studentProfile.username} />
+              <InfoRow label="Email" value={studentProfile.email} />
+              <InfoRow label="Phone Number" value={studentProfile.phoneNumber} />
+              <InfoRow label="College" value={studentProfile.collegeName} />
+              <InfoRow label="Department" value={studentProfile.department} />
+              <InfoRow label="Year" value={studentProfile.year} />
             </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="edit"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}
+            className="glass rounded-[28px] p-6 sm:p-8"
+          >
+            <h2 className="mb-5 text-lg font-semibold text-white">Edit Profile</h2>
+            <form onSubmit={handleSubmit(updateProfile)} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <label className="field-label">Username</label>
+                <input
+                  {...register('username')}
+                  placeholder="Enter username"
+                  className="field"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">Department</label>
-              <input
-                {...register('department')}
-                placeholder="Enter department"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-            </div>
+              <div>
+                <label className="field-label">Phone Number</label>
+                <input
+                  type="number"
+                  {...register('phoneNumber')}
+                  placeholder="Enter phone number"
+                  className="field"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm font-medium text-white mb-1">Year</label>
-              <input
-                type="number"
-                {...register('year')}
-                placeholder="Enter year"
-                className="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-              />
-            </div>
+              <div>
+                <label className="field-label">Department</label>
+                <input
+                  {...register('department')}
+                  placeholder="Enter department"
+                  className="field"
+                />
+              </div>
 
-            <div className="sm:col-span-2">
-              <button
-                type="submit"
-                className="w-full bg-black hover:bg-neutral-900 text-white font-semibold py-2 rounded-md transition"
-              >
-                Save Changes
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
-    </div>
+              <div>
+                <label className="field-label">Year</label>
+                <input
+                  type="number"
+                  {...register('year')}
+                  placeholder="Enter year"
+                  className="field"
+                />
+              </div>
+
+              <div className="sm:col-span-2">
+                <button type="submit" className="btn-primary w-full py-3">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Page>
   );
 }
 

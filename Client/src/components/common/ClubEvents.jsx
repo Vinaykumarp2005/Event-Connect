@@ -2,19 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { BsArrowUpRightCircle } from "react-icons/bs";
 import { useRecoilValue } from 'recoil';
 import { userAtom } from '../UserAtom';
+import { Page, PageHeader, EmptyState, Spinner, listVariants } from '../ui/Page';
+import EventCard from '../ui/EventCard';
+import { motion } from 'motion/react';
 
 function ClubEvents() {
   const user = useRecoilValue(userAtom);
   const { clubById } = useParams();
   const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate=useNavigate()
   useEffect(() => {
     async function getEvents() {
       try {
-        const res = await axios.get(`http://localhost:3000/event/app/v1/events/details/${clubById}`, {
+        const res = await axios.get(`http://localhost:4000/event/app/v1/events/details/${clubById}`, {
           headers: {
             Authorization: localStorage.getItem('token'),
           },
@@ -26,6 +29,8 @@ function ClubEvents() {
       } catch (e) {
         alert("Unable to fetch the club events");
         console.error(e);
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -42,23 +47,25 @@ function geteventdetails(eventId){
 }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4 ">Events of Club </h1>
-
-      {events.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <Page>
+      <PageHeader title="Club Events" subtitle="Everything this club is hosting" />
+      {loading ? (
+        <Spinner label="Loading club events…" />
+      ) : events.length > 0 ? (
+        <motion.div
+          variants={listVariants}
+          initial="hidden"
+          animate="show"
+          className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {events.map((event) => (
-            <div key={event._id} className="bg-white p-4 rounded shadow">
-              <h2 className="text-lg font-semibold">{event.eventName}</h2>
-              <p className="text-gray-600">{event.description}</p>
-            <button onClick={()=>geteventdetails(event._id)} className='bg-black text-white rounded-md p-1 w-36 flex px-3 mt-6'>Go to Event <BsArrowUpRightCircle className='mx-auto my-1'/></button>
-            </div>
+            <EventCard key={event._id} event={event} onOpen={() => geteventdetails(event._id)} ctaLabel="Go to event" showDescription />
           ))}
-        </div>
+        </motion.div>
       ) : (
-        <p>No events found for this club.</p>
+        <EmptyState title="No events found for this club." text="This club hasn't published anything yet." />
       )}
-    </div>
+    </Page>
   );
 }
 

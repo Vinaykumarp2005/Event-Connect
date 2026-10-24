@@ -12,5 +12,5 @@ export const userAtom = atom({
     _id: '',
     isLoggedIn:false
   },
-  effects_UNSTABLE: [persistAtom], // 🪄 this makes it persist!
+  effects_UNSTABLE: [persistAtom], 
 });

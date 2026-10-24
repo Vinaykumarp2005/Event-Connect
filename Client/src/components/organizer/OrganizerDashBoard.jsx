@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BsArrowUpRightCircle } from "react-icons/bs";
+import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { IconCalendarEvent, IconCircleCheck, IconFlame, IconHourglass } from '@tabler/icons-react';
+import { Page, Spinner, listVariants } from '../ui/Page';
+import { Avatar, InfoRow, StatTile } from '../ui/Stat';
+import EventCard from '../ui/EventCard';
 
 function OrganizerDashBoard() {
   const [details, setDetails] = useState(null);
@@ -18,16 +22,16 @@ function OrganizerDashBoard() {
         }
 
         const [detailsRes, eventsRes] = await Promise.all([
-          axios.get('http://localhost:3000/organiser/getdetails', {
-            headers: { 
+          axios.get('http://localhost:4000/organiser/getdetails', {
+            headers: {
               'Authorization': token,
-              'Content-Type': 'application/json' 
+              'Content-Type': 'application/json'
             }
           }),
-          axios.get('http://localhost:3000/event/app/v1/organiser/events', {
-            headers: { 
+          axios.get('http://localhost:4000/event/app/v1/organiser/events', {
+            headers: {
               'Authorization': token,
-              'Content-Type': 'application/json' 
+              'Content-Type': 'application/json'
             }
           }),
         ]);
@@ -43,112 +47,78 @@ function OrganizerDashBoard() {
     fetchData();
   }, []);
 
+  const now = new Date();
   const ongoingEvents = events.filter(event => {
-    const now = new Date();
     const start = new Date(event.startDate);
     const end = new Date(event.endDate);
     return start <= now && end >= now;
   });
+  const upcomingCount = events.filter(event => new Date(event.startDate) > now).length;
+  const completedCount = events.filter(event => new Date(event.endDate) < now).length;
 
   const gotoEvent = (id) => {
     navigate(`../viewevent/${id}`);
   };
 
   if (!details) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-600 text-lg">Loading organizer details...</p>
-      </div>
-    );
+    return <Spinner label="Loading organizer details…" />;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center ">
-        {details.username} Dashboard
-      </h1>
-
-    
-      <div className="bg-white shadow-lg rounded-xl p-4 sm:p-6 mb-6 border">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-700 mb-4">Profile Overview</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-gray-700 text-sm">
-          <InfoItem label="Username" value={details.username} />
-          <InfoItem label="Email" value={details.email} />
-          <InfoItem label="Phone Number" value={details.phoneNumber} />
-          <InfoItem label="Club Name" value={details.clubName?.join(', ')} />
-          <InfoItem label="College Name" value={details.collegeName} />
-          <InfoItem label="Department" value={details.department} />
-          <InfoItem label="Position" value={details.position} />
-          <InfoItem label="Role" value={details.role} />
+    <Page className="max-w-6xl">
+      {/* Profile header */}
+      <div className="glass-strong mb-5 flex flex-col gap-5 rounded-[28px] p-6 sm:flex-row sm:items-center sm:p-8">
+        <Avatar name={details.clubName?.[0] || details.username} />
+        <div className="min-w-0">
+          <h1 className="text-gradient truncate text-2xl font-bold tracking-tight sm:text-3xl">
+            {details.clubName?.join(', ') || details.username}
+          </h1>
+          <p className="truncate text-sm text-neutral-400">
+            <span className="capitalize">{details.username}</span> · <span className="capitalize">{details.position}</span>
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <span className="chip capitalize">{details.role}</span>
+            {details.verified && <span className="chip"><IconCircleCheck size={12} /> Verified</span>}
+          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8">
-        <StatCard label="Total Events Created" count={events.length} bg="bg-black" text="text-white" />
+      <motion.div variants={listVariants} initial="hidden" animate="show" className="mb-5 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatTile label="Total Events" value={events.length} icon={IconCalendarEvent} />
+        <StatTile label="Ongoing" value={ongoingEvents.length} icon={IconFlame} />
+        <StatTile label="Upcoming" value={upcomingCount} icon={IconHourglass} />
+        <StatTile label="Completed" value={completedCount} icon={IconCircleCheck} />
+      </motion.div>
+
+      <div className="glass mb-8 rounded-[28px] p-6 sm:p-8">
+        <h2 className="mb-5 text-lg font-semibold text-white">Profile Overview</h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <InfoRow label="Username" value={details.username} />
+          <InfoRow label="Email" value={details.email} />
+          <InfoRow label="Phone Number" value={details.phoneNumber} />
+          <InfoRow label="Club Name" value={details.clubName?.join(', ')} />
+          <InfoRow label="College Name" value={details.collegeName} />
+          <InfoRow label="Department" value={details.department} />
+          <InfoRow label="Position" value={details.position} />
+          <InfoRow label="Role" value={details.role} />
+        </div>
       </div>
 
       {/* Ongoing Events Section */}
       {ongoingEvents.length > 0 && (
         <>
-          <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">Ongoing Events</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <h2 className="mb-4 flex items-center gap-2 text-xl font-semibold text-white">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-white" /> Ongoing Events
+          </h2>
+          <motion.div variants={listVariants} initial="hidden" animate="show" className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {ongoingEvents.map((event) => (
-              <div key={event._id} className="bg-green-50 border border-green-200 rounded-lg shadow-md overflow-hidden">
-                <img
-                  src={event.eventImage}
-                  alt={event.eventName}
-                  className="w-full h-36 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-md font-semibold text-gray-800 mb-1 truncate">{event.eventName}</h3>
-                  <p className="text-xs sm:text-sm text-gray-600">
-                    <strong>Start:</strong>{' '}
-                    {new Date(event.startDate).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </p>
-                  <p className="text-xs sm:text-sm text-gray-600 mb-3">
-                    <strong>End:</strong>{' '}
-                    {new Date(event.endDate).toLocaleDateString('en-IN', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    })}
-                  </p>
-                  <button
-                    className="flex items-center bg-green-600 text-white text-xs sm:text-sm px-3 py-1.5 rounded-md hover:bg-green-700"
-                    onClick={() => gotoEvent(event._id)}
-                  >
-                    Get Details <BsArrowUpRightCircle className="ml-2" />
-                  </button>
-                </div>
-              </div>
+              <EventCard key={event._id} event={event} onOpen={() => gotoEvent(event._id)} ctaLabel="Get details" showStatus={false} />
             ))}
-          </div>
+          </motion.div>
         </>
       )}
-
-    </div>
-  );
-}
-
-function InfoItem({ label, value }) {
-  return (
-    <p>
-      <span className="font-medium">{label}:</span> {value || '—'}
-    </p>
-  );
-}
-
-function StatCard({ label, count, bg, text }) {
-  return (
-    <div className={`p-6 rounded-lg shadow-md ${bg}`}>
-      <h3 className={`text-lg font-medium mb-2 ${text}`}>{label}</h3>
-      <p className={`text-3xl font-bold ${text}`}>{count}</p>
-    </div>
+    </Page>
   );
 }
 

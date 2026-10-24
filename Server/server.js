@@ -1,6 +1,10 @@
 const mongoose=require("mongoose");
 const exp=require("express");
 const app=exp();
+// Add this at the very top of your server.js
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']); 
+
 require('dotenv').config();
 const {authApp}=require('./apis/Auth');
 const {eventApp}=require('./apis/Event');
@@ -12,6 +16,7 @@ const cors=require('cors');
 app.use(exp.json());
 app.use(cors());
 mongoose.connect(dbUrl).then(()=>{
+  console.log("URI exists:", !!process.env.DB_URL);
   console.log('database is successfully connected to the backend')
 }).catch((e)=>{
   console.log(e)

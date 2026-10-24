@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'motion/react';
 import axios from 'axios';
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors }, setValue } = useForm();
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setValue } = useForm();
   const [role, setRole] = useState('student');
 
   const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
@@ -27,7 +28,7 @@ export default function SignUp() {
         data.year = Number(data.year);
 
         const res = await axios.post(
-          'http://localhost:3000/auth/student/signUp',
+          'http://localhost:4000/auth/student/signUp',
           data
         );
 
@@ -59,7 +60,7 @@ export default function SignUp() {
         };
 
         const res = await axios.post(
-          'http://localhost:3000/auth/organizer/signUp',
+          'http://localhost:4000/auth/organizer/signUp',
           payload
         );
 
@@ -80,224 +81,223 @@ export default function SignUp() {
     setValue('role', role);
   }, [role, setValue]);
 
-  const borderColor = 'rgba(8, 112, 184, 0.7)';
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white">
-      <div
-        className="p-6 m-4 rounded-2xl shadow-lg w-full max-w-lg mt-20"
-        style={{ border: `1px solid ${borderColor}`,backgroundColor: 'bg-gray-800' }}
+    <div className="flex min-h-[calc(100svh-3.5rem)] items-center justify-center px-1 py-10 text-white">
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="glass-strong w-full max-w-2xl rounded-[28px] p-6 sm:p-8"
       >
-        <div className="flex justify-center mb-6">
-          <div className="flex rounded-full bg-gray-800 p-1">
-            <button
-              type="button"
-              onClick={() => setRole("student")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ease-in-out
-                ${
-                  role === "student"
-                    ? "bg-white text-black shadow-lg scale-105"
-                    : "text-gray-400"
+        <div className="mb-6 text-center">
+          <h1 className="text-gradient text-3xl font-bold tracking-tight">Create your account</h1>
+          <p className="mt-2 text-sm text-neutral-400">Join as a student or as a club organizer</p>
+        </div>
+
+        <div className="mb-8 flex justify-center">
+          <div className="glass flex rounded-full p-1">
+            {['student', 'organizer'].map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => setRole(r)}
+                className={`relative rounded-full px-5 py-2 text-sm font-medium capitalize transition-colors duration-200 ${
+                  role === r ? 'text-black' : 'text-neutral-400 hover:text-white'
                 }`}
-            >
-              Student
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole("organizer")}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ease-in-out
-                ${
-                  role === "organizer"
-                    ? "bg-white text-black shadow-lg scale-105"
-                    : "text-gray-400"
-                }`}
-            >
-              Organizer
-            </button>
+              >
+                {role === r && (
+                  <motion.span
+                    layoutId="signup-role-pill"
+                    transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    className="absolute inset-0 rounded-full bg-white"
+                  />
+                )}
+                <span className="relative z-10">{r}</span>
+              </button>
+            ))}
           </div>
         </div>
 
         <form onSubmit={handleSubmit(handleFormSubmit)}>
-          {/* Username */}
-          <div className="mb-3">
-            <label className="block mb-1 text-white">Username</label>
-            <input
-              type="text"
-              {...register('username', { required: true, minLength: 3, maxLength: 30 })}
-              className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
-            />
-            {errors.username?.type === 'required' && <p className='text-red-600'>*Username is required</p>}
-            {errors.username?.type === 'minLength' && <p className='text-red-600'>*MinLength is 3</p>}
-            {errors.username?.type === 'maxLength' && <p className='text-red-600'>*MaxLength is 30</p>}
-          </div>
-
-          {/* Email */}
-          <div className="mb-3">
-            <label className="block mb-1 text-white">Email</label>
-            <input
-              type="email"
-              {...register('email', { required: true })}
-              className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
-            />
-            {errors.email && <p className='text-red-600'>*Email is required</p>}
-          </div>
-
-          {/* Phone Number */}
-          <div className="mb-3">
-            <label className="block mb-1 text-white">Phone Number</label>
-            <input
-              type="text"
-              {...register('phoneNumber', {
-                required: true,
-                minLength: 10,
-                maxLength: 10,
-                pattern: {
-                  value: /^[0-9]+$/,
-                  message: "Phone number must contain only digits"
-                }
-              })}
-              className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
-            />
-            {errors.phoneNumber && <p className='text-red-600'>{errors.phoneNumber.message || "*Phone number is required"}</p>}
-          </div>
-
-          {/* Password */}
-          <div className="mb-3">
-            <label className="block mb-1 text-white">Password</label>
-            <input
-              type="password"
-              {...register('password', {
-                required: 'Password is required',
-                minLength: { value: 8, message: "Password must be at least 8 characters" },
-                pattern: {
-                  value: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*@).{8,}$/,
-                  message: "Password must include letters, digits, and '@'"
-                }
-              })}
-              className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
-            />
-            {errors.password && <p className='text-red-600'>*{errors.password.message}</p>}
-          </div>
-
-          {/* College Name */}
-          <div className="mb-3">
-            <label className="block mb-1 text-white">College Name</label>
-            <select
-              {...register('collegeName', { required: true })}
-              className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
-            >
-              <option value="vnrvjiet">VNRVJIET</option>
-              <option value="cbit">CBIT</option>
-              <option value="vasavi">VASAVI</option>
-              <option value="jntuh">JNTUH</option>
-              <option value="griet">GRIET</option>
-            </select>
-            {errors.collegeName && <p className='text-red-600'>*College name is required</p>}
-          </div>
-
-          {/* Department */}
-          <div className="mb-3">
-            <label className="block mb-1 text-white">Department</label>
-            <select
-              {...register('department', { required: true })}
-              className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              style={{ border: `1px solid ${borderColor}` }}
-            >
-              <option value="cse">CSE</option>
-              <option value="ece">ECE</option>
-              <option value="csm">CSM</option>
-              <option value="csd">CSD</option>
-              <option value="cys">CYS</option>
-              <option value="csbs">CSBS</option>
-              <option value="it">IT</option>
-              <option value="aids">AIDS</option>
-              <option value="mech">ME</option>
-            </select>
-            {errors.department && <p className='text-red-600'>*Department is required</p>}
-          </div>
-
-          {/* Student: Year */}
-          {role === 'student' && (
-            <div className="mb-3">
-              <label className="block mb-1 text-white">Year of Studying</label>
-              <select
-                {...register('year', { required: true })}
-                className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                style={{ border: `1px solid ${borderColor}` }}
-              >
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-              {errors.year && <p className='text-red-600'>*Year is required</p>}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* Username */}
+            <div>
+              <label className="field-label">Username</label>
+              <input
+                type="text"
+                placeholder="johndoe"
+                {...register('username', { required: true, minLength: 3, maxLength: 30 })}
+                className="field"
+              />
+              {errors.username?.type === 'required' && <p className='field-error'>Username is required</p>}
+              {errors.username?.type === 'minLength' && <p className='field-error'>MinLength is 3</p>}
+              {errors.username?.type === 'maxLength' && <p className='field-error'>MaxLength is 30</p>}
             </div>
-          )}
 
-          {/* Organizer Fields */}
-          {role === 'organizer' && (
-            <>
-              {/* Position */}
-              <div className="mb-3">
-                <label className="block mb-1 text-white">Position</label>
+            {/* Email */}
+            <div>
+              <label className="field-label">Email</label>
+              <input
+                type="email"
+                placeholder="you@college.edu"
+                {...register('email', { required: true })}
+                className="field"
+              />
+              {errors.email && <p className='field-error'>Email is required</p>}
+            </div>
+
+            {/* Phone Number */}
+            <div>
+              <label className="field-label">Phone Number</label>
+              <input
+                type="text"
+                placeholder="10-digit number"
+                {...register('phoneNumber', {
+                  required: true,
+                  minLength: 10,
+                  maxLength: 10,
+                  pattern: {
+                    value: /^[0-9]+$/,
+                    message: "Phone number must contain only digits"
+                  }
+                })}
+                className="field"
+              />
+              {errors.phoneNumber && <p className='field-error'>{errors.phoneNumber.message || "Phone number is required"}</p>}
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="field-label">Password</label>
+              <input
+                type="password"
+                placeholder="Min 8 chars, letters, digits, @"
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: { value: 8, message: "Password must be at least 8 characters" },
+                  pattern: {
+                    value: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*@).{8,}$/,
+                    message: "Password must include letters, digits, and '@'"
+                  }
+                })}
+                className="field"
+              />
+              {errors.password && <p className='field-error'>{errors.password.message}</p>}
+            </div>
+
+            {/* College Name */}
+            <div>
+              <label className="field-label">College Name</label>
+              <select
+                {...register('collegeName', { required: true })}
+                className="field"
+              >
+                <option value="vnrvjiet">VNRVJIET</option>
+                <option value="cbit">CBIT</option>
+                <option value="vasavi">VASAVI</option>
+                <option value="jntuh">JNTUH</option>
+                <option value="griet">GRIET</option>
+              </select>
+              {errors.collegeName && <p className='field-error'>College name is required</p>}
+            </div>
+
+            {/* Department */}
+            <div>
+              <label className="field-label">Department</label>
+              <select
+                {...register('department', { required: true })}
+                className="field"
+              >
+                <option value="cse">CSE</option>
+                <option value="ece">ECE</option>
+                <option value="csm">CSM</option>
+                <option value="csd">CSD</option>
+                <option value="cys">CYS</option>
+                <option value="csbs">CSBS</option>
+                <option value="it">IT</option>
+                <option value="aids">AIDS</option>
+                <option value="mech">ME</option>
+              </select>
+              {errors.department && <p className='field-error'>Department is required</p>}
+            </div>
+
+            {/* Student: Year */}
+            {role === 'student' && (
+              <div>
+                <label className="field-label">Year of Studying</label>
                 <select
-                  {...register('position')}
-                  className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ border: `1px solid ${borderColor}` }}
+                  {...register('year', { required: true })}
+                  className="field"
                 >
-                  <option value="lead">Lead</option>
-                  <option value="chairPerson">Chair Person</option>
-                  <option value="secretary">Secretary</option>
-                  <option value="president">President</option>
-                  <option value="cordinator">Coordinator</option>
-                  <option value="vlounteer">Volunteer</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
                 </select>
+                {errors.year && <p className='field-error'>Year is required</p>}
               </div>
+            )}
 
-              {/* Club Name */}
-              <div className="mb-3">
-                <label className="block mb-1 text-white">Club Name</label>
-                <input
-                  type="text"
-                  {...register('clubName', { required: true })}
-                  className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ border: `1px solid ${borderColor}` }}
-                />
-                {errors.clubName && <p className='text-red-600'>*Club name is required</p>}
-              </div>
+            {/* Organizer Fields */}
+            {role === 'organizer' && (
+              <>
+                {/* Position */}
+                <div>
+                  <label className="field-label">Position</label>
+                  <select
+                    {...register('position')}
+                    className="field"
+                  >
+                    <option value="lead">Lead</option>
+                    <option value="chairPerson">Chair Person</option>
+                    <option value="secretary">Secretary</option>
+                    <option value="president">President</option>
+                    <option value="cordinator">Coordinator</option>
+                    <option value="vlounteer">Volunteer</option>
+                  </select>
+                </div>
 
-              {/* Logo Upload */}
-              <div className="mb-3">
-                <label className="block mb-1 text-white">Upload Logo</label>
-                <input
-                  type="file"
-                  {...register('logo', { required: true })}
-                  accept="image/*"
-                  className="w-full px-4 py-2 bg-black text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  style={{ border: `1px solid ${borderColor}` }}
-                />
-                {errors.logo && <p className='text-red-600'>*Logo is required</p>}
-              </div>
-            </>
-          )}
+                {/* Club Name */}
+                <div>
+                  <label className="field-label">Club Name</label>
+                  <input
+                    type="text"
+                    placeholder="Coding Club"
+                    {...register('clubName', { required: true })}
+                    className="field"
+                  />
+                  {errors.clubName && <p className='field-error'>Club name is required</p>}
+                </div>
+
+                {/* Logo Upload */}
+                <div className="sm:col-span-2">
+                  <label className="field-label">Club Logo</label>
+                  <input
+                    type="file"
+                    {...register('logo', { required: true })}
+                    accept="image/*"
+                    className="field"
+                  />
+                  {errors.logo && <p className='field-error'>Logo is required</p>}
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Hidden Role Field */}
           <input type="hidden" {...register('role')} value={role} />
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-white text-black py-2 px-4 rounded-md border hover:bg-neutral-600 hover:border-white hover:text-white"
-          >
-            Sign Up
+          <button type="submit" disabled={isSubmitting} className="btn-primary mt-8 w-full py-3">
+            {isSubmitting ? 'Creating account…' : 'Sign Up'}
           </button>
         </form>
-      </div>
+
+        <p className="mt-6 text-center text-sm text-neutral-400">
+          Already have an account?{' '}
+          <Link to="/signin" className="font-medium text-white underline-offset-4 hover:underline">Sign in</Link>
+        </p>
+      </motion.div>
     </div>
   );
 }

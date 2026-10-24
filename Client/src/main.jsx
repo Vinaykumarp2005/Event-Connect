@@ -18,6 +18,7 @@ import OrganizerHomePage from './components/organizer/OrganizerHomePage.jsx'
 import CreatedEvents from './components/organizer/CreatedEvents.jsx'
 import PostEvent from './components/organizer/PostEvent.jsx'
 import {RecoilRoot} from 'recoil'
+import { MotionConfig } from 'motion/react'
 import Customcalendar from './components/common/Customcalender.jsx'
 import GalleryHomePage from './components/common/GalleryHomePage.jsx'
 import ClubEvents from './components/common/ClubEvents.jsx'
@@ -76,6 +77,8 @@ function Main() {
 
 createRoot(document.getElementById('root')).render(
   <RecoilRoot>
-    <Main/>
+    <MotionConfig reducedMotion="user">
+      <Main/>
+    </MotionConfig>
   </RecoilRoot>
 )
