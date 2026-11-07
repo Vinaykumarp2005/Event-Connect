@@ -26,7 +26,7 @@ function handleLogoError(e) {
 function GalleryHomePage() {
   const [clubs,setClubs] = useState([]);
   const [loading,setLoading] = useState(true);
-  const navigate=useNavigate();
+  const navigate= useNavigate();
   const user = useRecoilValue(userAtom);
 
   useEffect(()=>{
